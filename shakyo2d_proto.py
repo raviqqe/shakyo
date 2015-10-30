@@ -2,8 +2,8 @@
 
 import curses
 import curses.ascii
+import os
 import sys
-import game
 import collections
 
 
@@ -27,6 +27,38 @@ def usage():
 
 Thunk = collections.namedtuple("Thunk", ["function", "args"])
 
+class Game:
+  def __init__(self, window, sample_file):
+    self.window = window
+    self.sample_file = sample_file
+    self.display_screen = self.__display_start_screen
+
+  def __display_start_screen(window):
+    window.clear()
+    window.addstr(0, 0, "are you ready?")
+    window.addstr(1, 0, "press any key...")
+
+    char = window.getch()
+    if char == curses.ascii.ESC or char == curses.ascii.ctrl('q'):
+      return None
+
+    window.refresh()
+    return Thunk(display_game_screen, (window,))
+
+
+  def __display_game_screen(self):
+    game = Game(window)
+    return Thunk(display_result_screen, (window,))
+
+
+  def __display_result_screen(self):
+    self.window.clear()
+    self.window.addstr(0, 0, "good job!")
+    self.window.addstr(1, 0, "press any key...")
+    self.window.getch()
+    return None
+
+
 
 # functions
 
@@ -46,39 +78,14 @@ def initialize_curses():
   curses.start_color()
   curses.use_default_colors()
   window.keypad(True)
+  return window
 
 
-def finalize_curses(window):
-  window.keypad(False)
+def finalize_curses():
   curses.nocbreak()
   curses.echo()
   curses.endwin() # should be in the very last line
 
-
-def display_start_screen(window):
-  window.clear()
-  window.addstr(0, 0, "are you ready?")
-  window.addstr(1, 0, "press any key...")
-
-  char = window.getch()
-  if char == curses.ascii.ESC or char == curses.ascii.ctrl('q'):
-    return None
-
-  window.refresh()
-  return Thunk(display_game_screen, (window,))
-
-
-def display_game_screen(window):
-  game = Game(window)
-  return Thunk(display_result_screen, (window,))
-
-
-def display_result_screen(window,):
-  window.clear()
-  window.addstr(0, 0, "good job!")
-  window.addstr(1, 0, "press any key...")
-  window.getch()
-  return None
 
 
 # main routine
@@ -95,16 +102,15 @@ def main(*args):
     # You cannot use fail(), usage(), and so forth, which use exit().
     # Instead, you need to raise some Exception().
 
-    window = initilize_curses()
+    window = initialize_curses()
 
-    thunk = display_start_screen(window, sample_file)
-    while thunk:
-      thunk = thunk.function(thunk.args)
+    #thunk = display_start_screen(window, sample_file)
+    #while thunk:
+    #  thunk = thunk.function(thunk.args)
   except Exception as e:
     error_message = str(e)
   finally:
-    if "window" in locals():
-      finalize_curses(window)
+    finalize_curses()
 
   if "error_message" in locals():
     fail(error_message)
