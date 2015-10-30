@@ -7,6 +7,11 @@ import sys
 
 
 
+# constants
+
+quit_chars = curses.ascii.ESC or char == curses.ascii.ctrl('q')
+
+
 # the order of bugs
 
 def perror(*message):
@@ -27,9 +32,9 @@ def usage():
 # classes
 
 class Console:
-  def __init__(self, window, sample_file):
+  def __init__(self, window, game):
     self.window = window
-    self.sample_file = sample_file
+    self.game = game
     self.display_screen = self.__display_start_screen
 
   def is_down(self):
@@ -39,22 +44,62 @@ class Console:
 
   def __display_start_screen(self):
     self.window.clear()
-    self.window.addstr(0, 0, "are you ready?")
-    self.window.addstr(1, 0, "press any key...")
+    self.window.addstr(0, 0, "Are you ready?")
+    self.window.addstr(1, 0, "Press any key...")
     char = self.window.getch()
-    if char == curses.ascii.ESC or char == curses.ascii.ctrl('q'):
+    if char in quit_chars:
       self.display_screen = None
     self.display_screen = self.__display_game_screen
 
   def __display_game_screen(self):
+    self.game.play()
     self.display_screen = self.__display_result_screen
 
   def __display_result_screen(self):
     self.window.clear()
-    self.window.addstr(0, 0, "good job!")
-    self.window.addstr(1, 0, "press any key...")
+    self.window.addstr(0, 0, "Good job!")
+    self.window.addstr(1, 0, "Press any key...")
     self.window.getch()
     self.display_screen = None
+
+
+class Game:
+  def __init__(self, window, sample_file):
+    self.window = window
+    self.sample_file = sample_file
+    self.geometry = Geometry(window)
+
+    self.input_text = ""
+    self.sample_line_queue = collections.deque(self.sample_file.readlines(
+                             self.geometry.num_of_lower_sample_lines))
+
+    if len(self.sample_line_queue) == 0:
+      raise Exception("No line can be read from stdin.")
+
+  def play(self):
+    self.window.clear()
+    while not self.__is_over():
+      char = self.window.getch()
+      if char in quit_chars:
+        return
+      elif char == curses.ascii.ctrl('u'):
+        self.__clear_input_line()
+
+  def __is_over(self):
+    pass
+
+  def __clear_input_line(self):
+    self.input_text = ""
+    self.window.move(self.geometry.input_line, 0)
+    self.window.clrtoeol()
+
+
+class Geometry:
+  def __init__(self, window):
+    self.input_line = window.getmaxyx()[0] // 2
+    self.sample_line = self.input_line - 1
+    self.bottom_line = window.getmaxyx()[0] - 1
+    self.num_of_lower_sample_lines = self.bottom_line - self.input_line - 1
 
 
 
@@ -62,9 +107,11 @@ class Console:
 
 def reset_stdin(stdin):
   temporary_fd = 3
+  tty_device_file = "/dev/tty"
+
   os.dup2(stdin.fileno(), temporary_fd)
   os.close(stdin.fileno())
-  new_stdin = open("/dev/tty")
+  new_stdin = open(tty_device_file)
   original_stdin = os.fdopen(temporary_fd)
   return new_stdin, original_stdin
 
@@ -101,7 +148,7 @@ def main(*args):
     # Instead, you need to raise some Exception().
 
     window = initialize_curses()
-    console = Console(window, sample_file)
+    console = Console(window, Game(window, sample_file))
 
     while not console.is_down():
       console.display_screen()
