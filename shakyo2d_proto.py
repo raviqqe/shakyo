@@ -34,57 +34,63 @@ def usage():
 # classes
 
 class Console:
-  def __init__(self, window, game):
-    self.window = window
-    self.game = game
-    self.display_screen = self.__display_start_screen
+  def __init__(self, window):
+    assert isinstance(window, curses.Window)
+    self._window = window
+    self.__game = None
 
-  def is_down(self):
-    if self.display_screen == None:
-      return True
-    return False
+  def set_game(self, game):
+    self.__game = game
 
-  def __display_start_screen(self):
-    self.window.clear()
-    self.window.addstr(0, 0, "Are you ready?")
-    self.window.addstr(1, 0, "Press any key...")
-    char = self.window.getch()
-    if char in QUIT_CHARS:
-      self.display_screen = None
-    self.display_screen = self.__display_game_screen
+  def play_game(self):
+    self.__game.play()
 
-  def __display_game_screen(self):
-    self.game.set_window(self.window)
-    self.game.play()
-    self.display_screen = self.__display_result_screen
+  @property
+  def api():
+    class Api:
+      def __init__(self, console):
+        assert isinstance(console, Console)
+        self.__console = console
 
-  def __display_result_screen(self):
-    self.window.clear()
-    self.window.addstr(0, 0, "Good job!")
-    self.window.addstr(1, 0, "Press any key...")
-    self.window.getch()
-    self.display_screen = None
+      @property
+      def screen_height(self):
+        self.__console._window.getmaxyx()[0]
+
+      @property
+      def screen_width(self):
+        self.__console._window.getmaxyx()[1]
+
+      def get_char(self) -> int:
+        return self.__console._window.getch()
+
+      def print_line(self, line_pos, text):
+        self.__console._window.addstr(line_pos, 0, text)
+
+      def clear(self):
+        self.__console._window.clear()
+
+      def scroll(self):
+        self.__console._window.scroll()
+
+    return Api(self)
 
 
 class Game:
-  def __init__(self, sample):
-    self.window = None
-    self.sample = sample
-    self.geometry = Geometry(window)
-    self.input_text = ""
-    num_of_lower_sample_lines \
-        = self.geometry.bottom_line - self.geometry.input_line - 1
-    self.sample_lines = collections.deque(self.sample.readlines(
-                             num_of_lower_sample_lines))
-    if len(self.sample_lines) == 0:
+  def __init__(self, api, sample_file):
+    self.__api = api
+    self.__sample = Sample(sample_file, line_length=(api.screen_width - 1))
+    self.__geometry = Geometry(api.screen_height, api.screen_width)
+    self.__input_text = ""
+    if self.__sample.lines[0] == None:
       raise Exception("No line can be read from stdin.")
-    self.is_over = False
-
-  def set_window(self, window):
-    self.window = window
 
   def play(self):
-    self.window.clear()
+    if not self.__are_you_ready(): return
+    self.__start_game()
+    self.__show_result()
+
+  def __start_game():
+    self.__api.clear()
     while not self.is_over:
       char = self.window.getch()
       assert curses.ascii.isascii(char)
@@ -140,63 +146,88 @@ class Game:
     self.window.hline(self.geometry.input_line + 1, 0, SEPARATION_LINE_CHAR,
                       self.window.getmaxyx()[1])
 
+  def __are_you_ready(self) -> bool:
+    self.__api.clear()
+    self.__api.print_line(0, "Are you ready?")
+    self.__api.print_line(1, "Press any key...")
+    char = self.__api.get_char()
+    if char in QUIT_CHARS:
+      return False
+    return True
+
+  def __show_result(self):
+    self.__api.clear()
+    self.__api.print_line(0, "Good job!")
+    self.__api.print_line(1, "Press any key...")
+    self.__api.get_char()
+
 
 class Geometry:
-  def __init__(self, window):
-    self.input_line = window.getmaxyx()[0] // 2
+  def __init__(self, height, width):
+    self.height = height
+    self.width = width
+    self.input_line = height // 2
     self.sample_line = self.input_line - 1
-    self.bottom_line = window.getmaxyx()[0] - 1
+    self.bottom_line = height - 1
 
 
 class Sample:
   def __init__(self, sample_file, line_length=79):
-    self.file = sample_file
-    self.line_length = line_length
-    self.buffered_lines = []
+    self.__file = sample_file
+    self.__line_length = line_length
+    self._buffered_lines = []
 
-  def read_line(self):
-    if len(buffered_lines) > 0:
-      return buffered_lines.pop(0)
+  @property
+  def lines(self):
+    class Lines:
+      def __init__(self, sample):
+        assert isinstance(sample, Sample)
+        self.sample = sample
 
-    line = self.file.readline()
-    if len(line) == 0:
-      return None
+      def __getitem__(self, index: int) -> str:
+        assert isinstance(index, int)
 
+        self.sample._read_lines_from_file()
+
+        if index < len(self.sample._buffered_lines):
+          return self.sample._buffered_lines[index]
+        return None
+
+    return Lines(self)
+
+  def rotate(self):
+    self._bufferd_lines.pop(0)
+
+  def _read_lines_from_file(self):
+    lines = self.__file.readlines()
+
+    for line in lines:
+      self.__buffer_line(line)
+
+  def __buffer_line(self, line):
     assert line.endwith('\n')
     line = line.strip()
 
-    if len(line) > self.line_length:
-      line, rest_line = self.__split_line(line)
-      while len(rest_line) > line_length:
-        buffered_line, rest_line = self.__split_line(rest_line)
-        self.buffered_lines.append(buffered_line)
-      self.buffered_lines.append(rest_line)
-    return line
-
-  def read_lines(self, num_of_lines=INFINITY_INT):
-    lines = []
-    for _ in range(num_of_lines):
-      line = self.read_line()
-      if line == None: break
-      lines.append(line)
-    return lines
+    while len(line) > line_length:
+      buffered_line, line = self.__split_line(line)
+      self._buffered_lines.append(buffered_line)
+    self._buffered_lines.append(line)
 
   def __split_line(self, line):
-    return line[self.line_length:].strip(), line[:self.line_length].strip()
-
+    return line[self.__line_length:].strip(), line[:self.__line_length].strip()
 
 
 
 # functions
 
 def reset_stdin():
-  temporary_fd = 3
-  tty_device_file = "/dev/tty"
+  TEMPORARY_FD = 3
+  TTY_DEVICE_FILE = "/dev/tty"
 
-  os.dup2(sys.stdin.fileno(), temporary_fd)
+  os.dup2(sys.stdin.fileno(), TEMPORARY_FD)
   os.close(sys.stdin.fileno())
-  sys.stdin = open(tty_device_file)
-  original_stdin = os.fdopen(temporary_fd)
+  sys.stdin = open(TTY_DEVICE_FILE)
+  original_stdin = os.fdopen(TEMPORARY_FD)
   return original_stdin
 
 
@@ -232,14 +263,13 @@ def main(*args):
     # Instead, you need to raise some Exception().
 
     window = initialize_curses()
-    console = Console(window,
-              Game(Sample(sample_file, line_length=window.getmaxyx()[1] - 1)))
 
-    while not console.is_down():
-      console.display_screen()
+    console = Console(window)
+    console.set_game(TypingGame(console.api, sample_file))
+    console.play_game()
 
-  except Exception as e:
-    error_message = str(e)
+  except Exception as exception:
+    error_message = str(exception)
   finally:
     finalize_curses()
 
