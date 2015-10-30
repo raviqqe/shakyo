@@ -26,13 +26,13 @@ def usage():
 
 # classes
 
-class Game:
+class Console:
   def __init__(self, window, sample_file):
     self.window = window
     self.sample_file = sample_file
     self.display_screen = self.__display_start_screen
 
-  def is_over(self):
+  def is_down(self):
     if self.display_screen == None:
       return True
     return False
@@ -101,10 +101,10 @@ def main(*args):
     # Instead, you need to raise some Exception().
 
     window = initialize_curses()
-    game = Game(window, sample_file)
+    console = Console(window, sample_file)
 
-    while not game.is_over():
-      game.display_screen()
+    while not console.is_down():
+      console.display_screen()
 
   except Exception as e:
     error_message = str(e)
