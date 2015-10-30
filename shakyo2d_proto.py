@@ -4,7 +4,7 @@ import curses
 import curses.ascii
 import os
 import sys
-import collections
+
 
 
 # the order of bugs
@@ -26,38 +26,35 @@ def usage():
 
 # classes
 
-Thunk = collections.namedtuple("Thunk", ["function", "args"])
-
 class Game:
   def __init__(self, window, sample_file):
     self.window = window
     self.sample_file = sample_file
     self.display_screen = self.__display_start_screen
 
-  def __display_start_screen(window):
-    window.clear()
-    window.addstr(0, 0, "are you ready?")
-    window.addstr(1, 0, "press any key...")
+  def is_over(self):
+    if self.display_screen == None:
+      return True
+    return False
 
-    char = window.getch()
+  def __display_start_screen(self):
+    self.window.clear()
+    self.window.addstr(0, 0, "are you ready?")
+    self.window.addstr(1, 0, "press any key...")
+    char = self.window.getch()
     if char == curses.ascii.ESC or char == curses.ascii.ctrl('q'):
-      return None
-
-    window.refresh()
-    return Thunk(display_game_screen, (window,))
-
+      self.display_screen = None
+    self.display_screen = self.__display_game_screen
 
   def __display_game_screen(self):
-    game = Game(window)
-    return Thunk(display_result_screen, (window,))
-
+    self.display_screen = self.__display_result_screen
 
   def __display_result_screen(self):
     self.window.clear()
     self.window.addstr(0, 0, "good job!")
     self.window.addstr(1, 0, "press any key...")
     self.window.getch()
-    return None
+    self.display_screen = None
 
 
 
@@ -104,10 +101,11 @@ def main(*args):
     # Instead, you need to raise some Exception().
 
     window = initialize_curses()
+    game = Game(window, sample_file)
 
-    #thunk = display_start_screen(window, sample_file)
-    #while thunk:
-    #  thunk = thunk.function(thunk.args)
+    while not game.is_over():
+      game.display_screen()
+
   except Exception as e:
     error_message = str(e)
   finally:
