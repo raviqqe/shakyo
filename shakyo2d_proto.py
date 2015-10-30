@@ -23,6 +23,7 @@ def usage():
   fail("usage: {}".format(sys.argv[0]))
 
 
+
 # classes
 
 Thunk = collections.namedtuple("Thunk", ["function", "args"])
