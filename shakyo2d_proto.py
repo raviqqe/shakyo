@@ -65,6 +65,7 @@ class Console:
 
       def print_line(self, line_pos, text):
         self.__console._window.addstr(line_pos, 0, text)
+        self.__console._window.clrtoeol()
 
       def clear(self):
         self.__console._window.clear()
@@ -91,8 +92,9 @@ class Game:
 
   def __start_game():
     self.__api.clear()
-    while not self.is_over:
-      char = self.window.getch()
+    game_over = False
+    while not game_over:
+      char = self.__api.get_char()
       assert curses.ascii.isascii(char)
 
       if char in QUIT_CHARS:
@@ -102,49 +104,45 @@ class Game:
       elif char in DELETE_CHARS:
         self.__delete_char()
       elif curses.ascii.isprint(char)
-        self.__add_char(chr(char))
-      else:
-        raise Exception("Invalid character is typed.")
+        game_over = self.__add_char(chr(char))
       self.window.refresh() # TODO: is this necessary?
 
-  def __add_char(self, char):
+  def __add_char(self, char) -> bool:
     finish_or_next_line = curses.ascii.isspace(char) \
                           and self.input_text == self.sample_lines[0]
     if finish_or_next_line and len(self.sample_lines) == 0:
-      self.is_over = True
-      return
+      return True
     elif finish_or_next_line:
       self.__scroll()
-      return
+      return False
 
     self.input_text += char
     if char == self.sample_lines[0][len(self.input_text) - 1]:
+      pass
 
   def __delete_char(self):
     if len(self.input_text) == 0: return
     self.input_text = self.input_text[:-1]
-    self.window.move(self.geometry.input_line, len(self.input_text))
-    self.window.clrtoeol() # TODO: use delch()?
+    self.__api.print_line(self.geometry.input_line, self.input_text)
 
-  def __clear_input_line(self):
+  def __clear_input_text(self):
     self.input_text = ""
-    self.window.move(self.geometry.input_line, 0)
-    self.window.clrtoeol()
+    self.__api.print_line(self.geometry.input_line, self.input_text)
 
   def __scroll(self):
-    self.window.scroll()
-    self.window.addstr(self.geometry.sample_line - 2, 0,
-                       self.sample_lines.popleft())
-    self.window.addstr(self.geometry.sample_line - 2, 0, self.sample_lines[0])
+    self.__api.scroll()
+    self.__api.print_line(self.geometry.sample_line - 2,
+                          self.__sample.lines[0])
+    self.__sample.rotate()
+    self.__api.print_line(self.geometry.sample_line, self.__sample.lines[0])
     self.__draw_separation_lines()
-    self.__clear_input_line()
+    self.__clear_input_text()
 
   def __draw_separation_lines(self):
     SEPARATION_LINE_CHAR = '-'
-    self.window.hline(self.geometry.sample_line - 1, 0, SEPARATION_LINE_CHAR,
-                      self.window.getmaxyx()[1])
-    self.window.hline(self.geometry.input_line + 1, 0, SEPARATION_LINE_CHAR,
-                      self.window.getmaxyx()[1])
+    separation_line = SEPARATION_LINE_CHAR * self.__api.screen_width
+    self.__api.print_line(self.geometry.sample_line - 1, separation_line)
+    self.__api.print_line(self.geometry.input_line + 1, separation_line)
 
   def __are_you_ready(self) -> bool:
     self.__api.clear()
