@@ -10,10 +10,13 @@ import sys
 # constants
 
 INFINITY_INT = sys.maxsize
-QUIT_CHARS = {curses.ascii.ESC, char == curses.ascii.ctrl('q')}
+QUIT_CHARS = {curses.ascii.ESC, curses.ascii.ctrl('q')}
 DELETE_CHARS = {curses.ascii.DEL, curses.ascii.BS, curses.KEY_BACKSPACE,
                 curses.KEY_DC}
 CLEAR_CHARS = {curses.ascii.ctrl('u')}
+SPACES_PER_TAB = 2
+ATTR_CORRECT = curses.A_NORMAL
+ATTR_ERROR = curses.A_REVERSE
 
 
 
@@ -35,7 +38,6 @@ def usage():
 
 class Console:
   def __init__(self, window):
-    assert isinstance(window, curses.Window)
     self._window = window
     self.__game = None
 
@@ -46,7 +48,7 @@ class Console:
     self.__game.play()
 
   @property
-  def api():
+  def api(self):
     class Api:
       def __init__(self, console):
         assert isinstance(console, Console)
@@ -54,18 +56,30 @@ class Console:
 
       @property
       def screen_height(self):
-        self.__console._window.getmaxyx()[0]
+        return self.__console._window.getmaxyx()[0]
 
       @property
       def screen_width(self):
-        self.__console._window.getmaxyx()[1]
+        return self.__console._window.getmaxyx()[1]
 
       def get_char(self) -> int:
         return self.__console._window.getch()
 
+      def add_char(self, char: str, attr=curses.A_NORMAL):
+        assert len(char) == 1
+        if not self.__console._window.getyx()[1] < self.screen_width: return
+        self.__console._window.addch(ord(char), attr)
+
+      def delete_char(self):
+        y, x = self.__console._window.getyx()
+        if x == 0: return
+        self.__console._window.delch(y, x - 1)
+
       def print_line(self, line_pos, text):
-        self.__console._window.addstr(line_pos, 0, text)
+        assert len(text) <= self.screen_width
+        self.__console._window.move(line_pos, 0)
         self.__console._window.clrtoeol()
+        self.__console._window.addstr(line_pos, 0, text)
 
       def clear(self):
         self.__console._window.clear()
@@ -73,10 +87,13 @@ class Console:
       def scroll(self):
         self.__console._window.scroll()
 
+      def refresh(self):
+        self.__console._window.refresh()
+
     return Api(self)
 
 
-class Game:
+class TypingGame:
   def __init__(self, api, sample_file):
     self.__api = api
     self.__sample = Sample(sample_file, line_length=(api.screen_width - 1))
@@ -90,8 +107,9 @@ class Game:
     self.__start_game()
     self.__show_result()
 
-  def __start_game():
+  def __start_game(self):
     self.__api.clear()
+    self.__draw_new_screen()
     game_over = False
     while not game_over:
       char = self.__api.get_char()
@@ -103,46 +121,59 @@ class Game:
         self.__clear_input_line()
       elif char in DELETE_CHARS:
         self.__delete_char()
-      elif curses.ascii.isprint(char)
+      elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
         game_over = self.__add_char(chr(char))
-      self.window.refresh() # TODO: is this necessary?
+        assert isinstance(game_over, bool)
+      self.__api.refresh() # TODO: is this necessary?
 
-  def __add_char(self, char) -> bool:
-    finish_or_next_line = curses.ascii.isspace(char) \
-                          and self.input_text == self.sample_lines[0]
-    if finish_or_next_line and len(self.sample_lines) == 0:
+  def __add_char(self, char: str) -> bool:
+    go_to_next_line = curses.ascii.isspace(char) \
+                      and self.__input_text == self.__sample.lines[0]
+    if go_to_next_line and self.__sample.lines[1] == None:
       return True
-    elif finish_or_next_line:
-      self.__scroll()
-      return False
 
-    self.input_text += char
-    if char == self.sample_lines[0][len(self.input_text) - 1]:
+    if go_to_next_line:
+      self.__scroll()
+    elif len(self.__input_text) == len(self.__sample.lines[0]):
       pass
+    elif char == '\t':
+      for _ in range(SPACES_PER_TAB):
+        result = self.__add_char(' ')
+        assert result == False
+    elif curses.ascii.isprint(char):
+      self.__input_text += char
+      attr = ATTR_CORRECT \
+             if char == self.__sample.lines[0][len(self.__input_text) - 1] \
+             else ATTR_ERROR
+      self.__api.add_char(char, attr=attr)
+    return False
 
   def __delete_char(self):
-    if len(self.input_text) == 0: return
-    self.input_text = self.input_text[:-1]
-    self.__api.print_line(self.geometry.input_line, self.input_text)
+    if len(self.__input_text) == 0: return
+    self.__input_text = self.__input_text[:-1]
+    self.__api.delete_char()
 
   def __clear_input_text(self):
-    self.input_text = ""
-    self.__api.print_line(self.geometry.input_line, self.input_text)
+    self.__input_text = ""
+    self.__api.print_line(self.__geometry.input_line, self.__input_text)
 
   def __scroll(self):
     self.__api.scroll()
-    self.__api.print_line(self.geometry.sample_line - 2,
+    self.__api.print_line(self.__geometry.sample_line - 2,
                           self.__sample.lines[0])
     self.__sample.rotate()
-    self.__api.print_line(self.geometry.sample_line, self.__sample.lines[0])
+    self.__draw_new_screen()
+
+  def __draw_new_screen(self):
+    self.__api.print_line(self.__geometry.sample_line, self.__sample.lines[0])
     self.__draw_separation_lines()
     self.__clear_input_text()
 
   def __draw_separation_lines(self):
     SEPARATION_LINE_CHAR = '-'
     separation_line = SEPARATION_LINE_CHAR * self.__api.screen_width
-    self.__api.print_line(self.geometry.sample_line - 1, separation_line)
-    self.__api.print_line(self.geometry.input_line + 1, separation_line)
+    self.__api.print_line(self.__geometry.sample_line - 1, separation_line)
+    self.__api.print_line(self.__geometry.input_line + 1, separation_line)
 
   def __are_you_ready(self) -> bool:
     self.__api.clear()
@@ -180,21 +211,21 @@ class Sample:
     class Lines:
       def __init__(self, sample):
         assert isinstance(sample, Sample)
-        self.sample = sample
+        self.__sample = sample
 
       def __getitem__(self, index: int) -> str:
         assert isinstance(index, int)
 
-        self.sample._read_lines_from_file()
+        self.__sample._read_lines_from_file()
 
-        if index < len(self.sample._buffered_lines):
-          return self.sample._buffered_lines[index]
+        if index < len(self.__sample._buffered_lines):
+          return self.__sample._buffered_lines[index]
         return None
 
     return Lines(self)
 
   def rotate(self):
-    self._bufferd_lines.pop(0)
+    self._buffered_lines.pop(0)
 
   def _read_lines_from_file(self):
     lines = self.__file.readlines()
@@ -203,10 +234,10 @@ class Sample:
       self.__buffer_line(line)
 
   def __buffer_line(self, line):
-    assert line.endwith('\n')
+    assert line.endswith('\n')
     line = line.strip()
 
-    while len(line) > line_length:
+    while len(line) > self.__line_length:
       buffered_line, line = self.__split_line(line)
       self._buffered_lines.append(buffered_line)
     self._buffered_lines.append(line)
@@ -236,6 +267,7 @@ def initialize_curses():
   curses.start_color()
   curses.use_default_colors()
   window.keypad(True)
+  window.scrollok(True)
   return window
 
 
@@ -265,14 +297,8 @@ def main(*args):
     console = Console(window)
     console.set_game(TypingGame(console.api, sample_file))
     console.play_game()
-
-  except Exception as exception:
-    error_message = str(exception)
   finally:
     finalize_curses()
-
-  if "error_message" in locals():
-    fail(error_message)
 
 
 if __name__ == "__main__":
