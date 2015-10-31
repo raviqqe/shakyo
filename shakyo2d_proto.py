@@ -262,7 +262,6 @@ class Sample:
       self.__buffer_line(line)
 
   def __buffer_line(self, line):
-    assert line.endswith('\n')
     line = line.rstrip()
 
     while len(line) > self.__line_length:
