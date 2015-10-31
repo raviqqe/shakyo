@@ -235,6 +235,9 @@ class FormattedText:
     self.__line_length = line_length
     self.__buffered_lines = []
 
+  def __del__(self):
+    self.__file.close()
+
   def __getitem__(self, index: int) -> str:
     self.__read_lines_from_file()
 
