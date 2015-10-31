@@ -94,12 +94,12 @@ class Console:
 
 
 class TypingGame:
-  def __init__(self, api, sample_file):
+  def __init__(self, api, example_file):
     self.__api = api
-    self.__sample = Sample(sample_file, line_length=(api.screen_width - 1))
+    self.__example = Sample(example_file, line_length=(api.screen_width - 1))
     self.__geometry = Geometry(api.screen_height, api.screen_width)
     self.__input_text = ""
-    if self.__sample.lines[0] == None:
+    if self.__example.lines[0] == None:
       raise Exception("No line can be read from stdin.")
 
   def play(self):
@@ -127,13 +127,13 @@ class TypingGame:
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = curses.ascii.isspace(char) \
-                      and self.__input_text == self.__sample.lines[0]
-    if go_to_next_line and self.__sample.lines[1] == None:
+                      and self.__input_text == self.__example.lines[0]
+    if go_to_next_line and self.__example.lines[1] == None:
       return True
 
     if go_to_next_line:
       self.__scroll()
-    elif len(self.__input_text) == len(self.__sample.lines[0]):
+    elif len(self.__input_text) == len(self.__example.lines[0]):
       pass
     elif char == '\t':
       for _ in range(SPACES_PER_TAB):
@@ -142,7 +142,7 @@ class TypingGame:
     elif curses.ascii.isprint(char):
       self.__input_text += char
       attr = ATTR_CORRECT \
-             if char == self.__sample.lines[0][len(self.__input_text) - 1] \
+             if char == self.__example.lines[0][len(self.__input_text) - 1] \
              else ATTR_ERROR
       self.__api.add_char(char, attr=attr)
     return False
@@ -153,17 +153,17 @@ class TypingGame:
     self.__api.delete_char()
 
   def __initialize_screen(self):
-    self.__print_all_sample_text()
+    self.__print_all_example_text()
     self.__draw_partitions()
     self.__clear_input_text()
 
   def __scroll(self):
     self.__api.scroll()
-    self.__api.print_line(self.__geometry.sample_line - 2,
-                          self.__sample.lines[0])
-    self.__sample.rotate()
-    self.__print_current_sample_text()
-    self.__print_bottom_sample_text()
+    self.__api.print_line(self.__geometry.example_line - 2,
+                          self.__example.lines[0])
+    self.__example.rotate()
+    self.__print_current_example_text()
+    self.__print_bottom_example_text()
     self.__draw_partitions()
     self.__clear_input_text()
 
@@ -171,27 +171,27 @@ class TypingGame:
     self.__input_text = ""
     self.__api.print_line(self.__geometry.input_line, self.__input_text)
 
-  def __print_current_sample_text(self):
-    self.__api.print_line(self.__geometry.sample_line, self.__sample.lines[0])
+  def __print_current_example_text(self):
+    self.__api.print_line(self.__geometry.example_line, self.__example.lines[0])
 
-  def __print_bottom_sample_text(self):
-    index = self.__geometry.bottom_line - self.__geometry.next_sample_line + 1
-    if self.__sample.lines[index] != None:
+  def __print_bottom_example_text(self):
+    index = self.__geometry.bottom_line - self.__geometry.next_example_line + 1
+    if self.__example.lines[index] != None:
       self.__api.print_line(self.__geometry.bottom_line,
-                            self.__sample.lines[index])
+                            self.__example.lines[index])
 
-  def __print_all_sample_text(self):
-    self.__print_current_sample_text()
+  def __print_all_example_text(self):
+    self.__print_current_example_text()
     for index in range(1, 1 + (self.__geometry.bottom_line
-                               - self.__geometry.next_sample_line + 1)):
-      if self.__sample.lines[index] == None: break
-      self.__api.print_line(self.__geometry.next_sample_line + (index - 1),
-                            self.__sample.lines[index])
+                               - self.__geometry.next_example_line + 1)):
+      if self.__example.lines[index] == None: break
+      self.__api.print_line(self.__geometry.next_example_line + (index - 1),
+                            self.__example.lines[index])
 
   def __draw_partitions(self):
     PARTITION_CHAR = '-'
     partition = PARTITION_CHAR * self.__api.screen_width
-    self.__api.print_line(self.__geometry.sample_line - 1, partition)
+    self.__api.print_line(self.__geometry.example_line - 1, partition)
     self.__api.print_line(self.__geometry.input_line + 1, partition)
 
   def __are_you_ready(self) -> bool:
@@ -213,8 +213,8 @@ class TypingGame:
 class Geometry:
   def __init__(self, height, width):
     self.input_line = height // 2
-    self.sample_line = self.input_line - 1
-    self.next_sample_line = self.input_line + 2
+    self.example_line = self.input_line - 1
+    self.next_example_line = self.input_line + 2
     self.bottom_line = height - 1
 
 
@@ -304,7 +304,7 @@ def main(*args):
   if sys.stdin.isatty(): fail("stdin is a tty.")
   if len(args) != 0: usage()
 
-  sample_file = reset_stdin()
+  example_file = reset_stdin()
 
   try:
     # CAUTION:
@@ -314,7 +314,7 @@ def main(*args):
     window = initialize_curses()
 
     console = Console(window)
-    console.set_game(TypingGame(console.api, sample_file))
+    console.set_game(TypingGame(console.api, example_file))
     console.play_game()
   finally:
     finalize_curses()
