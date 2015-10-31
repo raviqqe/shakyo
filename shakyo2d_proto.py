@@ -172,7 +172,7 @@ class TypingGame:
     self.__api.scroll()
     self.__api.print_line(self.__geometry.example_line - 2,
                           self.__example_text[0])
-    self.__example_text.rotate()
+    del self.__example_text[0]
     self.__print_current_example_text()
     self.__print_bottom_example_text()
     self.__draw_partitions()
@@ -242,8 +242,8 @@ class FormattedText:
       return self.__buffered_lines[index]
     return None
 
-  def rotate(self):
-    self.__buffered_lines.pop(0)
+  def __delitem__(self, index: int):
+    del self.__buffered_lines[index]
 
   def __read_lines_from_file(self):
     lines = self.__file.readlines()
