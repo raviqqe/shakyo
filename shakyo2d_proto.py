@@ -39,13 +39,22 @@ def usage():
 class Console:
   def __init__(self, window):
     self._window = window
-    self.__game = None
+    self._game = None
 
-  def set_game(self, game):
-    self.__game = game
+  @property
+  def ui(self):
+    class Ui:
+      def __init__(self, console):
+        assert isinstance(console, Console)
+        self.__console = console
 
-  def play_game(self):
-    self.__game.play()
+      def set_game(self, game):
+        self.__console._game = game
+
+      def play_game(self):
+        self.__console._game.play()
+
+    return Ui(self)
 
   @property
   def api(self):
@@ -314,8 +323,8 @@ def main(*args):
     window = initialize_curses()
 
     console = Console(window)
-    console.set_game(TypingGame(console.api, example_file))
-    console.play_game()
+    console.ui.set_game(TypingGame(console.api, example_file))
+    console.ui.play_game()
   finally:
     finalize_curses()
 
