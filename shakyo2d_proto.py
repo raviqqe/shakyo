@@ -235,7 +235,7 @@ class Sample:
 
   def __buffer_line(self, line):
     assert line.endswith('\n')
-    line = line.strip()
+    line = line.rstrip()
 
     while len(line) > self.__line_length:
       buffered_line, line = self.__split_line(line)
@@ -243,7 +243,8 @@ class Sample:
     self._buffered_lines.append(line)
 
   def __split_line(self, line):
-    return line[self.__line_length:].strip(), line[:self.__line_length].strip()
+    return line[self.__line_length:].rstrip(), \
+           line[:self.__line_length].strip()
 
 
 
