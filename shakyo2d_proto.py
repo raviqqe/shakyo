@@ -109,7 +109,7 @@ class TypingGame:
 
   def __start_game(self):
     self.__api.clear()
-    self.__draw_new_screen()
+    self.__initialize_screen()
     game_over = False
     while not game_over:
       char = self.__api.get_char()
@@ -152,27 +152,47 @@ class TypingGame:
     self.__input_text = self.__input_text[:-1]
     self.__api.delete_char()
 
-  def __clear_input_text(self):
-    self.__input_text = ""
-    self.__api.print_line(self.__geometry.input_line, self.__input_text)
+  def __initialize_screen(self):
+    self.__print_all_sample_text()
+    self.__draw_partitions()
+    self.__clear_input_text()
 
   def __scroll(self):
     self.__api.scroll()
     self.__api.print_line(self.__geometry.sample_line - 2,
                           self.__sample.lines[0])
     self.__sample.rotate()
-    self.__draw_new_screen()
-
-  def __draw_new_screen(self):
-    self.__api.print_line(self.__geometry.sample_line, self.__sample.lines[0])
-    self.__draw_separation_lines()
+    self.__print_current_sample_text()
+    self.__print_bottom_sample_text()
+    self.__draw_partitions()
     self.__clear_input_text()
 
-  def __draw_separation_lines(self):
-    SEPARATION_LINE_CHAR = '-'
-    separation_line = SEPARATION_LINE_CHAR * self.__api.screen_width
-    self.__api.print_line(self.__geometry.sample_line - 1, separation_line)
-    self.__api.print_line(self.__geometry.input_line + 1, separation_line)
+  def __clear_input_text(self):
+    self.__input_text = ""
+    self.__api.print_line(self.__geometry.input_line, self.__input_text)
+
+  def __print_current_sample_text(self):
+    self.__api.print_line(self.__geometry.sample_line, self.__sample.lines[0])
+
+  def __print_bottom_sample_text(self):
+    index = self.__geometry.bottom_line - self.__geometry.next_sample_line + 1
+    if self.__sample.lines[index] != None:
+      self.__api.print_line(self.__geometry.bottom_line,
+                            self.__sample.lines[index])
+
+  def __print_all_sample_text(self):
+    self.__print_current_sample_text()
+    for index in range(1, 1 + (self.__geometry.bottom_line
+                               - self.__geometry.next_sample_line + 1)):
+      if self.__sample.lines[index] == None: break
+      self.__api.print_line(self.__geometry.next_sample_line + (index - 1),
+                            self.__sample.lines[index])
+
+  def __draw_partitions(self):
+    PARTITION_CHAR = '-'
+    partition = PARTITION_CHAR * self.__api.screen_width
+    self.__api.print_line(self.__geometry.sample_line - 1, partition)
+    self.__api.print_line(self.__geometry.input_line + 1, partition)
 
   def __are_you_ready(self) -> bool:
     self.__api.clear()
@@ -192,10 +212,9 @@ class TypingGame:
 
 class Geometry:
   def __init__(self, height, width):
-    self.height = height
-    self.width = width
     self.input_line = height // 2
     self.sample_line = self.input_line - 1
+    self.next_sample_line = self.input_line + 2
     self.bottom_line = height - 1
 
 
