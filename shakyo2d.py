@@ -253,7 +253,7 @@ class FormattedText:
     lines = self.__file.readlines()
 
     for line in lines:
-      self.__buffer_line(self.__preprocess_line(line))
+      self.__buffer_line(self.__preprocess_text(line))
 
   def __buffer_line(self, line):
     line = line.rstrip()
@@ -268,8 +268,8 @@ class FormattedText:
            line[:self.__line_length].strip()
 
   @staticmethod
-  def __preprocess_line(line):
-    return text_unidecode.unidecode(line.replace('\t', ' ' * SPACES_PER_TAB))
+  def __preprocess_text(text):
+    return text_unidecode.unidecode(text.replace('\t', ' ' * SPACES_PER_TAB))
 
 
 
