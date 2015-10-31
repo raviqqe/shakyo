@@ -52,6 +52,7 @@ class Console:
         self.__console._game = game
 
       def play_game(self):
+        assert self.__console._game != None
         self.__console._game.play()
 
     return Ui(self)
