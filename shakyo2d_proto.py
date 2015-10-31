@@ -10,9 +10,9 @@ import sys
 # constants
 
 INFINITY_INT = sys.maxsize
-QUIT_CHARS = {curses.ascii.ESC, curses.ascii.ctrl('q')}
-DELETE_CHARS = {curses.ascii.DEL, curses.ascii.BS, curses.KEY_BACKSPACE,
-                curses.KEY_DC}
+QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('q')}
+DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
+                chr(curses.KEY_BACKSPACE), chr(curses.KEY_DC)}
 CLEAR_CHARS = {curses.ascii.ctrl('u')}
 SPACES_PER_TAB = 2
 ATTR_CORRECT = curses.A_NORMAL
@@ -72,8 +72,8 @@ class Console:
       def screen_width(self):
         return self.__console._window.getmaxyx()[1]
 
-      def get_char(self) -> int:
-        return self.__console._window.getch()
+      def get_char(self) -> str:
+        return chr(self.__console._window.getch())
 
       def add_char(self, char: str, attr=curses.A_NORMAL):
         assert len(char) == 1
@@ -128,11 +128,11 @@ class TypingGame:
       if char in QUIT_CHARS:
         return
       elif char in CLEAR_CHARS:
-        self.__clear_input_line()
+        self.__clear_input_text()
       elif char in DELETE_CHARS:
         self.__delete_char()
       elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
-        game_over = self.__add_char(chr(char))
+        game_over = self.__add_char(char)
         assert isinstance(game_over, bool)
 
   def __add_char(self, char: str) -> bool:
