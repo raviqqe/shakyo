@@ -229,8 +229,8 @@ class Geometry:
 
 
 class Sample:
-  def __init__(self, sample_file, line_length=79):
-    self.__file = sample_file
+  def __init__(self, text_file, line_length=79):
+    self.__file = text_file
     self.__line_length = line_length
     self._buffered_lines = []
 
