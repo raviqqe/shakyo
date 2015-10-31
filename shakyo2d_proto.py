@@ -137,7 +137,7 @@ class TypingGame:
         assert isinstance(game_over, bool)
 
   def __add_char(self, char: str) -> bool:
-    go_to_next_line = curses.ascii.isspace(char) \
+    go_to_next_line = char == '\n' \
                       and self.__input_text == self.__example_text[0]
     if go_to_next_line and self.__example_text[1] == None:
       return True
