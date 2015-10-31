@@ -124,7 +124,6 @@ class TypingGame:
       elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
         game_over = self.__add_char(chr(char))
         assert isinstance(game_over, bool)
-      self.__api.refresh() # TODO: is this necessary?
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = curses.ascii.isspace(char) \
