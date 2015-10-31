@@ -4,6 +4,7 @@ import curses
 import curses.ascii
 import os
 import sys
+import text_unidecode
 
 
 
@@ -268,7 +269,7 @@ class FormattedText:
 
   @staticmethod
   def __preprocess_line(line):
-    return line.replace('\t', ' ' * SPACES_PER_TAB)
+    return text_unidecode.unidecode(line.replace('\t', ' ' * SPACES_PER_TAB))
 
 
 
