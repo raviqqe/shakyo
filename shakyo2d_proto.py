@@ -106,10 +106,11 @@ class Console:
 class TypingGame:
   def __init__(self, api, example_file):
     self.__api = api
-    self.__example = FormattedText(example_file, line_length=(api.screen_width - 1))
+    self.__example_text = FormattedText(example_file,
+                                        line_length=(api.screen_width - 1))
     self.__geometry = Geometry(api.screen_height, api.screen_width)
     self.__input_text = ""
-    if self.__example.lines[0] == None:
+    if self.__example_text[0] == None:
       raise Exception("No line can be read from stdin.")
 
   def play(self):
@@ -137,13 +138,13 @@ class TypingGame:
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = curses.ascii.isspace(char) \
-                      and self.__input_text == self.__example.lines[0]
-    if go_to_next_line and self.__example.lines[1] == None:
+                      and self.__input_text == self.__example_text[0]
+    if go_to_next_line and self.__example_text[1] == None:
       return True
 
     if go_to_next_line:
       self.__scroll()
-    elif len(self.__input_text) == len(self.__example.lines[0]):
+    elif len(self.__input_text) == len(self.__example_text[0]):
       pass
     elif char == '\t':
       for _ in range(SPACES_PER_TAB):
@@ -152,7 +153,7 @@ class TypingGame:
     elif curses.ascii.isprint(char):
       self.__input_text += char
       attr = ATTR_CORRECT \
-             if char == self.__example.lines[0][len(self.__input_text) - 1] \
+             if char == self.__example_text[0][len(self.__input_text) - 1] \
              else ATTR_ERROR
       self.__api.add_char(char, attr=attr)
     return False
@@ -170,8 +171,8 @@ class TypingGame:
   def __scroll(self):
     self.__api.scroll()
     self.__api.print_line(self.__geometry.example_line - 2,
-                          self.__example.lines[0])
-    self.__example.rotate()
+                          self.__example_text[0])
+    self.__example_text.rotate()
     self.__print_current_example_text()
     self.__print_bottom_example_text()
     self.__draw_partitions()
@@ -182,21 +183,21 @@ class TypingGame:
     self.__api.print_line(self.__geometry.input_line, self.__input_text)
 
   def __print_current_example_text(self):
-    self.__api.print_line(self.__geometry.example_line, self.__example.lines[0])
+    self.__api.print_line(self.__geometry.example_line, self.__example_text[0])
 
   def __print_bottom_example_text(self):
     index = self.__geometry.bottom_line - self.__geometry.next_example_line + 1
-    if self.__example.lines[index] != None:
+    if self.__example_text[index] != None:
       self.__api.print_line(self.__geometry.bottom_line,
-                            self.__example.lines[index])
+                            self.__example_text[index])
 
   def __print_all_example_text(self):
     self.__print_current_example_text()
     for index in range(1, 1 + (self.__geometry.bottom_line
                                - self.__geometry.next_example_line + 1)):
-      if self.__example.lines[index] == None: break
+      if self.__example_text[index] == None: break
       self.__api.print_line(self.__geometry.next_example_line + (index - 1),
-                            self.__example.lines[index])
+                            self.__example_text[index])
 
   def __draw_partitions(self):
     PARTITION_CHAR = '-'
@@ -232,30 +233,19 @@ class FormattedText:
   def __init__(self, text_file, line_length=79):
     self.__file = text_file
     self.__line_length = line_length
-    self._buffered_lines = []
+    self.__buffered_lines = []
 
-  @property
-  def lines(self):
-    class Lines:
-      def __init__(self, sample):
-        assert isinstance(sample, FormattedText)
-        self.__sample = sample
+  def __getitem__(self, index: int) -> str:
+    self.__read_lines_from_file()
 
-      def __getitem__(self, index: int) -> str:
-        assert isinstance(index, int)
-
-        self.__sample._read_lines_from_file()
-
-        if index < len(self.__sample._buffered_lines):
-          return self.__sample._buffered_lines[index]
-        return None
-
-    return Lines(self)
+    if index < len(self.__buffered_lines):
+      return self.__buffered_lines[index]
+    return None
 
   def rotate(self):
-    self._buffered_lines.pop(0)
+    self.__buffered_lines.pop(0)
 
-  def _read_lines_from_file(self):
+  def __read_lines_from_file(self):
     lines = self.__file.readlines()
 
     for line in lines:
@@ -266,8 +256,8 @@ class FormattedText:
 
     while len(line) > self.__line_length:
       buffered_line, line = self.__split_line(line)
-      self._buffered_lines.append(buffered_line)
-    self._buffered_lines.append(line)
+      self.__buffered_lines.append(buffered_line)
+    self.__buffered_lines.append(line)
 
   def __split_line(self, line):
     return line[self.__line_length:].rstrip(), \
