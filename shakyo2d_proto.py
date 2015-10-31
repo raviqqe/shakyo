@@ -106,7 +106,7 @@ class Console:
 class TypingGame:
   def __init__(self, api, example_file):
     self.__api = api
-    self.__example = Sample(example_file, line_length=(api.screen_width - 1))
+    self.__example = FormattedText(example_file, line_length=(api.screen_width - 1))
     self.__geometry = Geometry(api.screen_height, api.screen_width)
     self.__input_text = ""
     if self.__example.lines[0] == None:
@@ -228,7 +228,7 @@ class Geometry:
     self.bottom_line = height - 1
 
 
-class Sample:
+class FormattedText:
   def __init__(self, text_file, line_length=79):
     self.__file = text_file
     self.__line_length = line_length
@@ -238,7 +238,7 @@ class Sample:
   def lines(self):
     class Lines:
       def __init__(self, sample):
-        assert isinstance(sample, Sample)
+        assert isinstance(sample, FormattedText)
         self.__sample = sample
 
       def __getitem__(self, index: int) -> str:
