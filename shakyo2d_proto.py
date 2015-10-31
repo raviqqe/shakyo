@@ -252,7 +252,7 @@ class FormattedText:
     lines = self.__file.readlines()
 
     for line in lines:
-      self.__buffer_line(line)
+      self.__buffer_line(self.__preprocess_line(line))
 
   def __buffer_line(self, line):
     line = line.rstrip()
@@ -265,6 +265,10 @@ class FormattedText:
   def __split_line(self, line):
     return line[self.__line_length:].rstrip(), \
            line[:self.__line_length].strip()
+
+  @staticmethod
+  def __preprocess_line(line):
+    return line.replace('\t', ' ' * SPACES_PER_TAB)
 
 
 
