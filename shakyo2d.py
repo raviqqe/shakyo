@@ -19,8 +19,8 @@ TTY_DEVICE_FILE = "/dev/tty"
 QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
 DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
                 chr(curses.KEY_BACKSPACE), chr(curses.KEY_DC)}
-CLEAR_CHARS = {curses.ascii.ctrl('u')}
-CHEAT_CHARS = {curses.ascii.ctrl('n')}
+CLEAR_CHAR = curses.ascii.ctrl('u')
+CHEAT_CHAR = curses.ascii.ctrl('n')
 
 CAN_CHEAT = False
 SPACES_PER_TAB = 2
@@ -131,11 +131,11 @@ class TypingGame:
 
       if char in QUIT_CHARS:
         return
-      elif char in CLEAR_CHARS:
+      elif char == CLEAR_CHAR:
         self.__clear_input_text()
       elif char in DELETE_CHARS:
         self.__delete_char()
-      elif char in CHEAT_CHARS and CAN_CHEAT:
+      elif char == CHEAT_CHAR and CAN_CHEAT:
         game_over = self.__cheat()
       elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
         game_over = self.__add_char(char)
