@@ -45,6 +45,8 @@ def fail(*message):
 
 class Console:
   def __init__(self, window):
+    window.keypad(True)
+    window.scrollok(True)
     self._window = window
     self._game = None
 
@@ -287,8 +289,6 @@ def initialize_curses():
   curses.cbreak()
   curses.start_color()
   curses.use_default_colors()
-  window.keypad(True)
-  window.scrollok(True)
   return window
 
 
