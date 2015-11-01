@@ -329,7 +329,7 @@ def parse_args():
                           help="enable the cheat key")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
-                          help="number of spaces per tab")
+                          help="set number of spaces per tab")
 
   args = arg_parser.parse_args()
   if args.spaces_per_tab != None:
