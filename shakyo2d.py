@@ -294,7 +294,7 @@ def main():
   try:
     # CAUTION:
     # You need to raise some Exception() instead of calling exit() here
-    # to prevent curses messing up your terminal.
+    # to prevent curses from messing up your terminal.
 
     window = initialize_curses()
 
