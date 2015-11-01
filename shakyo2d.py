@@ -106,9 +106,6 @@ class Console:
       def scroll(self):
         self.__console._window.scroll()
 
-      def refresh(self):
-        self.__console._window.refresh()
-
     return Api(self)
 
 
