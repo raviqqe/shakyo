@@ -6,6 +6,7 @@ import curses.ascii
 import os
 import sys
 import text_unidecode
+import typing
 
 
 
@@ -64,8 +65,9 @@ class ConsoleApi:
   def screen_width(self):
     return self.__window.getmaxyx()[1]
 
-  def get_char(self) -> str:
-    return chr(self.__window.getch())
+  def get_char(self) -> typing.Optional[str]:
+    char = self.__window.getkey()
+    return char if len(char) == 1 and curses.ascii.isascii(char) else None
 
   @__save_position
   def put_char(self, char: str, attr=curses.A_NORMAL):
@@ -117,8 +119,7 @@ class TypingGame:
 
     game_over = False
     while not game_over:
-      char = self.__api.get_char()
-      assert curses.ascii.isascii(char)
+      char = self.__get_char()
 
       if char in QUIT_CHARS:
         return
@@ -130,6 +131,12 @@ class TypingGame:
         game_over = self.__cheat()
       elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
         game_over = self.__add_char(char)
+
+  def __get_char(self):
+    char = self.__api.get_char()
+    while char == None:
+      char = self.__api.get_char()
+    return char
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = char == '\n' \
