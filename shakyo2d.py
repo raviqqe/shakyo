@@ -69,6 +69,16 @@ class Console:
   @property
   def api(self):
     class Api:
+      class SavedPosition:
+        def __init__(self, window):
+          self.__window = window
+
+        def __enter__(self):
+          self.__saved_position = self.__window.getyx()
+
+        def __exit__(self, *_):
+          self.__window.move(*self.__saved_position)
+
       def __init__(self, console):
         assert isinstance(console, Console)
         self.__console = console
@@ -84,25 +94,38 @@ class Console:
       def get_char(self) -> str:
         return chr(self.__console._window.getch())
 
-      def add_char(self, char: str, attr=curses.A_NORMAL):
-        assert len(char) == 1
-        if not self.__console._window.getyx()[1] < self.screen_width: return
-        self.__console._window.addch(ord(char), attr)
+      def put_char(self, char: str, attr=curses.A_NORMAL):
+        assert len(char) == 1 # TODO: make it proper
+        with self.SavedPosition(self.__console._window):
+          self.__console._window.addch(ord(char), attr)
 
-      def print_line(self, line_pos, text):
+      def put_line(self, line_pos, text):
         assert len(text) <= self.screen_width
-        self.__console._window.move(line_pos, 0)
-        self.__console._window.clrtoeol()
-        self.__console._window.addstr(line_pos, 0, text)
+        with self.SavedPosition(self.__console._window):
+          self.__console._window.move(line_pos, 0)
+          self.__console._window.clrtoeol()
+          self.__console._window.addstr(line_pos, 0, text)
 
       def move(self, y, x):
         self.__console._window.move(y, x)
 
+      def move_right(self):
+        y, x = self.__console._window.getyx()
+        if x == self.screen_width - 1: return
+        self.__console._window.move(y, x + 1)
+
+      def move_left(self):
+        y, x = self.__console._window.getyx()
+        if x == 0: return
+        self.__console._window.move(y, x - 1)
+
       def clear(self):
-        self.__console._window.clear()
+        with self.SavedPosition(self.__console._window):
+          self.__console._window.clear()
 
       def scroll(self):
-        self.__console._window.scroll()
+        with self.SavedPosition(self.__console._window):
+          self.__console._window.scroll()
 
     return Api(self)
 
@@ -156,16 +179,15 @@ class TypingGame:
       attr = ATTR_CORRECT \
              if char == self.__example_text[0][len(self.__input_text) - 1] \
              else ATTR_ERROR
-      self.__api.add_char(char, attr=attr)
+      self.__api.put_char(char, attr=attr)
+      self.__api.move_right()
     return False
 
   def __delete_char(self):
     if len(self.__input_text) == 0: return
-    current_cursor_position = len(self.__input_text)
-    self.__api.move(self.__geometry.current_line, current_cursor_position - 1)
-    self.__api.add_char(self.__example_text[0][len(self.__input_text) - 1])
-    self.__api.move(self.__geometry.current_line, current_cursor_position - 1)
     self.__input_text = self.__input_text[:-1]
+    self.__api.move_left()
+    self.__api.put_char(self.__example_text[0][len(self.__input_text)])
 
   def __cheat(self):
     if self.__example_text[1] == None:
@@ -190,15 +212,15 @@ class TypingGame:
   def __print_bottom_example_text(self):
     index = self.__geometry.bottom_line - self.__geometry.current_line
     if self.__example_text[index] != None:
-      self.__api.print_line(self.__geometry.bottom_line,
-                            self.__example_text[index])
+      self.__api.put_line(self.__geometry.bottom_line,
+                          self.__example_text[index])
 
   def __print_all_example_text(self):
     for index in range(self.__geometry.bottom_line
                        - self.__geometry.current_line):
       if self.__example_text[index] == None: break
-      self.__api.print_line(self.__geometry.current_line + index,
-                            self.__example_text[index])
+      self.__api.put_line(self.__geometry.current_line + index,
+                          self.__example_text[index])
 
 
 class Geometry:
