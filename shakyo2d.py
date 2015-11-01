@@ -190,6 +190,7 @@ class TypingGame:
 
   def __clear_input_text(self):
     self.__input_text = ""
+    self.__api.put_line(self.__geometry.current_line, self.__example_text[0])
     self.__api.move(self.__geometry.current_line, 0)
 
   def __print_bottom_example_text(self):
