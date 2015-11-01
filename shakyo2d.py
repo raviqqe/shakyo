@@ -326,7 +326,8 @@ def parse_args():
   arg_parser.add_argument("-c", "--cheat",
                           dest="can_cheat",
                           action="store_true",
-                          help="enable the cheat key")
+                          help="enable the cheat key, {}"
+                               .format(curses.ascii.unctrl(CHEAT_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="set number of spaces per tab")
