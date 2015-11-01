@@ -11,11 +11,15 @@ import text_unidecode
 
 # constants
 
+TTY_DEVICE_FILE = "/dev/tty"
+
 QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
 DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
                 chr(curses.KEY_BACKSPACE), chr(curses.KEY_DC)}
 CLEAR_CHARS = {curses.ascii.ctrl('u')}
+
 SPACES_PER_TAB = 2
+
 ATTR_CORRECT = curses.A_NORMAL
 ATTR_ERROR = curses.A_REVERSE
 
@@ -274,7 +278,6 @@ class FormattedText:
 
 def reset_stdin():
   TEMPORARY_FD = 3
-  TTY_DEVICE_FILE = "/dev/tty"
 
   os.dup2(sys.stdin.fileno(), TEMPORARY_FD)
   os.close(sys.stdin.fileno())
