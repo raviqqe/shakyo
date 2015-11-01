@@ -306,8 +306,8 @@ def main():
 
   try:
     # CAUTION:
-    # You cannot use fail(), usage(), and so forth, which use exit().
-    # Instead, you need to raise some Exception().
+    # You need to raise some Exception() instead of calling exit() here
+    # to prevent curses messing up your terminal.
 
     window = initialize_curses()
 
