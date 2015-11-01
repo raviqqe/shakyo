@@ -43,91 +43,65 @@ def fail(*message):
 
 # classes
 
-class Console:
+class ConsoleApi:
+  class SavedPosition:
+    def __init__(self, window):
+      self.__window = window
+
+    def __enter__(self):
+      self.__saved_position = self.__window.getyx()
+
+    def __exit__(self, *_):
+      self.__window.move(*self.__saved_position)
+
   def __init__(self, window):
     window.keypad(True)
     window.scrollok(True)
-    self._window = window
-    self._game = None
+    self.__window = window
 
   @property
-  def ui(self):
-    class Ui:
-      def __init__(self, console):
-        assert isinstance(console, Console)
-        self.__console = console
-
-      def set_game(self, game):
-        self.__console._game = game
-
-      def play_game(self):
-        assert self.__console._game != None
-        self.__console._game.play()
-
-    return Ui(self)
+  def screen_height(self):
+    return self.__window.getmaxyx()[0]
 
   @property
-  def api(self):
-    class Api:
-      class SavedPosition:
-        def __init__(self, window):
-          self.__window = window
+  def screen_width(self):
+    return self.__window.getmaxyx()[1]
 
-        def __enter__(self):
-          self.__saved_position = self.__window.getyx()
+  def get_char(self) -> str:
+    return chr(self.__window.getch())
 
-        def __exit__(self, *_):
-          self.__window.move(*self.__saved_position)
+  def put_char(self, char: str, attr=curses.A_NORMAL):
+    assert len(char) == 1 # TODO: make it proper
+    with self.SavedPosition(self.__window):
+      self.__window.addch(ord(char), attr)
 
-      def __init__(self, console):
-        assert isinstance(console, Console)
-        self.__console = console
+  def put_line(self, line_pos, text):
+    assert len(text) <= self.screen_width
+    with self.SavedPosition(self.__window):
+      self.__window.move(line_pos, 0)
+      self.__window.clrtoeol()
+      self.__window.addstr(line_pos, 0, text)
 
-      @property
-      def screen_height(self):
-        return self.__console._window.getmaxyx()[0]
+  def move(self, y, x):
+    self.__window.move(y, x)
 
-      @property
-      def screen_width(self):
-        return self.__console._window.getmaxyx()[1]
+  def move_right(self):
+    y, x = self.__window.getyx()
+    if x == self.screen_width - 1: return
+    self.__window.move(y, x + 1)
 
-      def get_char(self) -> str:
-        return chr(self.__console._window.getch())
+  def move_left(self):
+    y, x = self.__window.getyx()
+    if x == 0: return
+    self.__window.move(y, x - 1)
 
-      def put_char(self, char: str, attr=curses.A_NORMAL):
-        assert len(char) == 1 # TODO: make it proper
-        with self.SavedPosition(self.__console._window):
-          self.__console._window.addch(ord(char), attr)
+  def clear(self):
+    with self.SavedPosition(self.__window):
+      self.__window.clear()
 
-      def put_line(self, line_pos, text):
-        assert len(text) <= self.screen_width
-        with self.SavedPosition(self.__console._window):
-          self.__console._window.move(line_pos, 0)
-          self.__console._window.clrtoeol()
-          self.__console._window.addstr(line_pos, 0, text)
-
-      def move(self, y, x):
-        self.__console._window.move(y, x)
-
-      def move_right(self):
-        y, x = self.__console._window.getyx()
-        if x == self.screen_width - 1: return
-        self.__console._window.move(y, x + 1)
-
-      def move_left(self):
-        y, x = self.__console._window.getyx()
-        if x == 0: return
-        self.__console._window.move(y, x - 1)
-
-      def clear(self):
-        with self.SavedPosition(self.__console._window):
-          self.__console._window.clear()
-
-      def scroll(self):
-        with self.SavedPosition(self.__console._window):
-          self.__console._window.scroll()
-
-    return Api(self)
+  def scroll(self):
+    with self.SavedPosition(self.__window):
+      self.__window.scroll()
 
 
 class TypingGame:
@@ -315,9 +289,7 @@ def main():
 
     window = initialize_curses()
 
-    console = Console(window)
-    console.ui.set_game(TypingGame(console.api, example_file))
-    console.ui.play_game()
+    TypingGame(ConsoleApi(window), example_file).play()
   finally:
     finalize_curses()
 
