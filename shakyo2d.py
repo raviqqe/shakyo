@@ -20,7 +20,9 @@ QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
 DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
                 chr(curses.KEY_BACKSPACE), chr(curses.KEY_DC)}
 CLEAR_CHARS = {curses.ascii.ctrl('u')}
+CHEAT_CHARS = {curses.ascii.ctrl('j')}
 
+CAN_CHEAT = False
 SPACES_PER_TAB = 2
 
 ATTR_CORRECT = curses.A_NORMAL
@@ -135,6 +137,8 @@ class TypingGame:
         self.__clear_input_text()
       elif char in DELETE_CHARS:
         self.__delete_char()
+      elif char in CHEAT_CHARS and CAN_CHEAT:
+        game_over = self.__cheat()
       elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
         game_over = self.__add_char(char)
         assert isinstance(game_over, bool)
@@ -165,6 +169,12 @@ class TypingGame:
     if len(self.__input_text) == 0: return
     self.__input_text = self.__input_text[:-1]
     self.__api.delete_char()
+
+  def __cheat(self):
+    if self.__example_text[1] == None:
+      return True
+    self.__scroll()
+    return False
 
   def __initialize_screen(self):
     self.__print_all_example_text()
@@ -315,6 +325,10 @@ def main():
 
 def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
+  arg_parser.add_argument("-c", "--cheat",
+                          dest="can_cheat",
+                          action="store_true",
+                          help="enable the cheat key")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="number of spaces per tab")
@@ -323,6 +337,9 @@ def parse_args():
   if args.spaces_per_tab != None:
     global SPACES_PER_TAB
     SPACES_PER_TAB = args.spaces_per_tab
+  if args.can_cheat == True:
+    global CAN_CHEAT
+    CAN_CHEAT = True
 
 
 if __name__ == "__main__":
