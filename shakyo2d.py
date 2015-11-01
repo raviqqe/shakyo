@@ -113,7 +113,6 @@ class TypingGame:
       raise Exception("No line can be read from stdin.")
 
   def play(self):
-    self.__api.clear()
     self.__initialize_screen()
 
     game_over = False
@@ -168,6 +167,7 @@ class TypingGame:
     return False
 
   def __initialize_screen(self):
+    self.__api.clear()
     self.__print_all_example_text()
     self.__clear_input_text()
 
