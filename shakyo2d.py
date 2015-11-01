@@ -11,6 +11,9 @@ import text_unidecode
 
 # constants
 
+DESCRIPTION = "shakyo2d is a tool to learn about something just copying it " \
+              "by hand."
+
 TTY_DEVICE_FILE = "/dev/tty"
 
 QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
@@ -328,8 +331,7 @@ def main():
 
 
 def parse_args():
-  arg_parser = argparse.ArgumentParser(
-      description="shakyo2d: do shakyo to death")
+  arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="number of spaces per tab")
