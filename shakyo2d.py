@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import curses
 import curses.ascii
 import os
@@ -29,9 +30,6 @@ def error(*message):
 def fail(*message):
   error(*message)
   exit(1)
-
-def usage():
-  fail("usage: {}".format(sys.argv[0]))
 
 
 
@@ -306,10 +304,9 @@ def finalize_curses():
 
 # main routine
 
-def main(*args):
+def main():
   if not sys.stdout.isatty(): fail("stdout is not a tty.")
   if sys.stdin.isatty(): fail("stdin is a tty.")
-  if len(args) != 0: usage()
 
   example_file = reset_stdin()
 
@@ -327,5 +324,19 @@ def main(*args):
     finalize_curses()
 
 
+def parse_args():
+  arg_parser = argparse.ArgumentParser(
+      description="shakyo2d: do shakyo to death")
+  arg_parser.add_argument("-t", "--spaces-per-tab",
+                          type=int, dest="spaces_per_tab",
+                          help="number of spaces per tab")
+
+  args = arg_parser.parse_args()
+  if args.spaces_per_tab != None:
+    global SPACES_PER_TAB
+    SPACES_PER_TAB = args.spaces_per_tab
+
+
 if __name__ == "__main__":
-  main(*sys.argv[1:])
+  parse_args()
+  main()
