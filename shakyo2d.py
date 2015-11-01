@@ -225,9 +225,8 @@ class FormattedText:
   def __getitem__(self, index: int) -> str:
     self.__read_lines_from_file()
 
-    if index < len(self.__buffered_lines):
-      return self.__buffered_lines[index]
-    return None
+    return self.__buffered_lines[index] if index < len(self.__buffered_lines) \
+           else None
 
   def __delitem__(self, index: int):
     del self.__buffered_lines[index]
