@@ -67,11 +67,11 @@ class ConsoleApi:
 
   def get_char(self) -> typing.Optional[str]:
     char = self.__window.getkey()
-    return char if len(char) == 1 and curses.ascii.isascii(char) else None
+    return char if self.__is_ascii_char(char) else None
 
   @__save_position
   def put_char(self, char: str, attr=curses.A_NORMAL):
-    assert len(char) == 1 # TODO: make it proper
+    assert self.__is_ascii_char(char)
     self.__window.addch(ord(char), attr)
 
   @__save_position
@@ -101,6 +101,10 @@ class ConsoleApi:
   @__save_position
   def scroll(self):
     self.__window.scroll()
+
+  @staticmethod
+  def __is_ascii_char(char):
+    return len(char) == 1 and curses.ascii.isascii(char)
 
 
 
