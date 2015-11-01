@@ -44,20 +44,17 @@ def fail(*message):
 # classes
 
 class ConsoleApi:
-  class SavedPosition:
-    def __init__(self, window):
-      self.__window = window
-
-    def __enter__(self):
-      self.__saved_position = self.__window.getyx()
-
-    def __exit__(self, *_):
-      self.__window.move(*self.__saved_position)
-
   def __init__(self, window):
     window.keypad(True)
     window.scrollok(True)
     self.__window = window
+
+  def __save_position(method):
+    def wrapper(self, *args, **keyword_args):
+      position = self.__window.getyx()
+      method(self, *args, **keyword_args)
+      self.__window.move(*position)
+    return wrapper
 
   @property
   def screen_height(self):
@@ -70,17 +67,17 @@ class ConsoleApi:
   def get_char(self) -> str:
     return chr(self.__window.getch())
 
+  @__save_position
   def put_char(self, char: str, attr=curses.A_NORMAL):
     assert len(char) == 1 # TODO: make it proper
-    with self.SavedPosition(self.__window):
-      self.__window.addch(ord(char), attr)
+    self.__window.addch(ord(char), attr)
 
+  @__save_position
   def put_line(self, line_pos, text):
     assert len(text) <= self.screen_width
-    with self.SavedPosition(self.__window):
-      self.__window.move(line_pos, 0)
-      self.__window.clrtoeol()
-      self.__window.addstr(line_pos, 0, text)
+    self.__window.move(line_pos, 0)
+    self.__window.clrtoeol()
+    self.__window.addstr(line_pos, 0, text)
 
   def move(self, y, x):
     self.__window.move(y, x)
@@ -95,13 +92,14 @@ class ConsoleApi:
     if x == 0: return
     self.__window.move(y, x - 1)
 
+  @__save_position
   def clear(self):
-    with self.SavedPosition(self.__window):
-      self.__window.clear()
+    self.__window.clear()
 
+  @__save_position
   def scroll(self):
-    with self.SavedPosition(self.__window):
-      self.__window.scroll()
+    self.__window.scroll()
+
 
 
 class TypingGame:
