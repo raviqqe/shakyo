@@ -116,7 +116,7 @@ class TypingGame:
     self.__geometry = Geometry(api.screen_height)
     self.__input_text = ""
     if self.__example_text[0] == None:
-      raise Exception("No line can be read from stdin.")
+      raise Exception("No line can be read from example souce.")
 
   def play(self):
     self.__initialize_screen()
