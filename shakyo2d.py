@@ -114,7 +114,7 @@ class TypingGame:
     self.__api = api
     self.__example_text = FormattedText(example_file,
                                         line_length=(api.screen_width - 1))
-    self.__geometry = Geometry(api.screen_height, api.screen_width)
+    self.__geometry = Geometry(api.screen_height)
     self.__input_text = ""
     if self.__example_text[0] == None:
       raise Exception("No line can be read from stdin.")
@@ -218,11 +218,11 @@ class TypingGame:
 
 
 class Geometry:
-  def __init__(self, height, width):
-    self.input_line = height // 2
+  def __init__(self, screen_height):
+    self.input_line = screen_height // 2
     self.current_example_line = self.input_line - 1
     self.next_example_line = self.input_line + 2
-    self.bottom_line = height - 1
+    self.bottom_line = screen_height - 1
 
 
 class FormattedText:
