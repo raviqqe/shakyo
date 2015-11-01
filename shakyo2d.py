@@ -138,7 +138,6 @@ class TypingGame:
         game_over = self.__cheat()
       elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
         game_over = self.__add_char(char)
-        assert isinstance(game_over, bool)
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = char == '\n' \
