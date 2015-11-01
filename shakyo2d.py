@@ -172,7 +172,7 @@ class TypingGame:
 
   def __scroll(self):
     self.__api.scroll()
-    self.__api.print_line(self.__geometry.example_line - 2,
+    self.__api.print_line(self.__geometry.current_example_line - 2,
                           self.__example_text[0])
     del self.__example_text[0]
     self.__print_current_example_text()
@@ -185,7 +185,8 @@ class TypingGame:
     self.__api.print_line(self.__geometry.input_line, self.__input_text)
 
   def __print_current_example_text(self):
-    self.__api.print_line(self.__geometry.example_line, self.__example_text[0])
+    self.__api.print_line(self.__geometry.current_example_line,
+                          self.__example_text[0])
 
   def __print_bottom_example_text(self):
     index = self.__geometry.bottom_line - self.__geometry.next_example_line + 1
@@ -204,7 +205,7 @@ class TypingGame:
   def __draw_partitions(self):
     PARTITION_CHAR = '-'
     partition = PARTITION_CHAR * self.__api.screen_width
-    self.__api.print_line(self.__geometry.example_line - 1, partition)
+    self.__api.print_line(self.__geometry.current_example_line - 1, partition)
     self.__api.print_line(self.__geometry.input_line + 1, partition)
 
   def __are_you_ready(self) -> bool:
@@ -226,7 +227,7 @@ class TypingGame:
 class Geometry:
   def __init__(self, height, width):
     self.input_line = height // 2
-    self.example_line = self.input_line - 1
+    self.current_example_line = self.input_line - 1
     self.next_example_line = self.input_line + 2
     self.bottom_line = height - 1
 
