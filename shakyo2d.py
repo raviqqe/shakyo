@@ -160,7 +160,7 @@ class TypingGame:
     self.__api.move_left()
     self.__api.put_char(self.__example_text[0][len(self.__input_text)])
 
-  def __cheat(self):
+  def __cheat(self) -> bool:
     if self.__example_text[1] == None:
       return True
     self.__scroll()
