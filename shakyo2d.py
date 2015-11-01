@@ -11,7 +11,6 @@ import text_unidecode
 
 # constants
 
-INFINITY_INT = sys.maxsize
 QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
 DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
                 chr(curses.KEY_BACKSPACE), chr(curses.KEY_DC)}
