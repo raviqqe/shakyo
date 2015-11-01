@@ -121,11 +121,9 @@ class TypingGame:
       raise Exception("No line can be read from stdin.")
 
   def play(self):
-    self.__start_game()
-
-  def __start_game(self):
     self.__api.clear()
     self.__initialize_screen()
+
     game_over = False
     while not game_over:
       char = self.__api.get_char()
