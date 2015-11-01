@@ -264,8 +264,8 @@ def reset_stdin():
   os.dup2(sys.stdin.fileno(), TEMPORARY_FD)
   os.close(sys.stdin.fileno())
   sys.stdin = open(TTY_DEVICE_FILE)
-  original_stdin = os.fdopen(TEMPORARY_FD)
-  return original_stdin
+
+  return os.fdopen(TEMPORARY_FD)
 
 
 def initialize_curses():
