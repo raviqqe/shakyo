@@ -14,7 +14,7 @@ import text_unidecode
 DESCRIPTION = "shakyo2d is a tool to learn about something just copying it " \
               "by hand."
 
-TTY_DEVICE_FILE = "/dev/tty"
+TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
 QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
 DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
