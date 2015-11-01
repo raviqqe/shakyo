@@ -119,9 +119,7 @@ class TypingGame:
       raise Exception("No line can be read from stdin.")
 
   def play(self):
-    if not self.__are_you_ready(): return
     self.__start_game()
-    self.__show_result()
 
   def __start_game(self):
     self.__api.clear()
@@ -210,21 +208,6 @@ class TypingGame:
     partition = PARTITION_CHAR * self.__api.screen_width
     self.__api.print_line(self.__geometry.current_example_line - 1, partition)
     self.__api.print_line(self.__geometry.input_line + 1, partition)
-
-  def __are_you_ready(self) -> bool:
-    self.__api.clear()
-    self.__api.print_line(0, "Are you ready?")
-    self.__api.print_line(1, "Press any key...")
-    char = self.__api.get_char()
-    if char in QUIT_CHARS:
-      return False
-    return True
-
-  def __show_result(self):
-    self.__api.clear()
-    self.__api.print_line(0, "Good job!")
-    self.__api.print_line(1, "Press any key...")
-    self.__api.get_char()
 
 
 class Geometry:
