@@ -4,6 +4,7 @@ import argparse
 import curses
 import curses.ascii
 import os
+import os.path
 import sys
 import tempfile
 import text_unidecode
@@ -20,7 +21,7 @@ __version__ = "0.0.1"
 
 DESCRIPTION = "{} is a tool to learn about something just copying it " \
               "by hand. Type Esc or ^[ to exit while running it." \
-              .format(__file__)
+              .format(os.path.basename(__file__))
 
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 UTF8 = "UTF-8"
@@ -44,7 +45,7 @@ SUPPORTED_SCHEMES = {"http", "https"}
 # the order of bugs
 
 def message(*text):
-  print("{}:".format(__file__), *text, file=sys.stderr)
+  print("{}:".format(os.path.basename(__file__)), *text, file=sys.stderr)
 
 def error(*text):
   message("error:", *text)
