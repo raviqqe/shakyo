@@ -256,8 +256,9 @@ class FormattedText:
     self.__buffered_lines.append(line)
 
   def __split_line(self, line):
-    return line[self.__line_length:].rstrip(), \
-           line[:self.__line_length].strip()
+    return line[:self.__line_length].rstrip(), \
+           line[self.__line_length:].rstrip()
+
 
   @staticmethod
   def __preprocess_text(text):
