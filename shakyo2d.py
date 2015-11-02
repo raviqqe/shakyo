@@ -5,8 +5,12 @@ import curses
 import curses.ascii
 import os
 import sys
+import tempfile
 import text_unidecode
 import typing
+import urllib.parse
+import urllib.request
+import validators
 
 
 
@@ -16,6 +20,7 @@ DESCRIPTION = "shakyo2d is a tool to learn about something just copying it " \
               "by hand."
 
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
+UTF8 = "UTF-8"
 
 QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
 DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
@@ -28,6 +33,8 @@ SPACES_PER_TAB = 2
 
 ATTR_CORRECT = curses.A_NORMAL
 ATTR_ERROR = curses.A_REVERSE
+
+SUPPORTED_SCHEMES = {"http", "https"}
 
 
 
@@ -307,13 +314,28 @@ def parse_args():
 
 
 def get_example_file(example_path):
-  if example_path != None and sys.stdin.isatty():
+  if example_path != None and validators.url(example_path) \
+      and sys.stdin.isatty():
+    return get_remote_file(example_path)
+  elif example_path != None and sys.stdin.isatty():
     return open(example_path)
   elif example_path == None and not sys.stdin.isatty():
     return reset_stdin()
   else:
-    fail("Example is read from either the example path specified in the "
-         "argument or stdin.")
+    fail("Example is read from either the path or URI specified "
+         "in the argument or stdin.")
+
+
+def get_remote_file(uri):
+  if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
+    fail("Invalid scheme of URI is detected. "
+         "(supported schemes: {})".format(", ".join(SUPPORTED_SCHEMES)))
+
+  temporary_file = tempfile.TemporaryFile(mode="w+")
+  with urllib.request.urlopen(uri) as response:
+    temporary_file.write(response.read().decode(UTF8, "replace"))
+  temporary_file.seek(0)
+  return temporary_file
 
 
 
