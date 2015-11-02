@@ -282,29 +282,10 @@ def finalize_curses():
   curses.endwin() # should be in the very last line
 
 
-
-# main routine
-
-def main():
-  if not sys.stdout.isatty(): fail("stdout is not a tty.")
-  if sys.stdin.isatty(): fail("stdin is a tty.")
-
-  example_file = reset_stdin()
-
-  try:
-    # CAUTION:
-    # You need to raise some Exception() instead of calling exit() here
-    # to prevent curses from messing up your terminal.
-
-    window = initialize_curses()
-
-    TypingGame(ConsoleApi(window), example_file).play()
-  finally:
-    finalize_curses()
-
-
 def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
+  arg_parser.add_argument("example_path", nargs='?', default=None,
+                          help="path or URI to example")
   arg_parser.add_argument("-c", "--cheat",
                           dest="can_cheat",
                           action="store_true",
@@ -322,7 +303,38 @@ def parse_args():
     global CAN_CHEAT
     CAN_CHEAT = True
 
+  return args.example_path
+
+
+def get_example_file(example_path):
+  if example_path != None and sys.stdin.isatty():
+    return open(example_path)
+  elif example_path == None and not sys.stdin.isatty():
+    return reset_stdin()
+  else:
+    fail("Example is read from either the example path specified in the "
+         "argument or stdin.")
+
+
+
+# main routine
+
+def main():
+  if not sys.stdout.isatty(): fail("stdout is not a tty.")
+
+  example_file = get_example_file(parse_args())
+
+  try:
+    # CAUTION:
+    # You need to raise some Exception() instead of calling exit() here
+    # to prevent curses from messing up your terminal.
+
+    window = initialize_curses()
+
+    TypingGame(ConsoleApi(window), example_file).play()
+  finally:
+    finalize_curses()
+
 
 if __name__ == "__main__":
-  parse_args()
   main()
