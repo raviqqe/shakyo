@@ -21,7 +21,7 @@ setuptools.setup(
     py_modules=[shakyo.__name__],
     install_requires=["text_unidecode", "validators"],
     classifiers=[
-        "Development Status :: Alpha",
+        "Development Status :: 3 - Alpha",
         "Environment :: Console :: Curses",
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
