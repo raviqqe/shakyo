@@ -18,8 +18,8 @@ setuptools.setup(
     author="raviqqe",
     author_email="raviqqe@gmail.com",
     url="http://github.com/raviqqe/shakyo/",
-    packages=[shakyo.__name__]
-    install_requires=["text_unidecode", "validators"])
+    py_modules=[shakyo.__name__],
+    install_requires=["text_unidecode", "validators"],
     classifiers=[
         "Development Status :: Alpha",
         "Environment :: Console :: Curses",
