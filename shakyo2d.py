@@ -40,11 +40,14 @@ SUPPORTED_SCHEMES = {"http", "https"}
 
 # the order of bugs
 
-def error(*message):
-  print("ERROR:", *message, file=sys.stderr)
+def message(*text):
+  print(*text, file=sys.stderr)
 
-def fail(*message):
-  error(*message)
+def error(*text):
+  message("ERROR:", *text)
+
+def fail(*text):
+  error(*text)
   exit(1)
 
 
