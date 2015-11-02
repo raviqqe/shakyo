@@ -19,7 +19,8 @@ import validators
 __version__ = "0.0.1"
 
 DESCRIPTION = "{} is a tool to learn about something just copying it " \
-              "by hand.".format(__file__)
+              "by hand. Type Esc or ^[ to exit while running it." \
+              .format(__file__)
 
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 UTF8 = "UTF-8"
