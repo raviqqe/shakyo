@@ -28,6 +28,7 @@ setuptools.setup(
         "Intended Audience :: End Users/Desktop",
         "License :: Public Domain",
         "Operating System :: POSIX",
+        "Programming Language :: Python :: 3.5",
         "Topic :: Education :: Computer Aided Instruction (CAI)",
         "Topic :: Games/Entertainment",
     ],
