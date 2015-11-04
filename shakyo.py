@@ -122,7 +122,6 @@ class ConsoleApi:
     return len(char) == 1 and curses.ascii.isascii(char)
 
 
-
 class TypingGame:
   def __init__(self, api, example_file):
     self.__api = api
@@ -263,7 +262,6 @@ class FormattedText:
   def __split_line(self, line):
     return line[:self.__line_length].rstrip(), \
            line[self.__line_length:].rstrip()
-
 
   @staticmethod
   def __preprocess_text(text):
