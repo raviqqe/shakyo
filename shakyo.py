@@ -5,6 +5,7 @@ import curses
 import curses.ascii
 import os
 import os.path
+import string
 import sys
 import tempfile
 import text_unidecode
@@ -266,7 +267,9 @@ class FormattedText:
 
   @staticmethod
   def __preprocess_text(text):
-    return text_unidecode.unidecode(text.replace('\t', ' ' * SPACES_PER_TAB))
+    return "".join(char for char in text_unidecode.unidecode(
+                   text.replace('\t', ' ' * SPACES_PER_TAB))
+                   if char in string.printable)
 
 
 
