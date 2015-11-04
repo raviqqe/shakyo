@@ -294,7 +294,7 @@ def initialize_curses():
 def finalize_curses():
   curses.nocbreak()
   curses.echo()
-  curses.endwin() # should be in the very last line
+  curses.endwin() # should be at the very last line
 
 
 def parse_args():
