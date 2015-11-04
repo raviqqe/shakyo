@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import setuptools
+import shutil
 import sys
 
 if not ((sys.version_info.major >= 3 and sys.version_info.minor >= 5)
@@ -8,6 +9,14 @@ if not ((sys.version_info.major >= 3 and sys.version_info.minor >= 5)
   exit("Sorry, Python's version must be later than 3.5.")
 
 import shakyo
+
+
+try:
+  import pypandoc
+  with open("README.rst", "w") as f:
+    f.write(pypandoc.convert("README.md", "rst"))
+except ImportError:
+  shutil.copyfile("README.md", "README")
 
 
 setuptools.setup(
