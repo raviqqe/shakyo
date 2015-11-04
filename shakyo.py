@@ -318,10 +318,12 @@ def parse_args():
     global CAN_CHEAT
     CAN_CHEAT = True
 
-  return args.example_path
+  return args
 
 
-def get_example_file(example_path):
+def get_example_file():
+  example_path = parse_args().example_path
+
   if example_path != None and validators.url(example_path) \
       and sys.stdin.isatty():
     return get_remote_file(example_path)
@@ -353,7 +355,7 @@ def get_remote_file(uri):
 def main():
   if not sys.stdout.isatty(): fail("stdout is not a tty.")
 
-  example_file = get_example_file(parse_args())
+  example_file = get_example_file()
 
   try:
     # CAUTION:
