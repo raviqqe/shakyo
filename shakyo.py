@@ -310,8 +310,17 @@ def parse_args():
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="set number of spaces per tab")
+  arg_parser.add_argument("-v", "--version",
+                          dest="show_version",
+                          action="store_true", default=False,
+                          help="show version information")
 
   args = arg_parser.parse_args()
+
+  if args.show_version:
+    print("version:", __version__)
+    exit()
+
   if args.spaces_per_tab != None:
     global SPACES_PER_TAB
     SPACES_PER_TAB = args.spaces_per_tab
