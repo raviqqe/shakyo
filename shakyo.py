@@ -18,7 +18,7 @@ import validators
 
 # constants
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 DESCRIPTION = "{} is a tool to learn about something just copying it " \
               "by hand. Type Esc or ^[ to exit while running it." \
