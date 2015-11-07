@@ -80,13 +80,12 @@ class ConsoleApi:
   def screen_width(self):
     return self.__window.getmaxyx()[1]
 
-  def get_char(self) -> typing.Optional[str]:
-    char = self.__window.getkey()
-    return char if self.__is_ascii_char(char) else None
+  def get_char(self) -> str:
+    return chr(self.__window.getch())
 
   @__save_position
   def put_char(self, char: str, attr=curses.A_NORMAL):
-    assert self.__is_ascii_char(char)
+    assert self.__is_single_width_ascii_char(char)
     self.__window.addch(ord(char), attr)
 
   @__save_position
@@ -118,8 +117,8 @@ class ConsoleApi:
     self.__window.scroll()
 
   @staticmethod
-  def __is_ascii_char(char):
-    return len(char) == 1 and curses.ascii.isascii(char)
+  def __is_single_width_ascii_char(char: str):
+    return len(char) == 1 and (curses.ascii.isprint(char) or char == " ")
 
 
 class TypingGame:
@@ -137,7 +136,7 @@ class TypingGame:
 
     game_over = False
     while not game_over:
-      char = self.__get_char()
+      char = self.__api.get_char()
 
       if char in QUIT_CHARS:
         return
@@ -147,14 +146,9 @@ class TypingGame:
         self.__delete_char()
       elif char == CHEAT_CHAR and CAN_CHEAT:
         game_over = self.__cheat()
-      elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
+      elif len(char) == 1 and (curses.ascii.isprint(char)
+           or curses.ascii.isspace(char)):
         game_over = self.__add_char(char)
-
-  def __get_char(self):
-    char = self.__api.get_char()
-    while char == None:
-      char = self.__api.get_char()
-    return char
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = char == '\n' \
