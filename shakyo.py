@@ -162,8 +162,7 @@ class TypingGame:
       pass
     elif char == '\t':
       for _ in range(SPACES_PER_TAB):
-        result = self.__add_char(' ')
-        assert result == False
+        self.__add_char(' ')
     elif curses.ascii.isprint(char):
       self.__input_text += char
       attr = ATTR_CORRECT \
