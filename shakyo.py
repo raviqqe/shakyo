@@ -209,7 +209,7 @@ class TypingGame:
 
   def __print_all_example_text(self):
     for index in range(self.__geometry.bottom_line
-                       - self.__geometry.current_line):
+                       - self.__geometry.current_line + 1):
       if self.__example_text[index] == None: break
       self.__api.put_line(self.__geometry.current_line + index,
                           self.__example_text[index])
