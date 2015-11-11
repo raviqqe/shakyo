@@ -18,7 +18,7 @@ import validators
 
 # constants
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 DESCRIPTION = "{} is a tool to learn about something just copying it " \
               "by hand. Type Esc or ^[ to exit while running it." \
@@ -80,13 +80,12 @@ class ConsoleApi:
   def screen_width(self):
     return self.__window.getmaxyx()[1]
 
-  def get_char(self) -> typing.Optional[str]:
-    char = self.__window.getkey()
-    return char if self.__is_ascii_char(char) else None
+  def get_char(self) -> str:
+    return chr(self.__window.getch())
 
   @__save_position
   def put_char(self, char: str, attr=curses.A_NORMAL):
-    assert self.__is_ascii_char(char)
+    assert self.__is_single_width_ascii_char(char)
     self.__window.addch(ord(char), attr)
 
   @__save_position
@@ -118,8 +117,8 @@ class ConsoleApi:
     self.__window.scroll()
 
   @staticmethod
-  def __is_ascii_char(char):
-    return len(char) == 1 and curses.ascii.isascii(char)
+  def __is_single_width_ascii_char(char: str):
+    return len(char) == 1 and (curses.ascii.isprint(char) or char == " ")
 
 
 class TypingGame:
@@ -137,7 +136,7 @@ class TypingGame:
 
     game_over = False
     while not game_over:
-      char = self.__get_char()
+      char = self.__api.get_char()
 
       if char in QUIT_CHARS:
         return
@@ -147,14 +146,9 @@ class TypingGame:
         self.__delete_char()
       elif char == CHEAT_CHAR and CAN_CHEAT:
         game_over = self.__cheat()
-      elif curses.ascii.isprint(char) or curses.ascii.isspace(char):
+      elif len(char) == 1 and (curses.ascii.isprint(char)
+           or curses.ascii.isspace(char)):
         game_over = self.__add_char(char)
-
-  def __get_char(self):
-    char = self.__api.get_char()
-    while char == None:
-      char = self.__api.get_char()
-    return char
 
   def __add_char(self, char: str) -> bool:
     go_to_next_line = char == '\n' \
@@ -168,8 +162,7 @@ class TypingGame:
       pass
     elif char == '\t':
       for _ in range(SPACES_PER_TAB):
-        result = self.__add_char(' ')
-        assert result == False
+        self.__add_char(' ')
     elif curses.ascii.isprint(char):
       self.__input_text += char
       attr = ATTR_CORRECT \
@@ -215,7 +208,7 @@ class TypingGame:
 
   def __print_all_example_text(self):
     for index in range(self.__geometry.bottom_line
-                       - self.__geometry.current_line):
+                       - self.__geometry.current_line + 1):
       if self.__example_text[index] == None: break
       self.__api.put_line(self.__geometry.current_line + index,
                           self.__example_text[index])
@@ -310,8 +303,17 @@ def parse_args():
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="set number of spaces per tab")
+  arg_parser.add_argument("-v", "--version",
+                          dest="show_version",
+                          action="store_true", default=False,
+                          help="show version information")
 
   args = arg_parser.parse_args()
+
+  if args.show_version:
+    print("version:", __version__)
+    exit()
+
   if args.spaces_per_tab != None:
     global SPACES_PER_TAB
     SPACES_PER_TAB = args.spaces_per_tab
