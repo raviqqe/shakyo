@@ -1,4 +1,6 @@
 __pycache__
 dist
 build
-shakyo.egg-info
+*.egg-info
+README.rst
+README
