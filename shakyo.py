@@ -35,7 +35,7 @@ CLEAR_CHAR = curses.ascii.ctrl('u')
 CHEAT_CHAR = curses.ascii.ctrl('n')
 
 CAN_CHEAT = False
-SPACES_PER_TAB = 2
+SPACES_PER_TAB = 4
 
 ATTR_CORRECT = curses.A_NORMAL
 ATTR_ERROR = curses.A_REVERSE
