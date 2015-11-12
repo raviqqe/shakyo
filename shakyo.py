@@ -84,6 +84,20 @@ class ConsoleApi:
   def x(self):
     return self.__window.getyx()[1]
 
+  @x.setter
+  def x(self, x):
+    if not 0 <= x < self.screen_width: return
+    self.__window.move(self.__window.getyx()[0], x)
+
+  @property
+  def y(self):
+    return self.__window.getyx()[0]
+
+  @y.setter
+  def y(self, y):
+    if not 0 <= y < self.screen_height: return
+    self.__window.move(y, self.__window.getyx()[1])
+
   def get_char(self) -> str:
     return chr(self.__window.getch())
 
@@ -98,19 +112,6 @@ class ConsoleApi:
     self.__window.move(line_pos, 0)
     self.__window.clrtoeol()
     self.__window.addstr(line_pos, 0, text)
-
-  def move(self, y, x):
-    self.__window.move(y, x)
-
-  def move_right(self):
-    y, x = self.__window.getyx()
-    if x == self.screen_width - 1: return
-    self.__window.move(y, x + 1)
-
-  def move_left(self):
-    y, x = self.__window.getyx()
-    if x == 0: return
-    self.__window.move(y, x - 1)
 
   @__save_position
   def clear(self):
@@ -175,12 +176,12 @@ class TypingGame:
     attr = ATTR_CORRECT if char == self.__example_text[0][self.__api.x] \
            else ATTR_ERROR
     self.__api.put_char(char, attr=attr)
-    self.__api.move_right()
+    self.__api.x += 1
 
   def __delete_char(self):
     if len(self.__input_text) == 0: return
     for _ in range(len(normalize_text(self.__input_text.pop_char()))):
-      self.__api.move_left()
+      self.__api.x -= 1
       self.__api.put_char(self.__example_text[0][self.__api.x])
 
   def __cheat(self) -> bool:
@@ -203,7 +204,8 @@ class TypingGame:
   def __clear_input_text(self):
     self.__input_text = InputText()
     self.__api.put_line(self.__geometry.current_line, self.__example_text[0])
-    self.__api.move(self.__geometry.current_line, 0)
+    self.__api.y = self.__geometry.current_line
+    self.__api.x = 0
 
   def __print_bottom_example_text(self):
     index = self.__geometry.bottom_line - self.__geometry.current_line
