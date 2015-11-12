@@ -9,7 +9,6 @@ import string
 import sys
 import tempfile
 import text_unidecode
-import typing
 import unicodedata
 import urllib.parse
 import urllib.request
