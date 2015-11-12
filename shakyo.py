@@ -10,6 +10,7 @@ import sys
 import tempfile
 import text_unidecode
 import typing
+import unicodedata
 import urllib.parse
 import urllib.request
 import validators
@@ -80,6 +81,10 @@ class ConsoleApi:
   def screen_width(self):
     return self.__window.getmaxyx()[1]
 
+  @property
+  def x(self):
+    return self.__window.getyx()[1]
+
   def get_char(self) -> str:
     return chr(self.__window.getch())
 
@@ -127,7 +132,7 @@ class TypingGame:
     self.__example_text = FormattedText(example_file,
                                         line_length=(api.screen_width - 1))
     self.__geometry = Geometry(api.screen_height)
-    self.__input_text = ""
+    self.__input_text = InputText()
     if self.__example_text[0] == None:
       raise Exception("No line can be read from example source.")
 
@@ -160,23 +165,24 @@ class TypingGame:
       self.__scroll()
     elif len(self.__input_text) == len(self.__example_text[0]):
       pass
-    elif char == '\t':
-      for _ in range(SPACES_PER_TAB):
-        self.__add_char(' ')
-    elif curses.ascii.isprint(char):
-      self.__input_text += char
-      attr = ATTR_CORRECT \
-             if char == self.__example_text[0][len(self.__input_text) - 1] \
-             else ATTR_ERROR
-      self.__api.put_char(char, attr=attr)
-      self.__api.move_right()
+    elif (char in string.printable
+        and not unicodedata.category(char).startswith("C")) or char == "\t":
+      self.__input_text.push_char(char)
+      for printed_char in normalize_text(char):
+        self.__print_char(printed_char)
     return False
+
+  def __print_char(self, char: str):
+    attr = ATTR_CORRECT if char == self.__example_text[0][self.__api.x] \
+           else ATTR_ERROR
+    self.__api.put_char(char, attr=attr)
+    self.__api.move_right()
 
   def __delete_char(self):
     if len(self.__input_text) == 0: return
-    self.__input_text = self.__input_text[:-1]
-    self.__api.move_left()
-    self.__api.put_char(self.__example_text[0][len(self.__input_text)])
+    for _ in range(len(normalize_text(self.__input_text.pop_char()))):
+      self.__api.move_left()
+      self.__api.put_char(self.__example_text[0][self.__api.x])
 
   def __cheat(self) -> bool:
     if self.__example_text[1] == None:
@@ -196,7 +202,7 @@ class TypingGame:
     self.__clear_input_text()
 
   def __clear_input_text(self):
-    self.__input_text = ""
+    self.__input_text = InputText()
     self.__api.put_line(self.__geometry.current_line, self.__example_text[0])
     self.__api.move(self.__geometry.current_line, 0)
 
@@ -212,6 +218,25 @@ class TypingGame:
       if self.__example_text[index] == None: break
       self.__api.put_line(self.__geometry.current_line + index,
                           self.__example_text[index])
+
+
+class InputText:
+  def __init__(self):
+    self.__text = ""
+
+  def __eq__(self, text):
+    return normalize_text(self.__text) == text
+
+  def __len__(self):
+    return len(normalize_text(self.__text))
+
+  def push_char(self, char: str):
+    self.__text += char
+
+  def pop_char(self):
+    last_char = self.__text[-1]
+    self.__text = self.__text[:-1]
+    return last_char
 
 
 class Geometry:
@@ -242,7 +267,7 @@ class FormattedText:
     lines = self.__file.readlines()
 
     for line in lines:
-      self.__buffer_line(self.__preprocess_text(line))
+      self.__buffer_line(normalize_text(line))
 
   def __buffer_line(self, line):
     line = line.rstrip()
@@ -256,15 +281,15 @@ class FormattedText:
     return line[:self.__line_length].rstrip(), \
            line[self.__line_length:].rstrip()
 
-  @staticmethod
-  def __preprocess_text(text):
-    return "".join(char for char in text_unidecode.unidecode(
-                   text.replace('\t', ' ' * SPACES_PER_TAB))
-                   if char in string.printable)
-
 
 
 # functions
+
+def normalize_text(text):
+  return "".join(char for char in text_unidecode.unidecode(
+                 text.replace("\t", " " * SPACES_PER_TAB))
+                 if char in string.printable)
+
 
 def reset_stdin():
   TEMPORARY_FD = 3
