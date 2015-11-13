@@ -163,12 +163,14 @@ class TypingGame:
 
     if go_to_next_line:
       self.__scroll()
-    elif len(self.__input_text) == len(self.__example_text[0]):
+    elif len(self.__input_text) >= len(self.__example_text[0]):
       pass
     elif (char in string.printable
         and not unicodedata.category(char).startswith("C")) or char == "\t":
       self.__input_text.push_char(char)
       for printed_char in normalize_text(char):
+        if self.__api.x == len(self.__example_text[0]):
+          break
         self.__print_char(printed_char)
     return False
 
@@ -180,7 +182,8 @@ class TypingGame:
 
   def __delete_char(self):
     if len(self.__input_text) == 0: return
-    for _ in range(len(normalize_text(self.__input_text.pop_char()))):
+    self.__input_text.pop_char()
+    while self.__api.x > len(self.__input_text):
       self.__api.x -= 1
       self.__api.put_char(self.__example_text[0][self.__api.x])
 
@@ -235,9 +238,7 @@ class InputText:
     self.__text += char
 
   def pop_char(self):
-    last_char = self.__text[-1]
     self.__text = self.__text[:-1]
-    return last_char
 
 
 class Geometry:
