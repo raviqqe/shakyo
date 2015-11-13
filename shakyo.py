@@ -65,11 +65,12 @@ class ConsoleApi:
     window.scrollok(True)
     self.__window = window
 
-  def __save_position(method):
+  def __keep_position(method):
     def wrapper(self, *args, **keyword_args):
       position = self.__window.getyx()
-      method(self, *args, **keyword_args)
+      result = method(self, *args, **keyword_args)
       self.__window.move(*position)
+      return result
     return wrapper
 
   @property
@@ -101,23 +102,23 @@ class ConsoleApi:
   def get_char(self) -> str:
     return chr(self.__window.getch())
 
-  @__save_position
+  @__keep_position
   def put_char(self, char: str, attr=curses.A_NORMAL):
     assert self.__is_single_width_ascii_char(char)
     self.__window.addch(ord(char), attr)
 
-  @__save_position
+  @__keep_position
   def put_line(self, line_pos, text):
     assert len(text) <= self.screen_width
     self.__window.move(line_pos, 0)
     self.__window.clrtoeol()
     self.__window.addstr(line_pos, 0, text)
 
-  @__save_position
+  @__keep_position
   def clear(self):
     self.__window.clear()
 
-  @__save_position
+  @__keep_position
   def scroll(self):
     self.__window.scroll()
 
@@ -126,124 +127,138 @@ class ConsoleApi:
     return len(char) == 1 and (curses.ascii.isprint(char) or char == " ")
 
 
+class LineApi:
+  def __init__(self, api, line):
+    assert isinstance(api, ConsoleApi)
+
+    self.__api = api
+    self.__line = line
+
+  def put_char(self, char, attr=ATTR_CORRECT):
+    self.__api.put_char(char, attr=attr)
+
+  def put_line(self, text):
+    self.__api.put_line(self.__line, text)
+
+  @property
+  def x(self):
+    return self.__api.x
+
+  @x.setter
+  def x(self, x):
+    self.__api.x = x
+
+
 class TypingGame:
   def __init__(self, api, example_file):
+    assert isinstance(api, ConsoleApi)
+
     self.__api = api
     self.__example_text = FormattedText(example_file,
                                         line_length=(api.screen_width - 1))
     self.__geometry = Geometry(api.screen_height)
-    self.__input_text = InputText()
+    self.__input_line = InputLine(LineApi(api, self.__geometry.center_line))
     if self.__example_text[0] == None:
       raise Exception("No line can be read from example source.")
 
   def play(self):
     self.__initialize_screen()
 
-    game_over = False
-    while not game_over:
+    while True:
       char = self.__api.get_char()
 
       if char in QUIT_CHARS:
-        return
-      elif char == CLEAR_CHAR:
-        self.__clear_input_text()
-      elif char in DELETE_CHARS:
-        self.__delete_char()
-      elif char == CHEAT_CHAR and CAN_CHEAT:
-        game_over = self.__cheat()
-      elif len(char) == 1 and (curses.ascii.isprint(char)
-           or curses.ascii.isspace(char)):
-        game_over = self.__add_char(char)
+        break
+      if char == CLEAR_CHAR:
+        self.__reset_input_line()
+        continue
+      if char in DELETE_CHARS:
+        self.__input_line.delete_char()
+        continue
 
-  def __add_char(self, char: str) -> bool:
-    go_to_next_line = char == '\n' \
-                      and self.__input_text == self.__example_text[0]
-    if go_to_next_line and self.__example_text[1] == None:
-      return True
-
-    if go_to_next_line:
+      if not (char == CHEAT_CHAR and CAN_CHEAT):
+        line_completed = self.__input_line.append_char(char)
+        if not line_completed: continue
+      if self.__example_text[1] == None: break
       self.__scroll()
-    elif len(self.__input_text) >= len(self.__example_text[0]):
-      pass
-    elif (char in string.printable
-        and not unicodedata.category(char).startswith("C")) or char == "\t":
-      self.__input_text.push_char(char)
-      for printed_char in normalize_text(char):
-        if self.__api.x == len(self.__example_text[0]):
-          break
-        self.__print_char(printed_char)
-    return False
-
-  def __print_char(self, char: str):
-    attr = ATTR_CORRECT if char == self.__example_text[0][self.__api.x] \
-           else ATTR_ERROR
-    self.__api.put_char(char, attr=attr)
-    self.__api.x += 1
-
-  def __delete_char(self):
-    if len(self.__input_text) == 0: return
-    self.__input_text.pop_char()
-    while self.__api.x > len(self.__input_text):
-      self.__api.x -= 1
-      self.__api.put_char(self.__example_text[0][self.__api.x])
-
-  def __cheat(self) -> bool:
-    if self.__example_text[1] == None:
-      return True
-    self.__scroll()
-    return False
-
-  def __initialize_screen(self):
-    self.__api.clear()
-    self.__print_all_example_text()
-    self.__clear_input_text()
 
   def __scroll(self):
     self.__api.scroll()
     del self.__example_text[0]
     self.__print_bottom_example_text()
-    self.__clear_input_text()
+    self.__reset_input_line()
 
-  def __clear_input_text(self):
-    self.__input_text = InputText()
-    self.__api.put_line(self.__geometry.current_line, self.__example_text[0])
-    self.__api.y = self.__geometry.current_line
-    self.__api.x = 0
+  def __reset_input_line(self):
+    self.__input_line.initialize(self.__example_text[0])
 
   def __print_bottom_example_text(self):
-    index = self.__geometry.bottom_line - self.__geometry.current_line
+    index = self.__geometry.bottom_line - self.__geometry.center_line
     if self.__example_text[index] != None:
       self.__api.put_line(self.__geometry.bottom_line,
                           self.__example_text[index])
 
+  def __initialize_screen(self):
+    self.__api.clear()
+    self.__api.y = self.__geometry.center_line
+    self.__print_all_example_text()
+    self.__reset_input_line()
+
   def __print_all_example_text(self):
     for index in range(self.__geometry.bottom_line
-                       - self.__geometry.current_line + 1):
+                       - self.__geometry.center_line + 1):
       if self.__example_text[index] == None: break
-      self.__api.put_line(self.__geometry.current_line + index,
+      self.__api.put_line(self.__geometry.center_line + index,
                           self.__example_text[index])
 
 
-class InputText:
-  def __init__(self):
-    self.__text = ""
+class InputLine:
+  def __init__(self, api):
+    assert isinstance(api, LineApi)
+    self.__api = api
 
-  def __eq__(self, text):
-    return normalize_text(self.__text) == text
+  def initialize(self, example_text):
+    assert example_text == normalize_text(example_text)
 
-  def __len__(self):
-    return len(normalize_text(self.__text))
+    self.__input_text = ""
+    self.__example_text = example_text
+    self.__api.put_line(example_text)
+    self.__api.x = 0
 
-  def push_char(self, char: str):
-    self.__text += char
+  def append_char(self, char) -> bool:
+    if char == "\n" \
+        and normalize_text(self.__input_text) == self.__example_text:
+      return True
 
-  def pop_char(self):
-    self.__text = self.__text[:-1]
+    if len(normalize_text(self.__input_text)) < len(self.__example_text) \
+        and self.__is_valid_input_char(char):
+      self.__input_text += char
+      for printed_char in normalize_text(char):
+        if self.__api.x == len(self.__example_text):
+          break
+        self.__print_char(printed_char)
+    return False
+
+  def delete_char(self):
+    self.__input_text = self.__input_text[:-1]
+    while self.__api.x > len(normalize_text(self.__input_text)):
+      self.__api.x -= 1
+      self.__api.put_char(self.__example_text[self.__api.x])
+
+  def __print_char(self, char):
+    attr = ATTR_CORRECT if char == self.__example_text[self.__api.x] \
+           else ATTR_ERROR
+    self.__api.put_char(char, attr=attr)
+    self.__api.x += 1
+
+  @staticmethod
+  def __is_valid_input_char(char):
+    return (char in string.printable
+            and not unicodedata.category(char).startswith("C")) or char == "\t"
 
 
 class Geometry:
   def __init__(self, screen_height):
-    self.current_line = (screen_height - 1) // 2
+    self.center_line = (screen_height - 1) // 2
     self.bottom_line = screen_height - 1
 
 
