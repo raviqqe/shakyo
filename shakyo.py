@@ -371,7 +371,7 @@ def get_remote_file(uri):
     fail("Invalid scheme of URI is detected. "
          "(supported schemes: {})".format(", ".join(SUPPORTED_SCHEMES)))
 
-  message("Loading page...")
+  message("Loading a page...")
   temporary_file = tempfile.TemporaryFile(mode="w+")
   with urllib.request.urlopen(uri) as response:
     temporary_file.write(response.read().decode(UTF8, "replace"))
