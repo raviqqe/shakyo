@@ -61,9 +61,12 @@ def fail(*text):
 
 class ConsoleApi:
   def __init__(self, window):
-    window.keypad(True)
-    window.scrollok(True)
     self.__window = window
+
+  def initialize(self):
+    self.__window.keypad(True)
+    self.__window.scrollok(True)
+    self.__window.move(self.input_line, self.x)
 
   def __keep_position(method):
     def wrapper(self, *args, **keyword_args):
@@ -72,6 +75,10 @@ class ConsoleApi:
       self.__window.move(*position)
       return result
     return wrapper
+
+  @property
+  def input_line(self):
+    return (self.screen_height - 1) // 2
 
   @property
   def screen_height(self):
@@ -89,15 +96,6 @@ class ConsoleApi:
   def x(self, x):
     if not 0 <= x < self.screen_width: return
     self.__window.move(self.__window.getyx()[0], x)
-
-  @property
-  def y(self):
-    return self.__window.getyx()[0]
-
-  @y.setter
-  def y(self, y):
-    if not 0 <= y < self.screen_height: return
-    self.__window.move(y, self.__window.getyx()[1])
 
   def get_char(self) -> str:
     return chr(self.__window.getch())
@@ -127,18 +125,16 @@ class ConsoleApi:
     return len(char) == 1 and (curses.ascii.isprint(char) or char == " ")
 
 
-class LineApi:
-  def __init__(self, api, line):
+class InputLineApi:
+  def __init__(self, api):
     assert isinstance(api, ConsoleApi)
-
     self.__api = api
-    self.__line = line
 
   def put_char(self, char, attr=ATTR_CORRECT):
     self.__api.put_char(char, attr=attr)
 
   def put_line(self, text):
-    self.__api.put_line(self.__line, text)
+    self.__api.put_line(self.__api.input_line, text)
 
   @property
   def x(self):
@@ -156,12 +152,12 @@ class TypingGame:
     self.__api = api
     self.__example_text = FormattedText(example_file,
                                         line_length=(api.screen_width - 1))
-    self.__geometry = Geometry(api.screen_height)
-    self.__input_line = InputLine(LineApi(api, self.__geometry.center_line))
+    self.__input_line = InputLine(InputLineApi(api))
     if self.__example_text[0] == None:
       raise Exception("No line can be read from example source.")
 
   def play(self):
+    self.__api.initialize()
     self.__initialize_screen()
 
     while True:
@@ -192,28 +188,29 @@ class TypingGame:
     self.__input_line.initialize(self.__example_text[0])
 
   def __print_bottom_example_text(self):
-    index = self.__geometry.bottom_line - self.__geometry.center_line
+    index = self.__bottom_line - self.__api.input_line
     if self.__example_text[index] != None:
-      self.__api.put_line(self.__geometry.bottom_line,
-                          self.__example_text[index])
+      self.__api.put_line(self.__bottom_line, self.__example_text[index])
 
   def __initialize_screen(self):
     self.__api.clear()
-    self.__api.y = self.__geometry.center_line
     self.__print_all_example_text()
     self.__reset_input_line()
 
   def __print_all_example_text(self):
-    for index in range(self.__geometry.bottom_line
-                       - self.__geometry.center_line + 1):
+    for index in range(self.__bottom_line - self.__api.input_line + 1):
       if self.__example_text[index] == None: break
-      self.__api.put_line(self.__geometry.center_line + index,
+      self.__api.put_line(self.__api.input_line + index,
                           self.__example_text[index])
+
+  @property
+  def __bottom_line(self):
+    return self.__api.screen_height - 1
 
 
 class InputLine:
   def __init__(self, api):
-    assert isinstance(api, LineApi)
+    assert isinstance(api, InputLineApi)
     self.__api = api
 
   def initialize(self, example_text):
@@ -254,12 +251,6 @@ class InputLine:
   def __is_valid_input_char(char):
     return (char in string.printable
             and not unicodedata.category(char).startswith("C")) or char == "\t"
-
-
-class Geometry:
-  def __init__(self, screen_height):
-    self.center_line = (screen_height - 1) // 2
-    self.bottom_line = screen_height - 1
 
 
 class FormattedText:
