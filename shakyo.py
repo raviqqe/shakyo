@@ -201,7 +201,7 @@ class InputLine:
     self.__y_input = y_input
 
   def initialize(self, example_text):
-    assert example_text == asciize(example_text)
+    assert example_text == asciize(example_text).rstrip()
     self.__example_text = example_text
     self.__api.print_text(self.__y_input, example_text)
     self.__input_text = ""
