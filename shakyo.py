@@ -61,12 +61,11 @@ def fail(*text):
 
 class ConsoleApi:
   def __init__(self, window):
+    window.keypad(True)
+    window.scrollok(True)
+    window.erase()
+    window.move(0, 0)
     self.__window = window
-
-  def initialize(self):
-    self.__window.keypad(True)
-    self.__window.scrollok(True)
-    self.__window.move(self.input_line, self.x)
 
   def __keep_position(method):
     def wrapper(self, *args, **keyword_args):
@@ -77,16 +76,21 @@ class ConsoleApi:
     return wrapper
 
   @property
-  def input_line(self):
-    return (self.screen_height - 1) // 2
-
-  @property
   def screen_height(self):
     return self.__window.getmaxyx()[0]
 
   @property
   def screen_width(self):
     return self.__window.getmaxyx()[1]
+
+  @property
+  def y(self):
+    return self.__window.getyx()[0]
+
+  @y.setter
+  def y(self, y):
+    if not 0 <= y < self.screen_height: return
+    self.__window.move(y, self.__window.getyx()[1])
 
   @property
   def x(self):
@@ -101,20 +105,19 @@ class ConsoleApi:
     return chr(self.__window.getch())
 
   @__keep_position
-  def put_char(self, char: str, attr=curses.A_NORMAL):
+  def print_char(self, char, attr=ATTR_CORRECT):
     assert self.__is_single_width_ascii_char(char)
     self.__window.addch(ord(char), attr)
 
   @__keep_position
-  def put_line(self, line_pos, text):
-    assert len(text) <= self.screen_width
-    self.__window.move(line_pos, 0)
+  def print_text(self, y, text):
+    self.__window.move(y, 0)
     self.__window.clrtoeol()
-    self.__window.addstr(line_pos, 0, text)
+    self.__window.addstr(y, 0, text[:self.screen_width])
 
   @__keep_position
-  def clear(self):
-    self.__window.clear()
+  def erase(self):
+    self.__window.erase()
 
   @__keep_position
   def scroll(self):
@@ -127,19 +130,22 @@ class ConsoleApi:
 
 class TypingGame:
   def __init__(self, api, example_file):
-    self.__api = api
+    self.__geometry = Geometry(api)
+    self.__keyboard = Keyboard(api)
+    self.__input_line = InputLine(api, self.__geometry.y_input)
+    self.__background = Background(api)
+
     self.__example_text = FormattedText(example_file,
                                         line_length=(api.screen_width - 1))
-    self.__input_line = InputLine(api)
     if self.__example_text[0] == None:
       raise Exception("No line can be read from example source.")
 
   def play(self):
-    self.__api.initialize()
-    self.__initialize_screen()
+    self.__reset_input_line()
+    self.__print_all_example_text()
 
     while True:
-      char = self.__api.get_char()
+      char = self.__keyboard.type()
 
       if char in QUIT_CHARS:
         break
@@ -157,77 +163,89 @@ class TypingGame:
       self.__scroll()
 
   def __scroll(self):
-    self.__api.scroll()
     del self.__example_text[0]
-    self.__print_bottom_example_text()
+    bottom_text = self.__example_text[self.__geometry.y_bottom
+                                      - self.__geometry.y_input]
+    self.__background.scroll(bottom_text if bottom_text != None else "")
     self.__reset_input_line()
 
   def __reset_input_line(self):
     self.__input_line.initialize(self.__example_text[0])
 
-  def __print_bottom_example_text(self):
-    index = self.__bottom_line - self.__api.input_line
-    if self.__example_text[index] != None:
-      self.__api.put_line(self.__bottom_line, self.__example_text[index])
-
-  def __initialize_screen(self):
-    self.__api.clear()
-    self.__print_all_example_text()
-    self.__reset_input_line()
-
   def __print_all_example_text(self):
-    for index in range(self.__bottom_line - self.__api.input_line + 1):
+    for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
       if self.__example_text[index] == None: break
-      self.__api.put_line(self.__api.input_line + index,
-                          self.__example_text[index])
-
-  @property
-  def __bottom_line(self):
-    return self.__api.screen_height - 1
+      self.__background.scroll(self.__example_text[index])
 
 
-class InputLine:
+class Geometry:
+  def __init__(self, api):
+    self.y_input = (api.screen_height - 1) // 2
+    self.y_bottom = api.screen_height - 1
+
+
+class Keyboard:
   def __init__(self, api):
     self.__api = api
 
-  def initialize(self, example_text):
-    assert example_text == normalize_text(example_text)
+  def type(self):
+    return self.__api.get_char()
 
-    self.__input_text = ""
+
+class InputLine:
+  def __init__(self, api, y_input):
+    self.__api = api
+    self.__y_input = y_input
+
+  def initialize(self, example_text):
+    assert example_text == asciize(example_text)
     self.__example_text = example_text
-    self.__api.put_line(self.__api.input_line, example_text)
+    self.__api.print_text(self.__y_input, example_text)
+    self.__input_text = ""
+    self.__api.y = self.__y_input
     self.__api.x = 0
 
   def append_char(self, char) -> bool:
-    if char == "\n" \
-        and normalize_text(self.__input_text) == self.__example_text:
+    if char == "\n" and asciize(self.__input_text) == self.__example_text:
       return True
 
-    if len(normalize_text(self.__input_text)) < len(self.__example_text) \
+    if len(asciize(self.__input_text)) < len(self.__example_text) \
         and self.__is_valid_input_char(char):
       self.__input_text += char
-      for printed_char in normalize_text(char):
-        if self.__api.x == len(self.__example_text):
-          break
-        self.__print_char(printed_char)
+      self.__print_unicode_char(char)
     return False
 
   def delete_char(self):
     self.__input_text = self.__input_text[:-1]
-    while self.__api.x > len(normalize_text(self.__input_text)):
+    while self.__api.x > len(asciize(self.__input_text)):
       self.__api.x -= 1
-      self.__api.put_char(self.__example_text[self.__api.x])
+      self.__api.print_char(self.__example_text[self.__api.x])
 
-  def __print_char(self, char):
+  def __print_unicode_char(self, unicode_char):
+    for ascii_char in asciize(unicode_char):
+      if self.__api.x == len(self.__example_text):
+        break
+      self.__print_ascii_char(ascii_char)
+
+  def __print_ascii_char(self, char):
     attr = ATTR_CORRECT if char == self.__example_text[self.__api.x] \
            else ATTR_ERROR
-    self.__api.put_char(char, attr=attr)
+    self.__api.print_char(char, attr)
     self.__api.x += 1
 
   @staticmethod
   def __is_valid_input_char(char):
     return (char in string.printable
             and not unicodedata.category(char).startswith("C")) or char == "\t"
+
+
+class Background:
+  def __init__(self, api):
+    self.__api = api
+
+  def scroll(self, bottom_text):
+    self.__api.scroll()
+    self.__api.print_text(self.__api.screen_height - 1, bottom_text)
 
 
 class FormattedText:
@@ -252,7 +270,7 @@ class FormattedText:
     lines = self.__file.readlines()
 
     for line in lines:
-      self.__buffer_line(normalize_text(line))
+      self.__buffer_line(asciize(line))
 
   def __buffer_line(self, line):
     line = line.rstrip()
@@ -270,7 +288,7 @@ class FormattedText:
 
 # functions
 
-def normalize_text(text):
+def asciize(text):
   return "".join(char for char in text_unidecode.unidecode(
                  text.replace("\t", " " * SPACES_PER_TAB))
                  if char in string.printable)
