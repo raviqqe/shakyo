@@ -125,34 +125,12 @@ class ConsoleApi:
     return len(char) == 1 and (curses.ascii.isprint(char) or char == " ")
 
 
-class InputLineApi:
-  def __init__(self, api):
-    assert isinstance(api, ConsoleApi)
-    self.__api = api
-
-  def put_char(self, char, attr=ATTR_CORRECT):
-    self.__api.put_char(char, attr=attr)
-
-  def put_line(self, text):
-    self.__api.put_line(self.__api.input_line, text)
-
-  @property
-  def x(self):
-    return self.__api.x
-
-  @x.setter
-  def x(self, x):
-    self.__api.x = x
-
-
 class TypingGame:
   def __init__(self, api, example_file):
-    assert isinstance(api, ConsoleApi)
-
     self.__api = api
     self.__example_text = FormattedText(example_file,
                                         line_length=(api.screen_width - 1))
-    self.__input_line = InputLine(InputLineApi(api))
+    self.__input_line = InputLine(api)
     if self.__example_text[0] == None:
       raise Exception("No line can be read from example source.")
 
@@ -210,7 +188,6 @@ class TypingGame:
 
 class InputLine:
   def __init__(self, api):
-    assert isinstance(api, InputLineApi)
     self.__api = api
 
   def initialize(self, example_text):
@@ -218,7 +195,7 @@ class InputLine:
 
     self.__input_text = ""
     self.__example_text = example_text
-    self.__api.put_line(example_text)
+    self.__api.put_line(self.__api.input_line, example_text)
     self.__api.x = 0
 
   def append_char(self, char) -> bool:
