@@ -141,8 +141,7 @@ class TypingGame:
       raise Exception("No line can be read from example source.")
 
   def play(self):
-    self.__reset_input_line()
-    self.__print_all_example_text()
+    self.__initialize_screen()
 
     while True:
       char = self.__keyboard.type()
@@ -171,6 +170,10 @@ class TypingGame:
 
   def __reset_input_line(self):
     self.__input_line.initialize(self.__example_text[0])
+
+  def __initialize_screen(self):
+    self.__reset_input_line()
+    self.__print_all_example_text()
 
   def __print_all_example_text(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
