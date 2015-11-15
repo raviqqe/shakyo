@@ -6,6 +6,11 @@ import setuptools
 import shutil
 import sys
 
+
+def warn(*text):
+  print("WARNING:", *text, file=sys.stderr)
+
+
 if not ((sys.version_info.major >= 3 and sys.version_info.minor >= 5)
     or sys.version_info.major > 3):
   exit("Sorry, Python's version must be later than 3.5.")
@@ -28,7 +33,9 @@ try:
   with open("README.rst", "w") as f:
     f.write(pypandoc.convert("README.md", "rst"))
   readme = read_text_file("README.rst")
-except ImportError:
+except (ImportError, OSError) as e:
+  os.remove("README.rst")
+  warn(e)
   shutil.copyfile("README.md", "README")
   readme = read_text_file("README")
 
