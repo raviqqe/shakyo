@@ -1,15 +1,16 @@
 import text_unidecode
 import unicodedata
 
-import console.attribute
-import console.misc
+from .attribute import Attribute, RenditionAttribute
 
 
 
 class Character:
-  def __init__(self, value, attr=console.attribute.RenditionAttribute.normal):
+  ASCIIZE = True
+
+  def __init__(self, value, attr=RenditionAttribute.normal):
     assert self.__is_valid_char(value) \
-           and isinstance(attr, console.attribute.Attribute)
+           and isinstance(attr, Attribute)
     self.__value = value
     self.__attr = attr
 
@@ -28,7 +29,7 @@ class Character:
 
   @attr.setter
   def attr(self, attr):
-    assert isinstance(attr, console.attribute.Attribute)
+    assert isinstance(attr, Attribute)
     self.__attr = attr
 
   @property
@@ -37,7 +38,7 @@ class Character:
 
   @property
   def normalized(self):
-    if console.misc.asciize:
+    if self.ASCIIZE:
       return self.__str2chars(text_unidecode.unidecode(self.value), self.attr)
     else:
       return self.__str2chars(unicodedata.normalize("NFC", self.value),

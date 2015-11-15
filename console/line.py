@@ -1,11 +1,12 @@
-import console.character
-import console.misc
+from .character import Character
 
 
 
 class Line:
+  SPACES_PER_TAB = 4
+
   def __init__(self, *chars):
-    assert all(map(lambda char: isinstance(char, console.character.Character),
+    assert all(map(lambda char: isinstance(char, Character),
                    chars))
     self.__chars = list(chars)
 
@@ -27,7 +28,7 @@ class Line:
         boundary = self.__next_tab_boundary(position)
         while position != boundary:
           position += 1
-          yield console.character.Character(' ', attr)
+          yield Character(' ', attr)
         continue
 
       for normalized_char in char.normalized:
@@ -35,7 +36,7 @@ class Line:
         yield normalized_char
 
   def append_char(self, char):
-    assert isinstance(char, console.character.Character)
+    assert isinstance(char, Character)
     self.__chars.append(char)
 
   def delete_char(self):
@@ -44,5 +45,4 @@ class Line:
 
   @staticmethod
   def __next_tab_boundary(position):
-    return (position // console.misc.spaces_per_tab + 1) \
-           * console.misc.spaces_per_tab
+    return (position // self.SPACES_PER_TAB + 1) * self.SPACES_PER_TAB

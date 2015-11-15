@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 import curses
 import unicodedata
 
-import console.line
+from .line import Line
 
 
 
@@ -46,7 +44,7 @@ class Console:
 
   def print_line(self, y, line):
     assert 0 <= y < self.screen_height - 1
-    assert isinstance(line, console.line.Line)
+    assert isinstance(line, Line)
     self.__window.move(y, 0)
     for char in line:
       assert not unicodedata.category(char.value).startswith("C")
@@ -66,5 +64,5 @@ class Console:
   def scroll(self, line=None):
     self.__window.scroll()
     if line != None:
-      assert isinstance(line, console.line.Line)
+      assert isinstance(line, Line)
       self.print_line(self.screen_height - 1, line)
