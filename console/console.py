@@ -7,16 +7,18 @@ from .attribute import ColorAttribute
 
 
 class Console:
-  def turn_on(self):
+  def __init__(self):
     self.__window = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
     curses.start_color()
     curses.use_default_colors()
     ColorAttribute.initialize()
-    curses.noecho()
-    curses.cbreak()
     self.__window.immedok(True)
     self.__window.keypad(True)
     self.__window.scrollok(True)
+
+  def turn_on(self):
     self.__window.clear()
     self.__window.move(0, 0)
 

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import argparse
+import curses.ascii
 import console as cui
 import os
 import os.path
 import pygments
 import pygments.formatter
+import pygments.lexers
 import sys
 import urllib.parse
 import urllib.request
@@ -57,10 +59,10 @@ class Shakyo:
 
   def __init__(self, example_text):
     self.__console = cui.Console()
-    self.__geometry = Geometry(console)
+    self.__geometry = Geometry(self.__console)
     self.__input_line = cui.Line()
     self.__example_lines \
-        = format(example_text, max_width=(console.screen_width - 1))
+        = format(example_text, max_width=(self.__console.screen_width - 1))
     if len(self.__example_lines) == 0:
       raise Exception("No line can be read from example source.")
 
@@ -81,7 +83,7 @@ class Shakyo:
            == self.__example_lines[0].normalized) \
            or (char == CHEAT_CHAR and CAN_CHEAT):
         self.__scroll()
-      elif (self.__input_line + cui.Character(char)).width
+      elif (self.__input_line + cui.Character(char)).width \
            <= self.__console.screen_width:
         self.__input_line += cui.Character(char, self.__next_attr(char))
       self.__update_input_line()
@@ -139,7 +141,7 @@ class Geometry:
 
 class CuiFormatter(pygments.formatter.Formatter):
   def __init__(self, **options):
-    super().__init__(self, **options)
+    super().__init__(**options)
 
     self.__attrs = {}
     for token_type, style in self.style:
@@ -150,18 +152,19 @@ class CuiFormatter(pygments.formatter.Formatter):
         attr |= cui.RenditionAttribute.bold
       if style["underline"]:
         attr |= cui.RenditionAttribute.underline
-      self.attrs[token_type] = attr
+      self.__attrs[token_type] = attr
 
   def format(self, tokens):
-    lines = []
+    lines = [cui.Line()]
     for token_type, value in tokens:
       if token_type == pygments.token.Token.Text and value == '\n':
         lines.append(cui.Line())
         continue
 
-      while token_type not in self.attrs:
+      while token_type not in self.__attrs:
         token_type = token_type.parent
-      lines[-1] += cui.Line(*(cui.Character(char, self.attrs[token_type])
+      print("ORD", ord(value), file=sys.stderr) # XXX
+      lines[-1] += cui.Line(*(cui.Character(char, self.__attrs[token_type])
                               for char in value))
     return lines
 
@@ -197,14 +200,15 @@ def parse_args():
   arg_parser.add_argument("example_path", nargs='?', default=None,
                           help="file path or URI to example")
   arg_parser.add_argument("-c", "--cheat",
-                          dest="can_cheat", type=bool, default=False,
-                          action="store_true",
+                          dest="can_cheat", action="store_true",
                           help="enable the cheat key, {}"
                                .format(curses.ascii.unctrl(CHEAT_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="set number of spaces per tab")
-  arg_parser.add_argument("-v", "--version", help="show version information")
+  arg_parser.add_argument("-v", "--version",
+                          dest="show_version", action="store_true",
+                          help="show version information")
 
   args = arg_parser.parse_args()
 
@@ -262,16 +266,16 @@ def main():
   else:
     example_text = read_local_file(args.example_path)
 
-  shakyo = Shakyo(example_text)
-
   try:
     # CAUTION:
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
+    shakyo = Shakyo(example_text)
     shakyo.start()
   finally:
-    shakyo.finish()
+    if "shakyo" in locals():
+      shakyo.finish()
 
 
 if __name__ == "__main__":
