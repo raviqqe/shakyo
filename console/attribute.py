@@ -21,10 +21,28 @@ class RenditionAttribute(Attribute):
 
 @enum.unique
 class ColorAttribute(Attribute):
-  black =   curses.COLOR_BLACK
-  blue =    curses.COLOR_BLUE
-  cyan =    curses.COLOR_CYAN
-  green =   curses.COLOR_GREEN
-  red =     curses.COLOR_RED
-  white =   curses.COLOR_WHITE
-  yellow =  curses.COLOR_YELLOW
+  @classmethod
+  def initialize(cls):
+    curses.init_pair(0, curses.COLOR_BLACK, -1)
+    cls.black = curses.color_pair(0)
+
+    curses.init_pair(1, curses.COLOR_BLUE, -1)
+    cls.blue = curses.color_pair(1)
+
+    curses.init_pair(2, curses.COLOR_CYAN, -1)
+    cls.cyan = curses.color_pair(2)
+
+    curses.init_pair(3, curses.COLOR_GREEN, -1)
+    cls.green = curses.color_pair(3)
+
+    curses.init_pair(4, curses.COLOR_MAGENTA, -1)
+    cls.magenta = curses.color_pair(4)
+
+    curses.init_pair(5, curses.COLOR_RED, -1)
+    cls.red = curses.color_pair(5)
+
+    curses.init_pair(6, curses.COLOR_WHITE, -1)
+    cls.white = curses.color_pair(6)
+
+    curses.init_pair(7, curses.COLOR_YELLOW, -1)
+    cls.yellow = curses.color_pair(7)

@@ -9,8 +9,7 @@ class Character:
   ASCIIZE = True
 
   def __init__(self, value, attr=RenditionAttribute.normal):
-    assert self.__is_valid_char(value) \
-           and isinstance(attr, Attribute)
+    assert self.__is_valid_char(value) and isinstance(attr, int)
     self.__value = value
     self.__attr = attr
 
@@ -29,7 +28,7 @@ class Character:
 
   @attr.setter
   def attr(self, attr):
-    assert isinstance(attr, Attribute)
+    assert isinstance(attr, int)
     self.__attr = attr
 
   @property
@@ -37,7 +36,7 @@ class Character:
     return 1 if unicodedata.east_asian_width(self.value) == "N" else 2
 
   @property
-  def normalized(self):
+  def _normalized(self):
     if self.ASCIIZE:
       return self.__str2chars(text_unidecode.unidecode(self.value), self.attr)
     else:
