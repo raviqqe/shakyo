@@ -37,11 +37,15 @@ class Console:
   def print_line(self, y, line, clear=True):
     assert 0 <= y < self.screen_height
     assert isinstance(line, Line)
+
     self.__window.move(y, 0)
     if clear:
       self.__window.clrtoeol()
+
     for char in line.normalized:
       assert not unicodedata.category(char.value).startswith("C")
+      if self.__window.getyx()[1] + char.width > self.screen_width:
+        break
       self.__window.addstr(char.value, char.attr)
 
   @__keep_position

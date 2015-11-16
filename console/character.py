@@ -21,4 +21,5 @@ class Character:
 
   @property
   def width(self):
-    return 1 if unicodedata.east_asian_width(self.value) == "N" else 2
+    return 1 if unicodedata.east_asian_width(self.value) not in {"W", "F"} \
+           else 2
