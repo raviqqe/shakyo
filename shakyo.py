@@ -79,9 +79,8 @@ class Shakyo:
         self.__input_line = cui.Line()
       elif char in DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
-      elif (char == '\n'
-           and self.__input_line.normalized
-           == self.__example_lines[0].normalized) \
+      elif (char == '\n' and self.__input_line.normalized
+                             == self.__example_lines[0].normalized) \
            or (char == CHEAT_CHAR and CAN_CHEAT):
         self.__scroll()
       elif cui.is_printable_char(char) \
