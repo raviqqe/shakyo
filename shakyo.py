@@ -67,7 +67,7 @@ class Shakyo:
     if len(self.__example_lines) == 0:
       raise Exception("No line can be read from example source.")
 
-  def start(self):
+  def do(self):
     self.__initialize_screen()
 
     while len(self.__example_lines) != 0:
@@ -288,7 +288,7 @@ def main():
     console = cui.turn_on_console()
 
     shakyo = Shakyo(console, example_text)
-    shakyo.start()
+    shakyo.do()
   finally:
     cui.turn_off_console()
 
