@@ -1,3 +1,6 @@
+import text_unidecode
+import unicodedata
+
 from .character import Character
 
 
@@ -8,6 +11,7 @@ class Line:
   """
 
   SPACES_PER_TAB = 4
+  ASCIIZE = True
 
   def __init__(self, *chars):
     assert all(map(lambda char: isinstance(char, Character), chars))
@@ -25,7 +29,8 @@ class Line:
     return True
 
   def __iter__(self):
-    return self._chars
+    for char in self._chars:
+      yield char
 
   def __add__(self, char_or_line):
     if isinstance(char_or_line, Character):
@@ -45,11 +50,15 @@ class Line:
                        .format(key))
 
   @property
-  def width(self):
-    return sum(char.width for char in self._printable_chars)
+  def normalized(self):
+    return Line(*self.__normalize_chars)
 
   @property
-  def _printable_chars(self):
+  def width(self):
+    return len(self.normalized)
+
+  @property
+  def __normalize_chars(self):
     position = 0
     for char in self._chars:
       if char.value == '\t':
@@ -59,10 +68,22 @@ class Line:
           yield Character(' ', char.attr)
         continue
 
-      for normalized_char in char._normalized:
+      for normalized_char in self.__normalize_char(char):
         position += normalized_char.width
         yield normalized_char
 
   @classmethod
   def __next_tab_boundary(cls, position):
     return (position // cls.SPACES_PER_TAB + 1) * cls.SPACES_PER_TAB
+
+  @classmethod
+  def __normalize_char(cls, char):
+    if cls.ASCIIZE:
+      return cls.__str2chars(text_unidecode.unidecode(char.value), char.attr)
+    else:
+      return cls.__str2chars(unicodedata.normalize("NFC", char.value),
+                              char.attr)
+
+  @staticmethod
+  def __str2chars(string, attr):
+    return [Character(char, attr) for char in string]

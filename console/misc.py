@@ -21,6 +21,6 @@ def set_option(name, value):
     Line.SPACES_PER_TAB = value
   elif name == "asciize":
     assert isinstance(value, bool)
-    Character.ASCIIZE = value
+    Line.ASCIIZE = value
   else:
     raise Exception("Invalid option name is detected.")

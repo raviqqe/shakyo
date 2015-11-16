@@ -50,7 +50,7 @@ class Console:
     self.__window.move(y, 0)
     if clear:
       self.__window.clrtoeol()
-    for char in line._printable_chars:
+    for char in line.normalized:
       assert not unicodedata.category(char.value).startswith("C")
       self.__window.addstr(char.value, char.attr)
 
