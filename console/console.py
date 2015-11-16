@@ -47,7 +47,7 @@ class Console:
     return chr(self.__window.getch())
 
   def print_line(self, y, line, clear=True):
-    assert 0 <= y < self.screen_height - 1
+    assert 0 <= y < self.screen_height
     assert isinstance(line, Line)
     self.__window.move(y, 0)
     if clear:

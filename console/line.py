@@ -2,6 +2,7 @@ import text_unidecode
 import unicodedata
 
 from .character import Character
+from .misc import ASCIIZE, SPACES_PER_TAB
 
 
 
@@ -9,9 +10,6 @@ class Line:
   """
   A immutable class which represents one-line text on console.
   """
-
-  SPACES_PER_TAB = 4
-  ASCIIZE = True
 
   def __init__(self, *chars):
     assert all(map(lambda char: isinstance(char, Character), chars))
@@ -21,7 +19,10 @@ class Line:
     return len(self._chars)
 
   def __eq__(self, line):
-    assert isinstance(line, Line)
+    if line == None: return False
+    if not isinstance(line, Line):
+      raise ValueError("Line cannot be compared with other class instances "
+                       "except for or None.")
 
     if len(self) != len(line): return False
     for my_char, your_char in zip(self, line):
@@ -74,11 +75,11 @@ class Line:
 
   @classmethod
   def __next_tab_boundary(cls, position):
-    return (position // cls.SPACES_PER_TAB + 1) * cls.SPACES_PER_TAB
+    return (position // SPACES_PER_TAB + 1) * SPACES_PER_TAB
 
   @classmethod
   def __normalize_char(cls, char):
-    if cls.ASCIIZE:
+    if ASCIIZE:
       return cls.__str2chars(text_unidecode.unidecode(char.value), char.attr)
     else:
       return cls.__str2chars(unicodedata.normalize("NFC", char.value),

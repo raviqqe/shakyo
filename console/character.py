@@ -1,12 +1,13 @@
 import unicodedata
 
 from .attribute import Attribute, RenditionAttribute
+from .misc import is_printable_char
 
 
 
 class Character:
   def __init__(self, value, attr=RenditionAttribute.normal):
-    assert self.__is_valid_char(value) and isinstance(attr, int)
+    assert is_printable_char(value) and isinstance(attr, int)
     self.__value = value
     self.__attr = attr
 
@@ -21,7 +22,3 @@ class Character:
   @property
   def width(self):
     return 1 if unicodedata.east_asian_width(self.value) == "N" else 2
-
-  @staticmethod
-  def __is_valid_char(char):
-    return not unicodedata.category(char).startswith("C") or char == '\t'
