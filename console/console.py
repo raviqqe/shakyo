@@ -7,23 +7,13 @@ from .attribute import ColorAttribute
 
 
 class Console:
-  def __init__(self):
-    self.__window = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    curses.start_color()
-    curses.use_default_colors()
-    ColorAttribute.initialize()
-    self.__window.immedok(True)
+  def __init__(self, window):
+    self.__window = window
+    self.__window.leaveok(True)
     self.__window.keypad(True)
     self.__window.scrollok(True)
     self.__window.clear()
     self.__window.move(0, 0)
-
-  def turn_off(self):
-    curses.nocbreak()
-    curses.echo()
-    curses.endwin()
 
   def __keep_position(method):
     def wrapper(self, *args, **keyword_args):
