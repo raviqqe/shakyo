@@ -17,8 +17,6 @@ class Console:
     self.__window.immedok(True)
     self.__window.keypad(True)
     self.__window.scrollok(True)
-
-  def turn_on(self):
     self.__window.clear()
     self.__window.move(0, 0)
 

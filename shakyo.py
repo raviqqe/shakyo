@@ -58,8 +58,8 @@ class Shakyo:
   ATTR_CORRECT = cui.RenditionAttribute.normal
   ATTR_WRONG = cui.RenditionAttribute.reverse
 
-  def __init__(self, example_text):
-    self.__console = cui.Console()
+  def __init__(self, console, example_text):
+    self.__console = console
     self.__geometry = Geometry(self.__console)
     self.__input_line = cui.Line()
     self.__example_lines \
@@ -90,11 +90,7 @@ class Shakyo:
         self.__input_line += cui.Character(char, self.__next_attr(char))
       self.__update_input_line()
 
-  def finish(self):
-    self.__console.turn_off()
-
   def __initialize_screen(self):
-    self.__console.turn_on()
     self.__print_all_example_lines()
     self.__update_input_line()
 
@@ -277,11 +273,12 @@ def main():
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    shakyo = Shakyo(example_text)
+    console = cui.turn_on_console()
+
+    shakyo = Shakyo(console, example_text)
     shakyo.start()
   finally:
-    if "shakyo" in locals():
-      shakyo.finish()
+    cui.turn_off_console()
 
 
 if __name__ == "__main__":
