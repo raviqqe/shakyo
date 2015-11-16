@@ -1,10 +1,9 @@
 import console as cui
 
 
-console = cui.Console()
 
 try:
-  console.turn_on()
+  console = cui.turn_on_console()
   console.erase()
   line = cui.Line()
   console.print_line(0, line)
@@ -28,4 +27,4 @@ try:
   console.print_line(1, line)
   console.get_char()
 finally:
-  console.turn_off()
+  cui.turn_off_console()
