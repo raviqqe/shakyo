@@ -85,7 +85,9 @@ class Shakyo:
         self.__scroll()
       elif cui.is_printable_char(char) \
            and (self.__input_line + cui.Character(char) + self.__cursor_char) \
-           .width <= self.__console.screen_width:
+               .width <= self.__console.screen_width:
+           # TODO: self.__curosor is stateful.
+           # So, the condition expression above is wrong.
         self.__input_line += cui.Character(char, self.__next_attr(char))
       self.__update_input_line()
 
@@ -130,18 +132,18 @@ class Shakyo:
     if len(normalized_input_line) >= len(normalized_example_line):
       return self.ATTR_WRONG
     return (self.ATTR_CORRECT if self.__is_correct_char(char)
-           else self.ATTR_WRONG) \
-           | normalized_example_line \
-           [min(len(normalized_input_line), len(normalized_example_line) - 1)]\
-           .attr
+            else self.ATTR_WRONG) \
+           | normalized_example_line[min(len(normalized_input_line),
+                                         len(normalized_example_line) - 1)] \
+                                         .attr
 
   def __is_correct_char(self, char):
     next_input_line = self.__input_line + cui.Character(char)
     for index in range(len(self.__input_line.normalized),
                        len(next_input_line.normalized)):
-      if not index < len(self.__example_lines[0].normalized) \
+      if index >= len(self.__example_lines[0].normalized) \
          or next_input_line.normalized[index].value \
-         != self.__example_lines[0].normalized[index].value:
+            != self.__example_lines[0].normalized[index].value:
         return False
     return True
 
