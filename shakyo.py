@@ -54,6 +54,7 @@ def fail(*text):
 # classes
 
 class Shakyo:
+  ATTR_CURSOR = cui.RenditionAttribute.reverse
   ATTR_CORRECT = cui.RenditionAttribute.normal
   ATTR_WRONG = cui.RenditionAttribute.reverse
 
@@ -66,7 +67,7 @@ class Shakyo:
     if len(self.__example_lines) == 0:
       raise Exception("No line can be read from example source.")
 
-  def play(self):
+  def start(self):
     self.__initialize_screen()
 
     while len(self.__example_lines) != 0:
@@ -83,12 +84,13 @@ class Shakyo:
            == self.__example_lines[0].normalized) \
            or (char == CHEAT_CHAR and CAN_CHEAT):
         self.__scroll()
-      elif (self.__input_line + cui.Character(char)).width \
+      elif cui.is_printable_char(char) \
+           and (self.__input_line + cui.Character(char)).width \
            <= self.__console.screen_width:
         self.__input_line += cui.Character(char, self.__next_attr(char))
       self.__update_input_line()
 
-  def end(self):
+  def finish(self):
     self.__console.turn_off()
 
   def __initialize_screen(self):
@@ -107,9 +109,9 @@ class Shakyo:
 
     bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
     if bottom_line_index < len(self.__example_lines):
-      self.__background.scroll(self.__example_lines[bottom_line_index])
+      self.__console.scroll(self.__example_lines[bottom_line_index])
     else:
-      self.__background.scroll()
+      self.__console.scroll()
 
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
@@ -117,10 +119,15 @@ class Shakyo:
       self.__console.scroll(self.__example_lines[index])
 
   def __next_attr(self, char):
+    normalized_input_line = self.__input_line.normalized
+    normalized_example_line = self.__example_lines[0].normalized
+    if len(normalized_input_line) >= len(normalized_example_line):
+      return self.ATTR_WRONG
     return (self.ATTR_CORRECT if self.__is_correct_char(char)
            else self.ATTR_WRONG) \
-           | self.__example_lines[0].normalized \
-           [len(self.__input_line.normalized)].attr
+           | normalized_example_line \
+           [min(len(normalized_input_line), len(normalized_example_line) - 1)]\
+           .attr
 
   def __is_correct_char(self, char):
     next_input_line = self.__input_line + cui.Character(char)
@@ -157,15 +164,14 @@ class CuiFormatter(pygments.formatter.Formatter):
   def format(self, tokens):
     lines = [cui.Line()]
     for token_type, value in tokens:
-      if token_type == pygments.token.Token.Text and value == '\n':
-        lines.append(cui.Line())
-        continue
-
       while token_type not in self.__attrs:
         token_type = token_type.parent
-      print("ORD", ord(value), file=sys.stderr) # XXX
-      lines[-1] += cui.Line(*(cui.Character(char, self.__attrs[token_type])
-                              for char in value))
+
+      for char in value:
+        if char == '\n':
+          lines.append(cui.Line())
+        else:
+          lines[-1] += cui.Character(char, self.__attrs[token_type])
     return lines
 
 
