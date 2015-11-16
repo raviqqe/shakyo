@@ -1,6 +1,6 @@
 import unicodedata
 
-from .attribute import Attribute, RenditionAttribute
+from .attribute import RenditionAttribute
 from .misc import is_printable_char
 
 
