@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
 import argparse
-import curses
-import curses.ascii
+import console as cui
 import os
 import os.path
-import string
+import pygments
+import pygments.formatter
 import sys
-import tempfile
-import text_unidecode
-import unicodedata
 import urllib.parse
 import urllib.request
 import validators
@@ -25,19 +22,14 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
               .format(os.path.basename(__file__))
 
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
-UTF8 = "UTF-8"
+ENCODING = "UTF-8"
 
-QUIT_CHARS = {chr(curses.ascii.ESC), curses.ascii.ctrl('[')}
-DELETE_CHARS = {chr(curses.ascii.DEL), chr(curses.ascii.BS),
-                chr(curses.KEY_BACKSPACE), chr(curses.KEY_DC)}
-CLEAR_CHAR = curses.ascii.ctrl('u')
-CHEAT_CHAR = curses.ascii.ctrl('n')
+QUIT_CHARS = cui.ESCAPE_CHARS
+DELETE_CHARS = cui.DELETE_CHARS | cui.BACKSPACE_CHARS
+CLEAR_CHAR = cui.char_with_control_key('u')
+CHEAT_CHAR = cui.char_with_control_key('n')
 
 CAN_CHEAT = False
-SPACES_PER_TAB = 4
-
-ATTR_CORRECT = curses.A_NORMAL
-ATTR_ERROR = curses.A_REVERSE
 
 SUPPORTED_SCHEMES = {"http", "https"}
 
@@ -59,285 +51,160 @@ def fail(*text):
 
 # classes
 
-class ConsoleApi:
-  def __init__(self, window):
-    window.keypad(True)
-    window.scrollok(True)
-    window.erase()
-    window.move(0, 0)
-    self.__window = window
+class Shakyo:
+  ATTR_CORRECT = cui.RenditionAttribute.normal
+  ATTR_WRONG = cui.RenditionAttribute.reverse
 
-  def __keep_position(method):
-    def wrapper(self, *args, **keyword_args):
-      position = self.__window.getyx()
-      result = method(self, *args, **keyword_args)
-      self.__window.move(*position)
-      return result
-    return wrapper
-
-  @property
-  def screen_height(self):
-    return self.__window.getmaxyx()[0]
-
-  @property
-  def screen_width(self):
-    return self.__window.getmaxyx()[1]
-
-  @property
-  def y(self):
-    return self.__window.getyx()[0]
-
-  @y.setter
-  def y(self, y):
-    if not 0 <= y < self.screen_height: return
-    self.__window.move(y, self.__window.getyx()[1])
-
-  @property
-  def x(self):
-    return self.__window.getyx()[1]
-
-  @x.setter
-  def x(self, x):
-    if not 0 <= x < self.screen_width: return
-    self.__window.move(self.__window.getyx()[0], x)
-
-  def get_char(self) -> str:
-    return chr(self.__window.getch())
-
-  @__keep_position
-  def print_char(self, char, attr=ATTR_CORRECT):
-    assert self.__is_single_width_ascii_char(char)
-    self.__window.addch(ord(char), attr)
-
-  @__keep_position
-  def print_text(self, y, text):
-    self.__window.move(y, 0)
-    self.__window.clrtoeol()
-    self.__window.addstr(y, 0, text[:self.screen_width])
-
-  @__keep_position
-  def erase(self):
-    self.__window.erase()
-
-  @__keep_position
-  def scroll(self):
-    self.__window.scroll()
-
-  @staticmethod
-  def __is_single_width_ascii_char(char: str):
-    return len(char) == 1 and (curses.ascii.isprint(char) or char == " ")
-
-
-class TypingGame:
-  def __init__(self, api, example_file):
-    self.__geometry = Geometry(api)
-    self.__keyboard = Keyboard(api)
-    self.__input_line = InputLine(api, self.__geometry.y_input)
-    self.__background = Background(api)
-
-    self.__example_text = FormattedText(example_file,
-                                        line_length=(api.screen_width - 1))
-    if self.__example_text[0] == None:
+  def __init__(self, example_text):
+    self.__console = cui.Console()
+    self.__geometry = Geometry(console)
+    self.__input_line = cui.Line()
+    self.__example_lines \
+        = format(example_text, max_width=(console.screen_width - 1))
+    if len(self.__example_lines) == 0:
       raise Exception("No line can be read from example source.")
 
   def play(self):
     self.__initialize_screen()
 
-    while True:
-      char = self.__keyboard.type()
+    while len(self.__example_lines) != 0:
+      char = self.__console.get_char()
 
       if char in QUIT_CHARS:
         break
-      if char == CLEAR_CHAR:
-        self.__reset_input_line()
-        continue
-      if char in DELETE_CHARS:
-        self.__input_line.delete_char()
-        continue
+      elif char == CLEAR_CHAR:
+        self.__input_line = cui.Line()
+      elif char in DELETE_CHARS:
+        self.__input_line = self.__input_line[:-1]
+      elif (char == '\n'
+           and self.__input_line.normalized
+           == self.__example_lines[0].normalized) \
+           or (char == CHEAT_CHAR and CAN_CHEAT):
+        self.__scroll()
+      elif (self.__input_line + cui.Character(char)).width
+           <= self.__console.screen_width:
+        self.__input_line += cui.Character(char, self.__next_attr(char))
+      self.__update_input_line()
 
-      if not (char == CHEAT_CHAR and CAN_CHEAT):
-        line_completed = self.__input_line.append_char(char)
-        if not line_completed: continue
-      if self.__example_text[1] == None: break
-      self.__scroll()
-
-  def __scroll(self):
-    del self.__example_text[0]
-    bottom_text = self.__example_text[self.__geometry.y_bottom
-                                      - self.__geometry.y_input]
-    self.__background.scroll(bottom_text if bottom_text != None else "")
-    self.__reset_input_line()
-
-  def __reset_input_line(self):
-    self.__input_line.initialize(self.__example_text[0])
+  def end(self):
+    self.__console.turn_off()
 
   def __initialize_screen(self):
-    self.__reset_input_line()
-    self.__print_all_example_text()
+    self.__console.turn_on()
+    self.__print_all_example_lines()
+    self.__update_input_line()
 
-  def __print_all_example_text(self):
+  def __update_input_line(self):
+    self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
+    self.__console.print_line(self.__geometry.y_input, self.__input_line,
+                              clear=False)
+
+  def __scroll(self):
+    del self.__example_lines[0]
+    self.__input_line = cui.Line()
+
+    bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
+    if bottom_line_index < len(self.__example_lines):
+      self.__background.scroll(self.__example_lines[bottom_line_index])
+    else:
+      self.__background.scroll()
+
+  def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
-      if self.__example_text[index] == None: break
-      self.__background.scroll(self.__example_text[index])
+      if index >= len(self.__example_lines): break
+      self.__console.scroll(self.__example_lines[index])
+
+  def __next_attr(self, char):
+    return (self.ATTR_CORRECT if self.__is_correct_char(char)
+           else self.ATTR_WRONG) \
+           | self.__example_lines[0].normalized \
+           [len(self.__input_line.normalized)].attr
+
+  def __is_correct_char(self, char):
+    next_input_line = self.__input_line + cui.Character(char)
+    for index in range(len(self.__input_line.normalized),
+                       len(next_input_line.normalized)):
+      if not index < len(self.__example_lines[0].normalized) \
+         or next_input_line.normalized[index].value \
+         != self.__example_lines[0].normalized[index].value:
+        return False
+    return True
 
 
 class Geometry:
-  def __init__(self, api):
-    self.y_input = (api.screen_height - 1) // 2
-    self.y_bottom = api.screen_height - 1
+  def __init__(self, console):
+    self.y_input = (console.screen_height - 1) // 2
+    self.y_bottom = console.screen_height - 1
 
 
-class Keyboard:
-  def __init__(self, api):
-    self.__api = api
+class CuiFormatter(pygments.formatter.Formatter):
+  def __init__(self, **options):
+    super().__init__(self, **options)
 
-  def type(self):
-    return self.__api.get_char()
+    self.__attrs = {}
+    for token_type, style in self.style:
+      attr = cui.RenditionAttribute.normal
+      if style["color"]:
+        attr |= cui.ColorAttribute.red
+      if style["bold"]:
+        attr |= cui.RenditionAttribute.bold
+      if style["underline"]:
+        attr |= cui.RenditionAttribute.underline
+      self.attrs[token_type] = attr
 
+  def format(self, tokens):
+    lines = []
+    for token_type, value in tokens:
+      if token_type == pygments.token.Token.Text and value == '\n':
+        lines.append(cui.Line())
+        continue
 
-class InputLine:
-  def __init__(self, api, y_input):
-    self.__api = api
-    self.__y_input = y_input
-
-  def initialize(self, example_text):
-    assert example_text == asciize(example_text).rstrip()
-    self.__example_text = example_text
-    self.__api.print_text(self.__y_input, example_text)
-    self.__input_text = ""
-    self.__api.y = self.__y_input
-    self.__api.x = 0
-
-  def append_char(self, char) -> bool:
-    if char == "\n" and asciize(self.__input_text) == self.__example_text:
-      return True
-
-    if len(asciize(self.__input_text)) < len(self.__example_text) \
-        and self.__is_valid_input_char(char):
-      self.__input_text += char
-      self.__print_unicode_char(char)
-    return False
-
-  def delete_char(self):
-    self.__input_text = self.__input_text[:-1]
-    while self.__api.x > len(asciize(self.__input_text)):
-      self.__api.x -= 1
-      self.__api.print_char(self.__example_text[self.__api.x])
-
-  def __print_unicode_char(self, unicode_char):
-    for ascii_char in asciize(unicode_char):
-      if self.__api.x == len(self.__example_text):
-        break
-      self.__print_ascii_char(ascii_char)
-
-  def __print_ascii_char(self, char):
-    attr = ATTR_CORRECT if char == self.__example_text[self.__api.x] \
-           else ATTR_ERROR
-    self.__api.print_char(char, attr)
-    self.__api.x += 1
-
-  @staticmethod
-  def __is_valid_input_char(char):
-    return (char in string.printable
-            and not unicodedata.category(char).startswith("C")) or char == "\t"
-
-
-class Background:
-  def __init__(self, api):
-    self.__api = api
-
-  def scroll(self, bottom_text):
-    self.__api.scroll()
-    self.__api.print_text(self.__api.screen_height - 1, bottom_text)
-
-
-class FormattedText:
-  def __init__(self, text_file, line_length=79):
-    self.__file = text_file
-    self.__line_length = line_length
-    self.__buffered_lines = []
-
-  def __del__(self):
-    self.__file.close()
-
-  def __getitem__(self, index: int) -> str:
-    self.__read_lines_from_file()
-
-    return self.__buffered_lines[index] if index < len(self.__buffered_lines) \
-           else None
-
-  def __delitem__(self, index: int):
-    del self.__buffered_lines[index]
-
-  def __read_lines_from_file(self):
-    lines = self.__file.readlines()
-
-    for line in lines:
-      self.__buffer_line(asciize(line))
-
-  def __buffer_line(self, line):
-    line = line.rstrip()
-
-    while len(line) > self.__line_length:
-      buffered_line, line = self.__split_line(line)
-      self.__buffered_lines.append(buffered_line)
-    self.__buffered_lines.append(line)
-
-  def __split_line(self, line):
-    return line[:self.__line_length].rstrip(), \
-           line[self.__line_length:].rstrip()
+      while token_type not in self.attrs:
+        token_type = token_type.parent
+      lines[-1] += cui.Line(*(cui.Character(char, self.attrs[token_type])
+                              for char in value))
+    return lines
 
 
 
 # functions
 
-def asciize(text):
-  return "".join(char for char in text_unidecode.unidecode(
-                 text.replace("\t", " " * SPACES_PER_TAB))
-                 if char in string.printable)
+def format(text, max_width=79):
+  tokens = pygments.lexers.guess_lexer(text, stripall=True).get_tokens(text)
+  lines = CuiFormatter().format(tokens)
+
+  new_lines = []
+  for line in lines:
+    while line.width > max_width:
+      new_line, line = split_line(line)
+      new_lines.append(new_line)
+    new_lines.append(line)
+  return new_lines
 
 
-def reset_stdin():
-  TEMPORARY_FD = 3
+def split_line(line, max_width):
+  assert max_width >= 2 # for double-width characters
+  assert line.width > max_width
 
-  os.dup2(sys.stdin.fileno(), TEMPORARY_FD)
-  os.close(sys.stdin.fileno())
-  sys.stdin = open(TTY_DEVICE_FILE)
-
-  return os.fdopen(TEMPORARY_FD)
-
-
-def initialize_curses():
-  window = curses.initscr()
-  curses.noecho()
-  curses.cbreak()
-  curses.start_color()
-  curses.use_default_colors()
-  return window
-
-
-def finalize_curses():
-  curses.nocbreak()
-  curses.echo()
-  curses.endwin() # should be at the very last line
+  for index in range(len(line) - 1, -1, -1):
+    if line[:index].width <= max_width:
+      return line[:index], line[index:]
+  raise Exception("You reached to unreachable code!")
 
 
 def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
   arg_parser.add_argument("example_path", nargs='?', default=None,
-                          help="path or URI to example")
+                          help="file path or URI to example")
   arg_parser.add_argument("-c", "--cheat",
-                          dest="can_cheat",
+                          dest="can_cheat", type=bool, default=False,
                           action="store_true",
                           help="enable the cheat key, {}"
                                .format(curses.ascii.unctrl(CHEAT_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="set number of spaces per tab")
-  arg_parser.add_argument("-v", "--version",
-                          dest="show_version",
-                          action="store_true", default=False,
-                          help="show version information")
+  arg_parser.add_argument("-v", "--version", help="show version information")
 
   args = arg_parser.parse_args()
 
@@ -346,41 +213,38 @@ def parse_args():
     exit()
 
   if args.spaces_per_tab != None:
-    global SPACES_PER_TAB
-    SPACES_PER_TAB = args.spaces_per_tab
-  if args.can_cheat == True:
-    global CAN_CHEAT
-    CAN_CHEAT = True
+    cui.set_option("spaces_per_tab", args.spaces_per_tab)
+
+  global CAN_CHEAT
+  CAN_CHEAT = args.can_cheat
 
   return args
 
 
-def get_example_file():
-  example_path = parse_args().example_path
+def read_from_stdin():
+  text = ""
+  for line in sys.stdin:
+    text += line
 
-  if example_path != None and validators.url(example_path) \
-      and sys.stdin.isatty():
-    return get_remote_file(example_path)
-  elif example_path != None and sys.stdin.isatty():
-    return open(example_path)
-  elif example_path == None and not sys.stdin.isatty():
-    return reset_stdin()
-  else:
-    fail("Example is read from either the path or URI specified "
-         "in the argument or stdin.")
+  sys.stdin.close()
+  sys.stdin = open(TTY_DEVICE_FILE)
+
+  return text
 
 
-def get_remote_file(uri):
+def read_local_file(path):
+  with open(path, encoding=ENCODING) as f:
+    return f.read()
+
+
+def read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
     fail("Invalid scheme of URI is detected. "
          "(supported schemes: {})".format(", ".join(SUPPORTED_SCHEMES)))
 
   message("Loading a page...")
-  temporary_file = tempfile.TemporaryFile(mode="w+")
   with urllib.request.urlopen(uri) as response:
-    temporary_file.write(response.read().decode(UTF8, "replace"))
-  temporary_file.seek(0)
-  return temporary_file
+    return response.read().decode(ENCODING, "replace")
 
 
 
@@ -389,18 +253,25 @@ def get_remote_file(uri):
 def main():
   if not sys.stdout.isatty(): fail("stdout is not a tty.")
 
-  example_file = get_example_file()
+  args = parse_args()
+
+  if args.example_path == None:
+    example_text = read_from_stdin()
+  elif validators.url(args.example_path):
+    example_text = read_remote_file(args.example_path)
+  else:
+    example_text = read_local_file(args.example_path)
+
+  shakyo = Shakyo(example_text)
 
   try:
     # CAUTION:
-    # You need to raise some Exception() instead of calling exit() here
+    # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    window = initialize_curses()
-
-    TypingGame(ConsoleApi(window), example_file).play()
+    shakyo.start()
   finally:
-    finalize_curses()
+    shakyo.finish()
 
 
 if __name__ == "__main__":
