@@ -15,10 +15,10 @@ class Line:
 
   def __init__(self, *chars):
     assert all(map(lambda char: isinstance(char, Character), chars))
-    self._chars = chars
+    self.__chars = chars
 
   def __len__(self):
-    return len(self._chars)
+    return len(self.__chars)
 
   def __eq__(self, line):
     if line == None: return False
@@ -32,22 +32,22 @@ class Line:
     return True
 
   def __iter__(self):
-    for char in self._chars:
+    for char in self.__chars:
       yield char
 
   def __add__(self, char_or_line):
     if isinstance(char_or_line, Character):
       char = char_or_line
-      return Line(*self._chars, char)
+      return Line(*self, char)
     elif isinstance(char_or_line, Line):
       line = char_or_line
-      return Line(*self._chars, *line._chars)
+      return Line(*self, *line)
 
   def __getitem__(self, key):
     if isinstance(key, int):
-      return self._chars[key]
+      return self.__chars[key]
     elif isinstance(key, slice):
-      return Line(*self._chars[key])
+      return Line(*self.__chars[key])
     else:
       raise IndexError("Invalid key for Line class is detected. (key: {})"
                        .format(key))
@@ -63,7 +63,7 @@ class Line:
   @property
   def __normalize_chars(self):
     position = 0
-    for char in self._chars:
+    for char in self.__chars:
       if char.value == '\t':
         boundary = self.__next_tab_boundary(position)
         while position != boundary:
