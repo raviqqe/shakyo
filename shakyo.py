@@ -84,6 +84,7 @@ class Shakyo:
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
            or (char == CHEAT_CHAR and CAN_CHEAT):
+        if len(self.__example_lines) == 1: break
         self.__scroll()
       elif xorcise.is_printable_char(char) \
            and (self.__input_line + xorcise.Character(char)).width \
@@ -156,16 +157,18 @@ class CuiFormatter(pygments.formatter.Formatter):
       self.__attrs[token_type] = attr
 
   def format(self, tokens):
-    lines = [xorcise.Line()]
+    lines = []
+    line = xorcise.Line()
     for token_type, value in tokens:
       while token_type not in self.__attrs:
         token_type = token_type.parent
 
       for char in value:
         if char == '\n':
-          lines.append(xorcise.Line())
+          lines.append(line)
+          line = xorcise.Line()
         else:
-          lines[-1] += xorcise.Character(char, self.__attrs[token_type])
+          line += xorcise.Character(char, self.__attrs[token_type])
     return lines
 
 
