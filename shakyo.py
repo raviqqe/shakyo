@@ -69,9 +69,10 @@ class Shakyo:
       raise Exception("No line can be read from example source.")
 
   def do(self):
-    self.__initialize_screen()
+    self.__print_all_example_lines()
 
     while len(self.__example_lines) != 0:
+      self.__update_input_line()
       char = self.__console.get_char()
 
       if char in QUIT_CHARS:
@@ -88,11 +89,6 @@ class Shakyo:
            and (self.__input_line + xorcise.Character(char)).width \
                + CURSOR_WIDTH <= self.__console.screen_width:
         self.__input_line += xorcise.Character(char, self.__next_attr(char))
-      self.__update_input_line()
-
-  def __initialize_screen(self):
-    self.__print_all_example_lines()
-    self.__update_input_line()
 
   def __update_input_line(self):
     self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
