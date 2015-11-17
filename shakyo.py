@@ -25,6 +25,7 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
 
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 ENCODING = "UTF-8"
+CURSOR_WIDTH = 1
 
 QUIT_CHARS = cui.ESCAPE_CHARS
 DELETE_CHARS = cui.DELETE_CHARS | cui.BACKSPACE_CHARS
@@ -54,7 +55,6 @@ def fail(*text):
 # classes
 
 class Shakyo:
-  ATTR_CURSOR = cui.RenditionAttribute.reverse
   ATTR_CORRECT = cui.RenditionAttribute.normal
   ATTR_WRONG = cui.RenditionAttribute.reverse
 
@@ -84,10 +84,8 @@ class Shakyo:
            or (char == CHEAT_CHAR and CAN_CHEAT):
         self.__scroll()
       elif cui.is_printable_char(char) \
-           and (self.__input_line + cui.Character(char) + self.__cursor_char) \
-               .width <= self.__console.screen_width:
-           # TODO: self.__curosor is stateful.
-           # So, the condition expression above is wrong.
+           and (self.__input_line + cui.Character(char)).width + CURSOR_WIDTH \
+               <= self.__console.screen_width:
         self.__input_line += cui.Character(char, self.__next_attr(char))
       self.__update_input_line()
 
@@ -98,17 +96,8 @@ class Shakyo:
   def __update_input_line(self):
     self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
     self.__console.print_line(self.__geometry.y_input,
-                              self.__input_line + self.__cursor_char,
+                              self.__input_line,
                               clear=False)
-
-  @property
-  def __cursor_char(self):
-    normalized_input_line = self.__input_line.normalized
-    normalized_example_line = self.__example_lines[0].normalized
-    if len(normalized_input_line) >= len(normalized_example_line):
-      return cui.Character(' ', self.ATTR_CURSOR)
-    next_char =  normalized_example_line[len(normalized_input_line)]
-    return cui.Character(next_char.value, next_char.attr | self.ATTR_CURSOR)
 
   def __scroll(self):
     self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])

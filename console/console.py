@@ -9,7 +9,6 @@ from .attribute import ColorAttribute
 class Console:
   def __init__(self, window):
     self.__window = window
-    self.__window.leaveok(True)
     self.__window.keypad(True)
     self.__window.scrollok(True)
     self.__window.clear()
