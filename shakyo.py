@@ -31,9 +31,9 @@ CURSOR_WIDTH = 1
 QUIT_CHARS = xorcise.ESCAPE_CHARS
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
 CLEAR_CHAR = xorcise.char_with_control_key('u')
-CHEAT_CHAR = xorcise.char_with_control_key('n')
+SKIP_CHAR = xorcise.char_with_control_key('n')
 
-CAN_CHEAT = False
+CAN_SKIP = False
 
 SUPPORTED_SCHEMES = {"http", "https"}
 
@@ -83,7 +83,7 @@ class Shakyo:
         self.__input_line = self.__input_line[:-1]
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
-           or (char == CHEAT_CHAR and CAN_CHEAT):
+           or (char == SKIP_CHAR and CAN_SKIP):
         if len(self.__example_lines) == 1: break
         self.__scroll()
       elif xorcise.is_printable_char(char) \
@@ -202,10 +202,10 @@ def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
   arg_parser.add_argument("example_path", nargs='?', default=None,
                           help="file path or URI to example")
-  arg_parser.add_argument("-c", "--cheat",
-                          dest="can_cheat", action="store_true",
-                          help="enable the cheat key, {}"
-                               .format(curses.ascii.unctrl(CHEAT_CHAR)))
+  arg_parser.add_argument("-s", "--skip",
+                          dest="can_skip", action="store_true",
+                          help="enable the skip key, {}"
+                               .format(curses.ascii.unctrl(SKIP_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           type=int, dest="spaces_per_tab",
                           help="set number of spaces per tab")
@@ -222,8 +222,8 @@ def parse_args():
   if args.spaces_per_tab != None:
     xorcise.set_option("spaces_per_tab", args.spaces_per_tab)
 
-  global CAN_CHEAT
-  CAN_CHEAT = args.can_cheat
+  global CAN_SKIP
+  CAN_SKIP = args.can_skip
 
   return args
 
