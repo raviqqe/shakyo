@@ -56,7 +56,7 @@ class Line:
 
   @property
   def width(self):
-    return len(self.normalized)
+    return sum(char.width for char in self.normalized)
 
   @property
   def __normalize_chars(self):
