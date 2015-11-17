@@ -13,6 +13,7 @@ class Console:
     self.__window.scrollok(True)
     self.__window.clear()
     self.__window.move(0, 0)
+    self.__window.refresh()
 
   def __keep_position(method):
     def wrapper(self, *args, **keyword_args):
