@@ -1,33 +1,34 @@
-import console as cui
+import xorcise
 
 
 
 try:
-  console = cui.turn_on_console()
+  console = xorcise.turn_on_console()
   console.erase()
-  line = cui.Line()
+  line = xorcise.Line()
   console.print_line(0, line)
-  line = cui.Line(
-      cui.Character("h", cui.ColorAttribute.black),
-      cui.Character("e", cui.ColorAttribute.blue),
-      cui.Character("l", cui.ColorAttribute.red),
-      cui.Character("l", cui.ColorAttribute.green),
-      cui.Character("o", cui.ColorAttribute.yellow),
-      cui.Character(","),
-      cui.Character("\t", cui.ColorAttribute.cyan
-                          | cui.RenditionAttribute.reverse),
-      cui.Character("w", cui.ColorAttribute.magenta),
-      cui.Character("o", cui.ColorAttribute.white),
-      cui.Character("r"),
-      cui.Character("l", cui.ColorAttribute.white),
-      cui.Character("d"),
-      cui.Character("!", cui.ColorAttribute.white
-                         | cui.RenditionAttribute.underline),
+  line = xorcise.Line(
+      xorcise.Character("h", xorcise.ColorAttribute.black),
+      xorcise.Character("e", xorcise.ColorAttribute.blue),
+      xorcise.Character("l", xorcise.ColorAttribute.red),
+      xorcise.Character("l", xorcise.ColorAttribute.green),
+      xorcise.Character("o", xorcise.ColorAttribute.yellow),
+      xorcise.Character(","),
+      xorcise.Character("\t", xorcise.ColorAttribute.cyan
+                          | xorcise.RenditionAttribute.reverse),
+      xorcise.Character("w", xorcise.ColorAttribute.magenta),
+      xorcise.Character("o", xorcise.ColorAttribute.white),
+      xorcise.Character("r"),
+      xorcise.Character("l", xorcise.ColorAttribute.white),
+      xorcise.Character("d"),
+      xorcise.Character("!", xorcise.ColorAttribute.white
+                         | xorcise.RenditionAttribute.underline),
   )
   console.print_line(1, line)
-  console.print_line(2, cui.Line(cui.Character("\t"),
-                                 cui.Character(" "),
-                                 cui.Character("A", cui.ColorAttribute.cyan)))
+  console.print_line(2, xorcise.Line(
+      xorcise.Character("\t"),
+      xorcise.Character(" "),
+      xorcise.Character("A", xorcise.ColorAttribute.cyan)))
   console.get_char()
   with open("debug.log", "w") as f:
     for char in line:
@@ -36,4 +37,4 @@ try:
     for char in line.normalized:
       f.write(char.value)
 finally:
-  cui.turn_off_console()
+  xorcise.turn_off_console()
