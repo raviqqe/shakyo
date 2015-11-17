@@ -25,6 +25,15 @@ try:
                          | cui.RenditionAttribute.underline),
   )
   console.print_line(1, line)
+  console.print_line(2, cui.Line(cui.Character("\t"),
+                                 cui.Character(" "),
+                                 cui.Character("A", cui.ColorAttribute.cyan)))
   console.get_char()
+  with open("debug.log", "w") as f:
+    for char in line:
+      f.write(char.value)
+    f.write("\n")
+    for char in line.normalized:
+      f.write(char.value)
 finally:
   cui.turn_off_console()
