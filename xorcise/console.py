@@ -51,6 +51,9 @@ class Console:
   def erase(self):
     self.__window.erase()
 
+  def refresh(self):
+    self.__window.refresh()
+
   @__keep_position
   def scroll(self, line=None):
     self.__window.scroll()

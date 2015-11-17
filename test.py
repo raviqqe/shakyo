@@ -29,6 +29,7 @@ try:
       xorcise.Character("\t"),
       xorcise.Character(" "),
       xorcise.Character("A", xorcise.ColorAttribute.cyan)))
+  console.refresh()
   console.get_char()
   with open("debug.log", "w") as f:
     for char in line:
