@@ -5,14 +5,17 @@ from .console import Console
 from .line import Line
 from .attribute import RenditionAttribute, ColorAttribute
 from .misc import ESCAPE_CHARS, DELETE_CHARS, BACKSPACE_CHARS, \
-                  char_with_control_key, set_option, is_printable_char
+                  is_printable_char, char_with_control_key
 
 
 
 __console = None
 
 
-def turn_on_console():
+def turn_on_console(asciize=False, spaces_per_tab=4):
+  Line.ASCIIZE = asciize
+  Line.SPACES_PER_TAB = spaces_per_tab
+
   window = curses.initscr()
   curses.noecho()
   curses.cbreak()

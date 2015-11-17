@@ -201,12 +201,15 @@ def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
   arg_parser.add_argument("example_path", nargs='?', default=None,
                           help="file path or URI to example")
+  arg_parser.add_argument("-a", "--asciize",
+                          dest="asciize", action="store_true",
+                          help="enable asciization")
   arg_parser.add_argument("-s", "--skip",
                           dest="can_skip", action="store_true",
                           help="enable the skip key, {}"
                                .format(curses.ascii.unctrl(SKIP_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
-                          type=int, dest="spaces_per_tab",
+                          dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab")
   arg_parser.add_argument("-v", "--version",
                           dest="show_version", action="store_true",
@@ -217,9 +220,6 @@ def parse_args():
   if args.show_version:
     print("version:", __version__)
     exit()
-
-  if args.spaces_per_tab != None:
-    xorcise.set_option("spaces_per_tab", args.spaces_per_tab)
 
   global CAN_SKIP
   CAN_SKIP = args.can_skip
@@ -273,7 +273,8 @@ def main():
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    console = xorcise.turn_on_console()
+    console = xorcise.turn_on_console(asciize=args.asciize,
+                                      spaces_per_tab=args.spaces_per_tab)
 
     shakyo = Shakyo(console, example_text)
     shakyo.do()
