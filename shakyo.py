@@ -2,7 +2,6 @@
 
 import argparse
 import curses.ascii
-import console as cui
 import os
 import os.path
 import pygments
@@ -12,6 +11,8 @@ import sys
 import urllib.parse
 import urllib.request
 import validators
+
+import xorcise
 
 
 
@@ -27,10 +28,10 @@ TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 ENCODING = "UTF-8"
 CURSOR_WIDTH = 1
 
-QUIT_CHARS = cui.ESCAPE_CHARS
-DELETE_CHARS = cui.DELETE_CHARS | cui.BACKSPACE_CHARS
-CLEAR_CHAR = cui.char_with_control_key('u')
-CHEAT_CHAR = cui.char_with_control_key('n')
+QUIT_CHARS = xorcise.ESCAPE_CHARS
+DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
+CLEAR_CHAR = xorcise.char_with_control_key('u')
+CHEAT_CHAR = xorcise.char_with_control_key('n')
 
 CAN_CHEAT = False
 
@@ -55,13 +56,13 @@ def fail(*text):
 # classes
 
 class Shakyo:
-  ATTR_CORRECT = cui.RenditionAttribute.normal
-  ATTR_WRONG = cui.RenditionAttribute.reverse
+  ATTR_CORRECT = xorcise.RenditionAttribute.normal
+  ATTR_WRONG = xorcise.RenditionAttribute.reverse
 
   def __init__(self, console, example_text):
     self.__console = console
     self.__geometry = Geometry(self.__console)
-    self.__input_line = cui.Line()
+    self.__input_line = xorcise.Line()
     self.__example_lines \
         = format(example_text, max_width=(self.__console.screen_width - 1))
     if len(self.__example_lines) == 0:
@@ -76,17 +77,17 @@ class Shakyo:
       if char in QUIT_CHARS:
         break
       elif char == CLEAR_CHAR:
-        self.__input_line = cui.Line()
+        self.__input_line = xorcise.Line()
       elif char in DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
            or (char == CHEAT_CHAR and CAN_CHEAT):
         self.__scroll()
-      elif cui.is_printable_char(char) \
-           and (self.__input_line + cui.Character(char)).width + CURSOR_WIDTH \
-               <= self.__console.screen_width:
-        self.__input_line += cui.Character(char, self.__next_attr(char))
+      elif xorcise.is_printable_char(char) \
+           and (self.__input_line + xorcise.Character(char)).width \
+               + CURSOR_WIDTH <= self.__console.screen_width:
+        self.__input_line += xorcise.Character(char, self.__next_attr(char))
       self.__update_input_line()
 
   def __initialize_screen(self):
@@ -102,7 +103,7 @@ class Shakyo:
   def __scroll(self):
     self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
     del self.__example_lines[0]
-    self.__input_line = cui.Line()
+    self.__input_line = xorcise.Line()
 
     bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
     if bottom_line_index < len(self.__example_lines):
@@ -127,7 +128,7 @@ class Shakyo:
                                          .attr
 
   def __is_correct_char(self, char):
-    next_input_line = self.__input_line + cui.Character(char)
+    next_input_line = self.__input_line + xorcise.Character(char)
     for index in range(len(self.__input_line.normalized),
                        len(next_input_line.normalized)):
       if index >= len(self.__example_lines[0].normalized) \
@@ -149,26 +150,26 @@ class CuiFormatter(pygments.formatter.Formatter):
 
     self.__attrs = {}
     for token_type, style in self.style:
-      attr = cui.RenditionAttribute.normal
+      attr = xorcise.RenditionAttribute.normal
       if style["color"]:
-        attr |= cui.ColorAttribute.red
+        attr |= xorcise.ColorAttribute.red
       if style["bold"]:
-        attr |= cui.RenditionAttribute.bold
+        attr |= xorcise.RenditionAttribute.bold
       if style["underline"]:
-        attr |= cui.RenditionAttribute.underline
+        attr |= xorcise.RenditionAttribute.underline
       self.__attrs[token_type] = attr
 
   def format(self, tokens):
-    lines = [cui.Line()]
+    lines = [xorcise.Line()]
     for token_type, value in tokens:
       while token_type not in self.__attrs:
         token_type = token_type.parent
 
       for char in value:
         if char == '\n':
-          lines.append(cui.Line())
+          lines.append(xorcise.Line())
         else:
-          lines[-1] += cui.Character(char, self.__attrs[token_type])
+          lines[-1] += xorcise.Character(char, self.__attrs[token_type])
     return lines
 
 
@@ -220,7 +221,7 @@ def parse_args():
     exit()
 
   if args.spaces_per_tab != None:
-    cui.set_option("spaces_per_tab", args.spaces_per_tab)
+    xorcise.set_option("spaces_per_tab", args.spaces_per_tab)
 
   global CAN_CHEAT
   CAN_CHEAT = args.can_cheat
@@ -274,12 +275,12 @@ def main():
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    console = cui.turn_on_console()
+    console = xorcise.turn_on_console()
 
     shakyo = Shakyo(console, example_text)
     shakyo.do()
   finally:
-    cui.turn_off_console()
+    xorcise.turn_off_console()
 
 
 if __name__ == "__main__":
