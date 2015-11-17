@@ -98,7 +98,6 @@ class Shakyo:
                               clear=False)
 
   def __scroll(self):
-    self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
     del self.__example_lines[0]
     self.__input_line = xorcise.Line()
 
