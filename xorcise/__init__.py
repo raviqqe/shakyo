@@ -9,9 +9,6 @@ from .misc import ESCAPE_CHARS, DELETE_CHARS, BACKSPACE_CHARS, \
 
 
 
-__console = None
-
-
 def turn_on_console(asciize=False, spaces_per_tab=4):
   Line.ASCIIZE = asciize
   Line.SPACES_PER_TAB = spaces_per_tab
@@ -24,10 +21,7 @@ def turn_on_console(asciize=False, spaces_per_tab=4):
   curses.use_default_colors()
   ColorAttribute.initialize()
 
-  global __console
-  __console = Console(window)
-
-  return __console
+  return Console(window)
 
 
 def turn_off_console():
