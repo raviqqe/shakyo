@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import curses.ascii
 import os
 import os.path
 import pygments
@@ -30,8 +29,8 @@ CURSOR_WIDTH = 1
 
 QUIT_CHARS = xorcise.ESCAPE_CHARS
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
-CLEAR_CHAR = xorcise.char_with_control_key('u')
-SKIP_CHAR = xorcise.char_with_control_key('n')
+CLEAR_CHAR = xorcise.ctrl('u')
+SKIP_CHAR = xorcise.ctrl('n')
 
 CAN_SKIP = False
 
@@ -207,7 +206,7 @@ def parse_args():
   arg_parser.add_argument("-s", "--skip",
                           dest="can_skip", action="store_true",
                           help="enable the skip key, {}"
-                               .format(curses.ascii.unctrl(SKIP_CHAR)))
+                               .format(xorcise.unctrl(SKIP_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab")
