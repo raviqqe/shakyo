@@ -62,15 +62,15 @@ class Shakyo:
     self.__console = console
     self.__geometry = Geometry(self.__console)
     self.__input_line = xorcise.Line()
-    self.__example_lines \
-        = format(example_text, max_width=(self.__console.screen_width - 1))
-    if len(self.__example_lines) == 0:
+    self.__example_lines = FormattedLines(
+        example_text, max_width=(self.__console.screen_width - 1))
+    if self.__example_lines[0] == None:
       raise Exception("No line can be read from example source.")
 
   def do(self):
     self.__print_all_example_lines()
 
-    while len(self.__example_lines) != 0:
+    while self.__example_lines[0] != None:
       self.__update_input_line()
       char = self.__console.get_char()
 
@@ -83,7 +83,7 @@ class Shakyo:
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
            or (char == SKIP_CHAR and CAN_SKIP):
-        if len(self.__example_lines) == 1: break
+        if self.__example_lines[1] == None: break
         self.__scroll()
       elif xorcise.is_printable_char(char) \
            and (self.__input_line + xorcise.Character(char)).width \
@@ -101,14 +101,14 @@ class Shakyo:
     self.__input_line = xorcise.Line()
 
     bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
-    if bottom_line_index < len(self.__example_lines):
+    if self.__example_lines[bottom_line_index] != None:
       self.__console.scroll(self.__example_lines[bottom_line_index])
     else:
       self.__console.scroll()
 
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
-      if index >= len(self.__example_lines): break
+      if self.__example_lines[index] == None: break
       self.__console.print_line(self.__geometry.y_input + index,
                                 self.__example_lines[index])
 
@@ -156,7 +156,6 @@ class CuiFormatter(pygments.formatter.Formatter):
       self.__attrs[token_type] = attr
 
   def format(self, tokens):
-    lines = []
     line = xorcise.Line()
     for token_type, value in tokens:
       while token_type not in self.__attrs:
@@ -164,51 +163,72 @@ class CuiFormatter(pygments.formatter.Formatter):
 
       for char in value:
         if char == '\n':
-          lines.append(line)
+          yield line
           line = xorcise.Line()
         elif xorcise.is_printable_char(char):
           line += xorcise.Character(char, self.__attrs[token_type])
-    return lines
+    # if there is no newline character at the end of the last line
+    if len(line) > 0:
+      yield line
+
+
+class FormattedLines:
+  def __init__(self, text, max_width=79):
+    assert max_width >= 2 # for double-width characters
+
+    self.__lines = []
+
+    lexer_options = {"stripall" : True}
+    try:
+      lexer = pygments.lexers.guess_lexer(text, **lexer_options)
+    except pygments.util.ClassNotFound:
+      lexer = pygments.lexers.special.TextLexer(**lexer_options)
+    tokens = lexer.get_tokens(text)
+    self.__line_generator = self.__fold_lines(CuiFormatter().format(tokens),
+                                              max_width)
+
+  def __getitem__(self, index):
+    assert isinstance(index, int)
+
+    for line in self.__line_generator:
+      self.__lines.append(line)
+      if index < len(self.__lines):
+        break
+
+    return self.__lines[index] if index < len(self.__lines) else None
+
+  def __delitem__(self, index):
+    assert isinstance(index, int)
+    del self.__lines[index]
+
+  @classmethod
+  def __fold_lines(cls, lines, max_width):
+    for line in lines:
+      while line.width > max_width:
+        new_line, line = cls.__split_line(line, max_width)
+        yield new_line
+      yield line
+
+  @staticmethod
+  def __split_line(line, max_width):
+    assert line.width > max_width
+
+    # binary search for max index to construct a line of max width
+    min_index = 0
+    max_index = len(line)
+    while min_index != max_index:
+      middle_index = (max_index - min_index + 1) // 2 + min_index
+      if line[:middle_index].width <= max_width:
+        min_index = middle_index
+      else:
+        max_index = middle_index - 1
+
+    assert line[:min_index].width <= max_width
+    return line[:min_index], line[min_index:]
 
 
 
 # functions
-
-def format(text, max_width=79):
-  lexer_options = {"stripall" : True}
-  try:
-    lexer = pygments.lexers.guess_lexer(text, **lexer_options)
-  except pygments.util.ClassNotFound:
-    lexer = pygments.lexers.special.TextLexer(**lexer_options)
-  tokens = lexer.get_tokens(text)
-  lines = CuiFormatter().format(tokens)
-
-  new_lines = []
-  for line in lines:
-    while line.width > max_width:
-      new_line, line = split_line(line, max_width)
-      new_lines.append(new_line)
-    new_lines.append(line)
-  return new_lines
-
-
-def split_line(line, max_width):
-  assert max_width >= 2 # for double-width characters
-  assert line.width > max_width
-
-  # binary search for max index to construct a line of max width
-  min_index = 0
-  max_index = len(line)
-  while min_index != max_index:
-    middle_index = (max_index - min_index + 1) // 2 + min_index
-    if line[:middle_index].width <= max_width:
-      min_index = middle_index
-    else:
-      max_index = middle_index - 1
-
-  assert line[:min_index].width <= max_width
-  return line[:min_index], line[min_index:]
-
 
 def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
