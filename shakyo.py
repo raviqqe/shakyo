@@ -83,7 +83,6 @@ class Shakyo:
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
            or (char == SKIP_CHAR and CAN_SKIP):
-        if self.__example_lines[1] == None: break
         self.__scroll()
       elif xorcise.is_printable_char(char) \
            and (self.__input_line + xorcise.Character(char)).width \
