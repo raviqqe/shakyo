@@ -174,7 +174,12 @@ class CuiFormatter(pygments.formatter.Formatter):
 # functions
 
 def format(text, max_width=79):
-  tokens = pygments.lexers.guess_lexer(text, stripall=True).get_tokens(text)
+  lexer_options = {"stripall" : True}
+  try:
+    lexer = pygments.lexers.guess_lexer(text, **lexer_options)
+  except pygments.util.ClassNotFound:
+    lexer = pygments.lexers.special.TextLexer(**lexer_options)
+  tokens = lexer.get_tokens(text)
   lines = CuiFormatter().format(tokens)
 
   new_lines = []
