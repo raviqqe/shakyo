@@ -109,7 +109,8 @@ class Shakyo:
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
       if index >= len(self.__example_lines): break
-      self.__console.scroll(self.__example_lines[index])
+      self.__console.print_line(self.__geometry.y_input + index,
+                                self.__example_lines[index])
 
   def __next_attr(self, char):
     normalized_input_line = self.__input_line.normalized
