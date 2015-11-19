@@ -140,7 +140,7 @@ class Geometry:
     self.y_bottom = console.screen_height - 1
 
 
-class CuiFormatter(pygments.formatter.Formatter):
+class XorciseFormatter(pygments.formatter.Formatter):
   def __init__(self, **options):
     super().__init__(**options)
 
@@ -184,8 +184,8 @@ class FormattedLines:
     except pygments.util.ClassNotFound:
       lexer = pygments.lexers.special.TextLexer(**lexer_options)
     tokens = lexer.get_tokens(text)
-    self.__line_generator = self.__fold_lines(CuiFormatter().format(tokens),
-                                              max_width)
+    self.__line_generator \
+        = self.__fold_lines(XorciseFormatter().format(tokens), max_width)
 
   def __getitem__(self, index):
     assert isinstance(index, int)
