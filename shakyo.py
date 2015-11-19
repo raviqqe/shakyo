@@ -165,7 +165,7 @@ class CuiFormatter(pygments.formatter.Formatter):
         if char == '\n':
           lines.append(line)
           line = xorcise.Line()
-        else:
+        elif xorcise.is_printable_char(char):
           line += xorcise.Character(char, self.__attrs[token_type])
     return lines
 
@@ -180,7 +180,7 @@ def format(text, max_width=79):
   new_lines = []
   for line in lines:
     while line.width > max_width:
-      new_line, line = split_line(line)
+      new_line, line = split_line(line, max_width)
       new_lines.append(new_line)
     new_lines.append(line)
   return new_lines
@@ -190,7 +190,7 @@ def split_line(line, max_width):
   assert max_width >= 2 # for double-width characters
   assert line.width > max_width
 
-  for index in range(len(line) - 1, -1, -1):
+  for index in range(len(line) - 1, -1, -1): # TODO: make it binary search
     if line[:index].width <= max_width:
       return line[:index], line[index:]
   raise Exception("You reached to unreachable code!")
