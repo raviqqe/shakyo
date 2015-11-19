@@ -14,7 +14,7 @@ class Line:
   ASCIIZE = False
 
   def __init__(self, *chars):
-    assert all(map(lambda char: isinstance(char, Character), chars))
+    assert all(isinstance(char, Character) for char in chars)
     self.__chars = chars
 
   def __len__(self):
