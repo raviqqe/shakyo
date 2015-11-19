@@ -34,7 +34,7 @@ SKIP_CHAR = xorcise.ctrl('n')
 
 CAN_SKIP = False
 
-SUPPORTED_SCHEMES = {"http", "https"}
+SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 
 
 
