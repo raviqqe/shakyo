@@ -82,11 +82,10 @@ class Line:
   @classmethod
   def __normalize_char(cls, char):
     if cls.ASCIIZE:
-      return cls.__str2chars(text_unidecode.unidecode(char.value), char.attr)
+      return [Character(string_char, char.attr)
+             for string_char in text_unidecode.unidecode(char.value)]
     else:
-      return cls.__str2chars(unicodedata.normalize("NFC", char.value),
-                             char.attr)
-
-  @staticmethod
-  def __str2chars(string, attr):
-    return [Character(char, attr) for char in string]
+      return [Character(string_char, char.attr)
+             if not unicodedata.category(string_char).startswith("Z")
+             else Character(' ', char.attr)
+             for string_char in unicodedata.normalize("NFC", char.value)]
