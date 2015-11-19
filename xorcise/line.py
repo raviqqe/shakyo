@@ -85,7 +85,7 @@ class Line:
       return cls.__str2chars(text_unidecode.unidecode(char.value), char.attr)
     else:
       return cls.__str2chars(unicodedata.normalize("NFC", char.value),
-                              char.attr)
+                             char.attr)
 
   @staticmethod
   def __str2chars(string, attr):
