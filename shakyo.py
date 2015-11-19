@@ -195,10 +195,18 @@ def split_line(line, max_width):
   assert max_width >= 2 # for double-width characters
   assert line.width > max_width
 
-  for index in range(len(line) - 1, -1, -1): # TODO: make it binary search
-    if line[:index].width <= max_width:
-      return line[:index], line[index:]
-  raise Exception("You reached to unreachable code!")
+  # binary search for max index to construct a line of max width
+  min_index = 0
+  max_index = len(line)
+  while min_index != max_index:
+    middle_index = (max_index - min_index + 1) // 2 + min_index
+    if line[:middle_index].width <= max_width:
+      min_index = middle_index
+    else:
+      max_index = middle_index - 1
+
+  assert line[:min_index].width <= max_width
+  return line[:min_index], line[min_index:]
 
 
 def parse_args():
@@ -243,8 +251,8 @@ def read_from_stdin():
 
 
 def read_local_file(path):
-  with open(path, encoding=ENCODING) as f:
-    return f.read()
+  with open(path, "rb") as f:
+    return f.read().decode(ENCODING, "replace")
 
 
 def read_remote_file(uri):
