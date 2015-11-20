@@ -32,8 +32,6 @@ DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
 CLEAR_CHAR = xorcise.ctrl('u')
 SKIP_CHAR = xorcise.ctrl('n')
 
-CAN_SKIP = False
-
 SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 
 
@@ -82,7 +80,7 @@ class Shakyo:
         self.__input_line = self.__input_line[:-1]
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
-           or (char == SKIP_CHAR and CAN_SKIP):
+           or (char == SKIP_CHAR):
         self.__scroll()
       elif xorcise.is_printable_char(char) \
            and (self.__input_line + xorcise.Character(char)).width \
@@ -236,10 +234,6 @@ def parse_args():
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
                           help="enable asciization")
-  arg_parser.add_argument("-s", "--skip",
-                          dest="can_skip", action="store_true",
-                          help="enable the skip key, {}"
-                               .format(xorcise.unctrl(SKIP_CHAR)))
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab")
@@ -252,9 +246,6 @@ def parse_args():
   if args.show_version:
     print("version:", __version__)
     exit()
-
-  global CAN_SKIP
-  CAN_SKIP = args.can_skip
 
   return args
 
