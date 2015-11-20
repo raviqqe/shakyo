@@ -146,7 +146,8 @@ class XorciseFormatter(pygments.formatter.Formatter):
     for token_type, style in self.style:
       attr = xorcise.RenditionAttribute.normal
       if style["color"]:
-        attr |= xorcise.ColorAttribute.red
+        attr |= xorcise.ColorAttribute.get_best_match(
+                self.__interpret_string_rgb(style["color"]))
       if style["bold"]:
         attr |= xorcise.RenditionAttribute.bold
       if style["underline"]:
@@ -168,6 +169,11 @@ class XorciseFormatter(pygments.formatter.Formatter):
     # if there is no newline character at the end of the last line
     if len(line) > 0:
       yield line
+
+  @staticmethod
+  def __interpret_string_rgb(string_rgb):
+    int_rgb = int(string_rgb, 16)
+    return (int_rgb >> 16 & 0xff, int_rgb >> 8 & 0xff, int_rgb & 0xff)
 
 
 class FormattedLines:

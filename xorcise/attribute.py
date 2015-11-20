@@ -3,12 +3,8 @@ import enum
 
 
 
-class Attribute(enum.IntEnum):
-  pass
-
-
 @enum.unique
-class RenditionAttribute(Attribute):
+class RenditionAttribute(enum.IntEnum):
   altcharset =  curses.A_ALTCHARSET
   blink =       curses.A_BLINK
   bold =        curses.A_BOLD
@@ -19,30 +15,46 @@ class RenditionAttribute(Attribute):
   underline =   curses.A_UNDERLINE
 
 
-@enum.unique
-class ColorAttribute(Attribute):
+class ColorAttribute:
   @classmethod
   def initialize(cls):
-    curses.init_pair(0, curses.COLOR_BLACK, -1)
-    cls.black = curses.color_pair(0)
+    if not curses.has_colors(): return
 
-    curses.init_pair(1, curses.COLOR_BLUE, -1)
-    cls.blue = curses.color_pair(1)
+    cls.__rgb2attr = {}
+    for color_index in range(curses.COLORS):
+      pair_index = color_index + 1
+      if pair_index >= curses.COLOR_PAIRS: break
+      curses.init_pair(pair_index, color_index, -1)
+      rgb = tuple(color * 255 // 1000
+                  for color in curses.color_content(color_index))
+      cls.__rgb2attr[rgb] = curses.color_pair(pair_index)
 
-    curses.init_pair(2, curses.COLOR_CYAN, -1)
-    cls.cyan = curses.color_pair(2)
+  @classmethod
+  def get_best_match(cls, rgb):
+    assert len(rgb) == 3
+    assert all(0 <= color < 256 for color in rgb)
 
-    curses.init_pair(3, curses.COLOR_GREEN, -1)
-    cls.green = curses.color_pair(3)
+    if not curses.has_colors():
+      return curses.A_NORMAL
 
-    curses.init_pair(4, curses.COLOR_MAGENTA, -1)
-    cls.magenta = curses.color_pair(4)
+    if rgb in cls.__rgb2attr:
+      return cls.__rgb2attr[rgb]
 
-    curses.init_pair(5, curses.COLOR_RED, -1)
-    cls.red = curses.color_pair(5)
+    attr = cls.__find_best_match(rgb)
+    cls.__rgb2attr[rgb] = attr
+    return attr
 
-    curses.init_pair(6, curses.COLOR_WHITE, -1)
-    cls.white = curses.color_pair(6)
+  @classmethod
+  def __find_best_match(cls, new_rgb):
+    matched_attr = curses.color_pair(0) # white on black
+    min_distance = cls.__color_distance((0, 0, 0), (255, 255, 255))
+    for rgb, attr in cls.__rgb2attr.items():
+      distance = cls.__color_distance(new_rgb, rgb)
+      if distance < min_distance:
+        min_distance = distance
+        matched_attr = attr
+    return matched_attr
 
-    curses.init_pair(7, curses.COLOR_YELLOW, -1)
-    cls.yellow = curses.color_pair(7)
+  @staticmethod
+  def __color_distance(rgb1, rgb2):
+    return sum((color1 - color2) ** 2 for color1, color2 in zip(rgb1, rgb2))
