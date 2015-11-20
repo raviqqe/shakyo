@@ -19,10 +19,6 @@ import xorcise
 
 __version__ = "0.0.3"
 
-DESCRIPTION = "{} is a tool to learn about something just copying it " \
-              "by hand. Type Esc or ^[ to exit while running it." \
-              .format(os.path.basename(__file__))
-
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 ENCODING = "UTF-8"
 CURSOR_WIDTH = 1
@@ -33,6 +29,11 @@ CLEAR_CHAR = xorcise.ctrl('u')
 SKIP_CHAR = xorcise.ctrl('n')
 
 SUPPORTED_SCHEMES = {"http", "https", "ftp"}
+
+DESCRIPTION = "{} is a tool to learn about something just copying it " \
+              "by hand. Type {} to skip one line, " \
+              "and Esc or ^[ to exit while running it." \
+              .format(os.path.basename(__file__), xorcise.unctrl(SKIP_CHAR))
 
 
 
