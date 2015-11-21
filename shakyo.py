@@ -23,12 +23,16 @@ __version__ = "0.0.3"
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
 QUIT_CHARS = xorcise.ESCAPE_CHARS
 CLEAR_CHAR = xorcise.ctrl('u')
-SKIP_CHAR = xorcise.ctrl('n')
+SCROLL_UP_CHAR = xorcise.ctrl('n')
+SCROLL_DOWN_CHAR = xorcise.ctrl('p')
 
 DESCRIPTION = "{} is a tool to learn about something just copying it " \
-              "by hand. Type {} to skip one line, " \
+              "by hand. Type {} to scroll up and " \
+              "{} to scroll down one line, " \
               "and Esc or ^[ to exit while running it." \
-              .format(os.path.basename(__file__), xorcise.unctrl(SKIP_CHAR))
+              .format(os.path.basename(__file__),
+                      xorcise.unctrl(SCROLL_UP_CHAR),
+                      xorcise.unctrl(SCROLL_DOWN_CHAR))
 
 CURSOR_WIDTH = 1
 ENCODING = "UTF-8"
@@ -81,10 +85,14 @@ class Shakyo:
         self.__input_line = xorcise.Line()
       elif char in DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
+      elif char == SCROLL_DOWN_CHAR:
+        self.__input_line = xorcise.Line()
+        self.__scroll_down()
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
-           or (char == SKIP_CHAR):
-        self.__scroll()
+           or (char == SCROLL_UP_CHAR):
+        self.__input_line = xorcise.Line()
+        self.__scroll_up()
       elif xorcise.is_printable_char(char) \
            and (self.__input_line + xorcise.Character(char)).width \
                + CURSOR_WIDTH <= self.__console.screen_width:
@@ -96,15 +104,23 @@ class Shakyo:
                               self.__input_line,
                               clear=False)
 
-  def __scroll(self):
-    del self.__example_lines[0]
-    self.__input_line = xorcise.Line()
-
+  def __scroll_up(self):
+    self.__example_lines.base_index += 1
     bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
     if self.__example_lines[bottom_line_index] is not None:
       self.__console.scroll(self.__example_lines[bottom_line_index])
     else:
       self.__console.scroll()
+
+  def __scroll_down(self):
+    self.__example_lines.base_index -= 1
+    top_line_index = 0 - self.__geometry.y_input
+    if self.__example_lines[top_line_index] is not None:
+      self.__console.scroll(self.__example_lines[top_line_index], direction=-1)
+    elif self.__example_lines[0] is not None:
+      self.__console.scroll(direction=-1)
+    else:
+      self.__example_lines.base_index += 1
 
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
@@ -183,20 +199,28 @@ class FormattedLines:
     assert max_width >= 2 # for double-width characters
     self.__line_generator = self.__fold_lines(raw_lines, max_width)
     self.__lines = []
+    self.__base_index = 0
 
-  def __getitem__(self, index):
-    assert isinstance(index, int)
+  def __getitem__(self, relative_index):
+    assert isinstance(relative_index, int)
+
+    index = self.__base_index + relative_index
 
     for line in self.__line_generator:
       self.__lines.append(line)
       if index < len(self.__lines):
         break
 
-    return self.__lines[index] if index < len(self.__lines) else None
+    return self.__lines[index] if 0 <= index < len(self.__lines) else None
 
-  def __delitem__(self, index):
-    assert isinstance(index, int)
-    del self.__lines[index]
+  @property
+  def base_index(self):
+    return self.__base_index
+
+  @base_index.setter
+  def base_index(self, base_index):
+    assert isinstance(base_index, int)
+    self.__base_index = base_index
 
   @classmethod
   def __fold_lines(cls, lines, max_width):

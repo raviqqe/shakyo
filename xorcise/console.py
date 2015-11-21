@@ -56,8 +56,13 @@ class Console:
     self.__window.refresh()
 
   @__keep_position
-  def scroll(self, line=None):
-    self.__window.scroll()
-    if line is not None:
-      assert isinstance(line, Line)
+  def scroll(self, line=None, direction=1):
+    assert direction in {-1, 1}
+    assert isinstance(line, Line) or line is None
+
+    self.__window.scroll(direction)
+
+    if line is not None and direction == 1:
       self.print_line(self.screen_height - 1, line)
+    elif line is not None and direction == -1:
+      self.print_line(0, line)
