@@ -58,6 +58,6 @@ class Console:
   @__keep_position
   def scroll(self, line=None):
     self.__window.scroll()
-    if line != None:
+    if line is not None:
       assert isinstance(line, Line)
       self.print_line(self.screen_height - 1, line)

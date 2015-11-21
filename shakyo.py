@@ -65,13 +65,13 @@ class Shakyo:
     self.__input_line = xorcise.Line()
     self.__example_lines = FormattedLines(example_lines,
                                           max_width=(console.screen_width - 1))
-    if self.__example_lines[0] == None:
+    if self.__example_lines[0] is None:
       raise Exception("No line can be read from example source.")
 
   def do(self):
     self.__print_all_example_lines()
 
-    while self.__example_lines[0] != None:
+    while self.__example_lines[0] is not None:
       self.__update_input_line()
       char = self.__console.get_char()
 
@@ -101,14 +101,14 @@ class Shakyo:
     self.__input_line = xorcise.Line()
 
     bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
-    if self.__example_lines[bottom_line_index] != None:
+    if self.__example_lines[bottom_line_index] is not None:
       self.__console.scroll(self.__example_lines[bottom_line_index])
     else:
       self.__console.scroll()
 
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
-      if self.__example_lines[index] == None: break
+      if self.__example_lines[index] is None: break
       self.__console.print_line(self.__geometry.y_input + index,
                                 self.__example_lines[index])
 
@@ -318,7 +318,7 @@ def main():
 
   args = parse_args()
 
-  if args.example_path == None:
+  if args.example_path is None:
     filename = None
     example_text = read_from_stdin()
   elif validators.url(args.example_path):

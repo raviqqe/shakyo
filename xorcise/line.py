@@ -21,7 +21,7 @@ class Line:
     return len(self.__chars)
 
   def __eq__(self, line):
-    if line == None: return False
+    if line is None: return False
     if not isinstance(line, Line):
       raise ValueError("Line cannot be compared with other class instances "
                        "except for or None.")
