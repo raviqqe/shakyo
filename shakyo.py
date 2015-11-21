@@ -50,11 +50,9 @@ TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 def message(*text):
   print("{}:".format(COMMAND_NAME), *text, file=sys.stderr)
 
+
 def error(*text):
   message("error:", *text)
-
-def fail(*text):
-  error(*text)
   exit(1)
 
 
@@ -330,8 +328,8 @@ def read_local_file(path):
 
 def read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
-    fail("Invalid scheme of URI is detected. "
-         "(supported schemes: {})".format(", ".join(SUPPORTED_SCHEMES)))
+    error("Invalid scheme of URI is detected. "
+          "(supported schemes: {})".format(", ".join(SUPPORTED_SCHEMES)))
 
   message("Loading a page...")
   with urllib.request.urlopen(uri) as response:
@@ -376,7 +374,7 @@ def text2lines(text, lexer, style_name="default",
 def main():
   args = parse_args()
 
-  if not sys.stdout.isatty(): fail("stdout is not a tty.")
+  if not sys.stdout.isatty(): error("stdout is not a tty.")
 
   if args.example_path is None:
     filename = None
