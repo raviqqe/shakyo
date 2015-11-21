@@ -59,10 +59,10 @@ class Shakyo:
 
   def __init__(self, console, example_lines):
     self.__console = console
-    self.__geometry = Geometry(self.__console)
+    self.__geometry = Geometry(console)
     self.__input_line = xorcise.Line()
     self.__example_lines = example_lines
-    if self.__example_lines[0] == None:
+    if example_lines[0] == None:
       raise Exception("No line can be read from example source.")
 
   def do(self):
