@@ -258,11 +258,9 @@ def parse_args():
 
 
 def read_from_stdin():
-  text = ""
-  for line in sys.stdin:
-    text += line
+  text = sys.stdin.read()
 
-  sys.stdin.close()
+  os.close(sys.stdin.fileno())
   sys.stdin = open(TTY_DEVICE_FILE)
 
   return text
