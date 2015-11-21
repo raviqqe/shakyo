@@ -176,19 +176,26 @@ class XorciseFormatter(pygments.formatter.Formatter):
 
 
 class FormattedLines:
-  def __init__(self, text, max_width=79):
+  def __init__(self, text,  filename=None, lexer_name=None,
+               style_name="default", max_width=79):
     assert max_width >= 2 # for double-width characters
+    assert isinstance(style_name, str)
 
     self.__lines = []
 
     lexer_options = {"stripall" : True}
-    try:
-      lexer = pygments.lexers.guess_lexer(text, **lexer_options)
-    except pygments.util.ClassNotFound:
-      lexer = pygments.lexers.special.TextLexer(**lexer_options)
+    if lexer_name is not None:
+      assert isinstance(lexer_name, str)
+      lexer = pygments.lexers.get_lexer_by_name(lexer_name, **lexer_options)
+    else:
+      lexer = self.__guess_lexer(text, filename, **lexer_options)
     tokens = lexer.get_tokens(text)
+
+    style = pygments.styles.get_style_by_name(style_name)
+
     self.__line_generator \
-        = self.__fold_lines(XorciseFormatter().format(tokens), max_width)
+        = self.__fold_lines(XorciseFormatter(style=style).format(tokens),
+                            max_width)
 
   def __getitem__(self, index):
     assert isinstance(index, int)
@@ -229,6 +236,30 @@ class FormattedLines:
     assert line[:min_index].width <= max_width
     return line[:min_index], line[min_index:]
 
+  @classmethod
+  def __guess_lexer(cls, text, filename=None, **lexer_options):
+    if filename is not None:
+      lexer = cls.__get_lexer_for_filename(filename, **lexer_options)
+    if lexer is None:
+      lexer = cls.__guess_lexer_from_text(text, **lexer_options)
+    if lexer is None:
+      lexer = pygments.lexers.special.TextLexer(**lexer_options)
+    return lexer
+
+  @staticmethod
+  def __get_lexer_for_filename(filename, **lexer_options):
+    try:
+      return pygments.lexers.get_lexer_for_filename(filename, **lexer_options)
+    except pygments.util.ClassNotFound:
+      return None
+
+  @staticmethod
+  def __guess_lexer_from_text(text, **lexer_options):
+    try:
+      return pygments.lexers.guess_lexer(text, **lexer_options)
+    except pygments.util.ClassNotFound:
+      return None
+
 
 
 # functions
@@ -240,6 +271,12 @@ def parse_args():
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
                           help="enable asciization")
+  arg_parser.add_argument("-l", "--lexer",
+                          dest="lexer_name", type=str, default=None,
+                          help="specify a lexer name of pygments package")
+  arg_parser.add_argument("-s", "--style",
+                          dest="style_name", type=str, default="default",
+                          help="specify a style name of pygments package")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab")
@@ -289,10 +326,13 @@ def main():
   args = parse_args()
 
   if args.example_path == None:
+    filename = None
     example_text = read_from_stdin()
   elif validators.url(args.example_path):
+    filename = os.path.basename(urllib.parse.urlparse(args.example_path).path)
     example_text = read_remote_file(args.example_path)
   else:
+    filename = os.path.basename(args.example_path)
     example_text = read_local_file(args.example_path)
 
   try:
@@ -304,7 +344,10 @@ def main():
                                       spaces_per_tab=args.spaces_per_tab)
 
     example_lines = FormattedLines(example_text,
-                                   max_width=(console.screen_width - 1))
+                                   max_width=(console.screen_width - 1),
+                                   filename=filename,
+                                   lexer_name=args.lexer_name,
+                                   style_name=args.style_name)
 
     shakyo = Shakyo(console, example_lines)
     shakyo.do()
