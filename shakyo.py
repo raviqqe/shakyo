@@ -20,6 +20,8 @@ import xorcise
 
 __version__ = "0.0.3"
 
+COMMAND_NAME = sys.argv[0]
+
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
 QUIT_CHARS = xorcise.ESCAPE_CHARS
 CLEAR_CHAR = xorcise.ctrl('u')
@@ -30,7 +32,7 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
               "by hand. Type {} to scroll up and " \
               "{} to scroll down one line, " \
               "and Esc or ^[ to exit while running it." \
-              .format(os.path.basename(__file__),
+              .format(COMMAND_NAME,
                       xorcise.unctrl(SCROLL_UP_CHAR),
                       xorcise.unctrl(SCROLL_DOWN_CHAR))
 
@@ -46,7 +48,7 @@ TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 # the order of bugs
 
 def message(*text):
-  print("{}:".format(os.path.basename(__file__)), *text, file=sys.stderr)
+  print("{}:".format(COMMAND_NAME), *text, file=sys.stderr)
 
 def error(*text):
   message("error:", *text)
