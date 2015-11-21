@@ -302,6 +302,11 @@ def guess_lexer_from_text(text, **lexer_options):
     return None
 
 
+def text2lines(text, lexer, style_name="default"):
+  style = pygments.styles.get_style_by_name(style_name)
+  return XorciseFormatter(style=style).format(lexer.get_tokens(text))
+
+
 
 # main routine
 
@@ -335,12 +340,9 @@ def main():
     else:
       lexer = guess_lexer(example_text, filename, **lexer_options)
 
-    style = pygments.styles.get_style_by_name(args.style_name)
-    example_lines = XorciseFormatter(style=style) \
-                    .format(lexer.get_tokens(example_text))
-
     formatted_example_lines = FormattedLines(
-        example_lines, max_width=(console.screen_width - 1))
+        text2lines(example_text, lexer, style_name=args.style_name),
+        max_width=(console.screen_width - 1))
 
     shakyo = Shakyo(console, formatted_example_lines)
     shakyo.do()
