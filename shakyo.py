@@ -6,6 +6,7 @@ import os.path
 import pygments
 import pygments.formatter
 import pygments.lexers
+import pygments.styles
 import sys
 import urllib.parse
 import urllib.request
@@ -32,6 +33,7 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
 CURSOR_WIDTH = 1
 ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
+SEPARATOR = ", "
 SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
@@ -234,10 +236,16 @@ def parse_args():
                           help="enable asciization")
   arg_parser.add_argument("-l", "--lexer",
                           dest="lexer_name", type=str, default=None,
-                          help="specify a lexer name of pygments package")
+                          help="specify a lexer name")
+  arg_parser.add_argument("--show-lexers",
+                          dest="show_lexers", action="store_true",
+                          help="show all available lexer names")
   arg_parser.add_argument("-s", "--style",
                           dest="style_name", type=str, default="default",
-                          help="specify a style name of pygments package")
+                          help="specify a style name")
+  arg_parser.add_argument("--show-styles",
+                          dest="show_styles", action="store_true",
+                          help="show all available style names")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab")
@@ -250,8 +258,24 @@ def parse_args():
   if args.show_version:
     print("version:", __version__)
     exit()
+  elif args.show_lexers:
+    print(all_lexers())
+    exit()
+  elif args.show_styles:
+    print(all_styles())
+    exit()
 
   return args
+
+
+def all_lexers():
+  return SEPARATOR.join(sorted(alias for _, aliases, _, _
+                        in pygments.lexers.get_all_lexers()
+                        for alias in aliases))
+
+
+def all_styles():
+  return SEPARATOR.join(sorted(pygments.styles.get_all_styles()))
 
 
 def read_from_stdin():
@@ -312,9 +336,9 @@ def text2lines(text, lexer, style_name="default"):
 # main routine
 
 def main():
-  if not sys.stdout.isatty(): fail("stdout is not a tty.")
-
   args = parse_args()
+
+  if not sys.stdout.isatty(): fail("stdout is not a tty.")
 
   if args.example_path is None:
     filename = None
