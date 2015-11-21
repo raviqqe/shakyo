@@ -157,13 +157,13 @@ class Geometry:
 
 
 class XorciseFormatter(pygments.formatter.Formatter):
-  def __init__(self, style="default", decorate=True):
+  def __init__(self, style="default", colorize=True, decorate=True):
     super().__init__(style=style)
 
     self.__attrs = {}
     for token_type, properties in self.style:
       attr = xorcise.RenditionAttribute.normal
-      if properties["color"]:
+      if colorize and properties["color"]:
         attr |= xorcise.ColorAttribute.get_best_match(
                 self.__interpret_string_rgb(properties["color"]))
       if decorate and properties["bold"]:
@@ -258,6 +258,9 @@ def parse_args():
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
                           help="enable asciization")
+  arg_parser.add_argument("-c", "--no-color",
+                          dest="colorize", action="store_false",
+                          help="disable colorization of text")
   arg_parser.add_argument("-d", "--no-decoration",
                           dest="decorate", action="store_false",
                           help="disable decoration of text")
@@ -354,9 +357,10 @@ def guess_lexer_from_text(text):
     return None
 
 
-def text2lines(text, lexer, style_name="default", decorate=True):
+def text2lines(text, lexer, style_name="default",
+               colorize=True, decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  return XorciseFormatter(style=style, decorate=decorate) \
+  return XorciseFormatter(style=style, colorize=colorize, decorate=decorate) \
          .format(lexer.get_tokens(text))
 
 
@@ -392,6 +396,7 @@ def main():
       lexer = guess_lexer(example_text, filename)
     example_lines = text2lines(example_text, lexer,
                                style_name=args.style_name,
+                               colorize=args.colorize,
                                decorate=args.decorate)
 
     shakyo = Shakyo(console, example_lines)
