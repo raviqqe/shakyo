@@ -19,23 +19,21 @@ import xorcise
 
 __version__ = "0.0.3"
 
-TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
-ENCODING = "UTF-8"
-CURSOR_WIDTH = 1
-
-QUIT_CHARS = xorcise.ESCAPE_CHARS
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
+QUIT_CHARS = xorcise.ESCAPE_CHARS
 CLEAR_CHAR = xorcise.ctrl('u')
 SKIP_CHAR = xorcise.ctrl('n')
-
-SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 
 DESCRIPTION = "{} is a tool to learn about something just copying it " \
               "by hand. Type {} to skip one line, " \
               "and Esc or ^[ to exit while running it." \
               .format(os.path.basename(__file__), xorcise.unctrl(SKIP_CHAR))
 
+CURSOR_WIDTH = 1
+ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
+SUPPORTED_SCHEMES = {"http", "https", "ftp"}
+TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
 
 
