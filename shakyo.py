@@ -329,7 +329,8 @@ def read_local_file(path):
 def read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
     error("Invalid scheme of URI is detected. "
-          "(supported schemes: {})".format(", ".join(SUPPORTED_SCHEMES)))
+          "(supported schemes: {})"
+          .format(", ".join(sorted(SUPPORTED_SCHEMES))))
 
   message("Loading a page...")
   with urllib.request.urlopen(uri) as response:
