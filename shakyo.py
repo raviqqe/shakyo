@@ -57,12 +57,11 @@ class Shakyo:
   ATTR_CORRECT = xorcise.RenditionAttribute.normal
   ATTR_WRONG = xorcise.RenditionAttribute.reverse
 
-  def __init__(self, console, example_text):
+  def __init__(self, console, example_lines):
     self.__console = console
     self.__geometry = Geometry(self.__console)
     self.__input_line = xorcise.Line()
-    self.__example_lines = FormattedLines(
-        example_text, max_width=(self.__console.screen_width - 1))
+    self.__example_lines = example_lines
     if self.__example_lines[0] == None:
       raise Exception("No line can be read from example source.")
 
@@ -304,7 +303,10 @@ def main():
     console = xorcise.turn_on_console(asciize=args.asciize,
                                       spaces_per_tab=args.spaces_per_tab)
 
-    shakyo = Shakyo(console, example_text)
+    example_lines = FormattedLines(example_text,
+                                   max_width=(console.screen_width - 1))
+
+    shakyo = Shakyo(console, example_lines)
     shakyo.do()
   finally:
     xorcise.turn_off_console()
