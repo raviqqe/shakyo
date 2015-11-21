@@ -157,6 +157,10 @@ class Geometry:
 
 
 class XorciseFormatter(pygments.formatter.Formatter):
+  """
+  TODO: Follow Liskov substitution principle.
+  """
+
   def __init__(self, style="default", colorize=True, decorate=True):
     super().__init__(style=style)
 
