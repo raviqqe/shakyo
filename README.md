@@ -36,6 +36,10 @@ $ shakyo source_code.c
 $ shakyo https://raw.github.com/raviqqe/shakyo/master/shakyo.py
 ```
 
+```
+$ for you in more less; do cp `which shakyo` `which $you`; done
+```
+
 
 # License
 
