@@ -157,18 +157,18 @@ class Geometry:
 
 
 class XorciseFormatter(pygments.formatter.Formatter):
-  def __init__(self, **options):
-    super().__init__(**options)
+  def __init__(self, style="default", decorate=True):
+    super().__init__(style=style)
 
     self.__attrs = {}
-    for token_type, style in self.style:
+    for token_type, properties in self.style:
       attr = xorcise.RenditionAttribute.normal
-      if style["color"]:
+      if properties["color"]:
         attr |= xorcise.ColorAttribute.get_best_match(
-                self.__interpret_string_rgb(style["color"]))
-      if style["bold"]:
+                self.__interpret_string_rgb(properties["color"]))
+      if decorate and properties["bold"]:
         attr |= xorcise.RenditionAttribute.bold
-      if style["underline"]:
+      if decorate and properties["underline"]:
         attr |= xorcise.RenditionAttribute.underline
       self.__attrs[token_type] = attr
 
@@ -258,6 +258,9 @@ def parse_args():
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
                           help="enable asciization")
+  arg_parser.add_argument("-d", "--no-decoration",
+                          dest="decorate", action="store_false",
+                          help="disable decoration of text")
   arg_parser.add_argument("-l", "--lexer",
                           dest="lexer_name", type=str, default=None,
                           help="specify a lexer name")
@@ -351,9 +354,10 @@ def guess_lexer_from_text(text):
     return None
 
 
-def text2lines(text, lexer, style_name="default"):
+def text2lines(text, lexer, style_name="default", decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  return XorciseFormatter(style=style).format(lexer.get_tokens(text))
+  return XorciseFormatter(style=style, decorate=decorate) \
+         .format(lexer.get_tokens(text))
 
 
 
@@ -386,7 +390,9 @@ def main():
       lexer = pygments.lexers.get_lexer_by_name(args.lexer_name)
     else:
       lexer = guess_lexer(example_text, filename)
-    example_lines = text2lines(example_text, lexer, style_name=args.style_name)
+    example_lines = text2lines(example_text, lexer,
+                               style_name=args.style_name,
+                               decorate=args.decorate)
 
     shakyo = Shakyo(console, example_lines)
     shakyo.do()
