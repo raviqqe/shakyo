@@ -35,6 +35,8 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
               "and Esc or ^[ to exit while running it." \
               .format(os.path.basename(__file__), xorcise.unctrl(SKIP_CHAR))
 
+LEXER_OPTIONS = {"stripall" : True}
+
 
 
 # the order of bugs
@@ -277,27 +279,27 @@ def read_remote_file(uri):
     return response.read().decode(ENCODING, "replace")
 
 
-def guess_lexer(text, filename=None, **lexer_options):
+def guess_lexer(text, filename=None):
   lexer = None
   if filename is not None:
-    lexer = get_lexer_for_filename(filename, **lexer_options)
+    lexer = get_lexer_for_filename(filename)
   if lexer is None:
-    lexer = guess_lexer_from_text(text, **lexer_options)
+    lexer = guess_lexer_from_text(text)
   if lexer is None:
-    lexer = pygments.lexers.special.TextLexer(**lexer_options)
+    lexer = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
   return lexer
 
 
-def get_lexer_for_filename(filename, **lexer_options):
+def get_lexer_for_filename(filename):
   try:
-    return pygments.lexers.get_lexer_for_filename(filename, **lexer_options)
+    return pygments.lexers.get_lexer_for_filename(filename, **LEXER_OPTIONS)
   except pygments.util.ClassNotFound:
     return None
 
 
-def guess_lexer_from_text(text, **lexer_options):
+def guess_lexer_from_text(text):
   try:
-    return pygments.lexers.guess_lexer(text, **lexer_options)
+    return pygments.lexers.guess_lexer(text, **LEXER_OPTIONS)
   except pygments.util.ClassNotFound:
     return None
 
@@ -333,12 +335,10 @@ def main():
     console = xorcise.turn_on_console(asciize=args.asciize,
                                       spaces_per_tab=args.spaces_per_tab)
 
-    lexer_options = {"stripall" : True}
     if args.lexer_name is not None:
-      lexer = pygments.lexers.get_lexer_by_name(args.lexer_name,
-                                                **lexer_options)
+      lexer = pygments.lexers.get_lexer_by_name(args.lexer_name)
     else:
-      lexer = guess_lexer(example_text, filename, **lexer_options)
+      lexer = guess_lexer(example_text, filename)
 
     formatted_example_lines = FormattedLines(
         text2lines(example_text, lexer, style_name=args.style_name),
