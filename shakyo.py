@@ -256,7 +256,7 @@ def read_from_stdin():
   for line in sys.stdin:
     text += line
 
-  sys.stdin.close()
+  os.close(sys.stdin.fileno())
   sys.stdin = open(TTY_DEVICE_FILE)
 
   return text
