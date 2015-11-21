@@ -63,8 +63,9 @@ class Shakyo:
     self.__console = console
     self.__geometry = Geometry(console)
     self.__input_line = xorcise.Line()
-    self.__example_lines = example_lines
-    if example_lines[0] == None:
+    self.__example_lines = FormattedLines(example_lines,
+                                          max_width=(console.screen_width - 1))
+    if self.__example_lines[0] == None:
       raise Exception("No line can be read from example source.")
 
   def do(self):
@@ -339,12 +340,9 @@ def main():
       lexer = pygments.lexers.get_lexer_by_name(args.lexer_name)
     else:
       lexer = guess_lexer(example_text, filename)
+    example_lines = text2lines(example_text, lexer, style_name=args.style_name)
 
-    formatted_example_lines = FormattedLines(
-        text2lines(example_text, lexer, style_name=args.style_name),
-        max_width=(console.screen_width - 1))
-
-    shakyo = Shakyo(console, formatted_example_lines)
+    shakyo = Shakyo(console, example_lines)
     shakyo.do()
   finally:
     xorcise.turn_off_console()
