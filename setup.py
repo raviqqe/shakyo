@@ -11,8 +11,7 @@ def warn(*text):
   print("WARNING:", *text, file=sys.stderr)
 
 
-if not ((sys.version_info.major >= 3 and sys.version_info.minor >= 5)
-    or sys.version_info.major > 3):
+if not sys.version_info >= (3, 5):
   exit("Sorry, Python's version must be later than 3.5.")
 
 
