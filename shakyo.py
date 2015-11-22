@@ -325,11 +325,12 @@ def check_args(args):
   elif args.style_name not in all_style_names():
     error("The style, \"{}\" is not available.".format(args.style_name))
 
-  try:
-    with open(args.example_path, "rb") as f:
-      f.read(1)
-  except (FileNotFoundError, PermissionError) as e:
-    error(e)
+  if args.example_path is not None:
+    try:
+      with open(args.example_path, "rb") as f:
+        f.read(1)
+    except (FileNotFoundError, PermissionError) as e:
+      error(e)
 
 
 def all_lexer_names():
