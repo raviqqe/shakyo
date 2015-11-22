@@ -58,14 +58,14 @@ class Line:
 
   @property
   def normalized(self):
-    return Line(*self.__normalize_chars)
+    return Line(*self.__normalized_chars)
 
   @property
   def width(self):
     return sum(char.width for char in self.normalized)
 
   @property
-  def __normalize_chars(self):
+  def __normalized_chars(self):
     position = 0
     for char in self.__chars:
       if char.value == '\t':
