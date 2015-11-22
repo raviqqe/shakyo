@@ -36,8 +36,8 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
                       xorcise.unctrl(SCROLL_UP_CHAR),
                       xorcise.unctrl(SCROLL_DOWN_CHAR))
 
-CURSOR_WIDTH = 1
 ARGUMENT_DEFAULT_HELP = " (default: %(default)s)"
+CURSOR_WIDTH = 1
 ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
 SEPARATOR = ", "
