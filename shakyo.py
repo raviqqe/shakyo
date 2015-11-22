@@ -169,7 +169,7 @@ class XorciseFormatter(pygments.formatter.Formatter):
       attr = xorcise.RenditionAttribute.normal
       if colorize and properties["color"]:
         attr |= xorcise.ColorAttribute.get_best_match(
-                self.__interpret_string_rgb(properties["color"]))
+                interpret_string_rgb(properties["color"]))
       if decorate and properties["bold"]:
         attr |= xorcise.RenditionAttribute.bold
       if decorate and properties["underline"]:
@@ -192,11 +192,6 @@ class XorciseFormatter(pygments.formatter.Formatter):
     # if there is no newline character at the end of the last line
     if len(line) > 0:
       yield line
-
-  @staticmethod
-  def __interpret_string_rgb(string_rgb):
-    int_rgb = int(string_rgb, 16)
-    return (int_rgb >> 16 & 0xff, int_rgb >> 8 & 0xff, int_rgb & 0xff)
 
 
 class FormattedLines:
@@ -263,6 +258,12 @@ def parse_args():
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
                           help="enable asciization")
+  arg_parser.add_argument("-b", "--background-color",
+                          dest="background_rgb", default="000000",
+                          help="tell {} the hexadecimal background color "
+                               "of your terminal to avoid the same font color "
+                               "as it"
+                               .format(COMMAND_NAME))
   arg_parser.add_argument("-c", "--no-color",
                           dest="colorize", action="store_false",
                           help="disable colorization of text")
@@ -370,6 +371,11 @@ def text2lines(text, lexer, style_name="default",
          .format(lexer.get_tokens(text))
 
 
+def interpret_string_rgb(string_rgb):
+  int_rgb = int(string_rgb, 16)
+  return (int_rgb >> 16 & 0xff, int_rgb >> 8 & 0xff, int_rgb & 0xff)
+
+
 
 # main routine
 
@@ -393,8 +399,10 @@ def main():
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    console = xorcise.turn_on_console(asciize=args.asciize,
-                                      spaces_per_tab=args.spaces_per_tab)
+    console = xorcise.turn_on_console(
+        asciize=args.asciize,
+        spaces_per_tab=args.spaces_per_tab,
+        background_rgb=interpret_string_rgb(args.background_rgb))
 
     if args.lexer_name is not None:
       lexer = pygments.lexers.get_lexer_by_name(args.lexer_name)

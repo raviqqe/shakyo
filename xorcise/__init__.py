@@ -9,7 +9,7 @@ from .misc import ESCAPE_CHARS, DELETE_CHARS, BACKSPACE_CHARS, \
 
 
 
-def turn_on_console(asciize=False, spaces_per_tab=4):
+def turn_on_console(asciize=False, spaces_per_tab=4, background_rgb=(0, 0, 0)):
   Line.ASCIIZE = asciize
   Line.SPACES_PER_TAB = spaces_per_tab
 
@@ -19,7 +19,7 @@ def turn_on_console(asciize=False, spaces_per_tab=4):
 
   curses.start_color()
   curses.use_default_colors()
-  ColorAttribute.initialize()
+  ColorAttribute.initialize(background_rgb=background_rgb)
 
   return Console(window)
 
