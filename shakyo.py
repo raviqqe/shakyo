@@ -420,6 +420,8 @@ def main():
 
     shakyo = Shakyo(console, example_lines)
     shakyo.do()
+  except KeyboardInterrupt:
+    pass
   finally:
     xorcise.turn_off_console()
 
