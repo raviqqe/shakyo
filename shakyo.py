@@ -305,7 +305,11 @@ def parse_args():
     print(all_styles())
     exit()
 
-  args.background_rgb = interpret_string_rgb(args.background_rgb)
+  try:
+    args.background_rgb = interpret_string_rgb(args.background_rgb)
+  except (AssertionError, ValueError) as e:
+    error("\"{}\" is invalid as a hexadecimal RGB color."
+          .format(args.background_rgb))
 
   return args
 
