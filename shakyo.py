@@ -299,10 +299,10 @@ def parse_args():
     print("version:", __version__)
     exit()
   elif args.show_lexers:
-    print(all_lexers())
+    print_sequence(all_lexer_names())
     exit()
   elif args.show_styles:
-    print(all_styles())
+    print_sequence(all_style_names())
     exit()
 
   try:
@@ -311,17 +311,38 @@ def parse_args():
     error("\"{}\" is invalid as a hexadecimal RGB color."
           .format(args.background_rgb))
 
+  check_args(args)
+
   return args
 
 
-def all_lexers():
-  return SEPARATOR.join(sorted(alias for _, aliases, _, _
-                        in pygments.lexers.get_all_lexers()
-                        for alias in aliases))
+def check_args(args):
+  if args.spaces_per_tab <= 0:
+    error("Number of spaces per tab must be greater than 0.")
+  elif args.lexer_name is not None \
+      and args.lexer_name not in all_lexer_names():
+    error("The lexer, \"{}\" is not available.".format(args.lexer_name))
+  elif args.style_name not in all_style_names():
+    error("The style, \"{}\" is not available.".format(args.style_name))
+
+  try:
+    with open(args.example_path, "rb") as f:
+      f.read(1)
+  except (FileNotFoundError, PermissionError) as e:
+    error(e)
 
 
-def all_styles():
-  return SEPARATOR.join(sorted(pygments.styles.get_all_styles()))
+def all_lexer_names():
+  return {alias for _, aliases, _, _ in pygments.lexers.get_all_lexers()
+          for alias in aliases}
+
+
+def all_style_names():
+  return pygments.styles.get_all_styles()
+
+
+def print_sequence(sequence, sep=", "):
+  print(*sorted(sequence), sep=sep)
 
 
 def read_from_stdin():
