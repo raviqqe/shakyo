@@ -188,6 +188,7 @@ class XorciseFormatter(pygments.formatter.Formatter):
           line = xorcise.Line()
         elif xorcise.is_printable_char(char):
           line += xorcise.Character(char, self.__attrs[token_type])
+
     # if there is no newline character at the end of the last line
     if len(line) > 0:
       yield line
