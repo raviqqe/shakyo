@@ -43,6 +43,10 @@ class Line:
       line = char_or_line
       return Line(*self, *line)
 
+  def __radd__(self, char):
+    assert isinstance(char, Character)
+    return Line(char, *self)
+
   def __getitem__(self, key):
     if isinstance(key, int):
       return self.__chars[key]
