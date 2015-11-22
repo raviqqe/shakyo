@@ -37,6 +37,7 @@ DESCRIPTION = "{} is a tool to learn about something just copying it " \
                       xorcise.unctrl(SCROLL_DOWN_CHAR))
 
 CURSOR_WIDTH = 1
+ARGUMENT_DEFAULT_HELP = " (default: %(default)s)"
 ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
 SEPARATOR = ", "
@@ -263,7 +264,8 @@ def parse_args():
                           help="tell {} the hexadecimal background color "
                                "of your terminal to avoid the same font color "
                                "as it"
-                               .format(COMMAND_NAME))
+                               .format(COMMAND_NAME)
+                               + ARGUMENT_DEFAULT_HELP)
   arg_parser.add_argument("-c", "--no-color",
                           dest="colorize", action="store_false",
                           help="disable colorization of text")
@@ -278,13 +280,14 @@ def parse_args():
                           help="show all available lexer names")
   arg_parser.add_argument("-s", "--style",
                           dest="style_name", type=str, default="default",
-                          help="specify a style name")
+                          help="specify a style name" + ARGUMENT_DEFAULT_HELP)
   arg_parser.add_argument("--show-styles",
                           dest="show_styles", action="store_true",
                           help="show all available style names")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
-                          help="set number of spaces per tab")
+                          help="set number of spaces per tab"
+                               + ARGUMENT_DEFAULT_HELP)
   arg_parser.add_argument("-v", "--version",
                           dest="show_version", action="store_true",
                           help="show version information")
