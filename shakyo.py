@@ -301,6 +301,8 @@ def parse_args():
     print(all_styles())
     exit()
 
+  args.background_rgb = interpret_string_rgb(args.background_rgb)
+
   return args
 
 
@@ -400,10 +402,9 @@ def main():
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    console = xorcise.turn_on_console(
-        asciize=args.asciize,
-        spaces_per_tab=args.spaces_per_tab,
-        background_rgb=interpret_string_rgb(args.background_rgb))
+    console = xorcise.turn_on_console(asciize=args.asciize,
+                                      spaces_per_tab=args.spaces_per_tab,
+                                      background_rgb=args.background_rgb)
 
     if args.lexer_name is not None:
       lexer = pygments.lexers.get_lexer_by_name(args.lexer_name)
