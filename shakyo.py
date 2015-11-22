@@ -254,6 +254,7 @@ class FormattedLines:
 
 def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
+
   arg_parser.add_argument("example_path", nargs='?', default=None,
                           help="file path or URI to example")
   arg_parser.add_argument("-a", "--asciize",
