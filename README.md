@@ -1,13 +1,11 @@
 # Shakyo
 
-Type and learn about it.
-
 ![shakyo calligraphy](img/shakyo_calligraphy.png)
 
 
 # About
 
-Shakyo is a tool to learn about something just copying it by hand.
+Shakyo is a tool to learn about something just by typing it.
 
 
 # Install
