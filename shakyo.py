@@ -324,12 +324,16 @@ def check_args(args):
   elif args.style_name not in all_style_names():
     error("The style, \"{}\" is not available.".format(args.style_name))
 
-  if args.example_path is not None:
+  if args.example_path is not None and not is_uri(args.example_path):
     try:
       with open(args.example_path, "rb") as f:
         f.read(1)
     except (FileNotFoundError, PermissionError) as e:
       error(e)
+
+
+def is_uri(uri):
+  return validators.url(uri)
 
 
 def all_lexer_names():
@@ -419,7 +423,7 @@ def main():
   if args.example_path is None:
     filename = None
     example_text = read_from_stdin()
-  elif validators.url(args.example_path):
+  elif is_uri(args.example_path):
     filename = os.path.basename(urllib.parse.urlparse(args.example_path).path)
     example_text = read_remote_file(args.example_path)
   else:
