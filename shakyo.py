@@ -272,12 +272,12 @@ def parse_args():
   arg_parser.add_argument("-d", "--no-decoration",
                           dest="decorate", action="store_false",
                           help="disable decoration of text")
-  arg_parser.add_argument("-l", "--lexer",
+  arg_parser.add_argument("-l", "--language", metavar="LANGUAGE",
                           dest="lexer_name", type=str, default=None,
-                          help="specify a lexer name")
-  arg_parser.add_argument("--show-lexers",
-                          dest="show_lexers", action="store_true",
-                          help="show all available lexer names")
+                          help="specify a language of an example")
+  arg_parser.add_argument("--show-languages",
+                          dest="show_languages", action="store_true",
+                          help="show all lauguages available for examples")
   arg_parser.add_argument("-s", "--style",
                           dest="style_name", type=str, default="default",
                           help="specify a style name" + ARGUMENT_DEFAULT_HELP)
@@ -297,7 +297,7 @@ def parse_args():
   if args.show_version:
     print("version:", __version__)
     exit()
-  elif args.show_lexers:
+  elif args.show_languages:
     print_sequence(all_lexer_names())
     exit()
   elif args.show_styles:
