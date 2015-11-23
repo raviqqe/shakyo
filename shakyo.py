@@ -70,7 +70,7 @@ class Shakyo:
     self.__example_lines = FormattedLines(example_lines,
                                           max_width=(console.screen_width - 1))
     if self.__example_lines[0] is None:
-      raise Exception("No line can be read from example source.")
+      raise Exception("No line can be read from the example source.")
 
   def do(self):
     self.__print_all_example_lines()
@@ -255,7 +255,7 @@ def parse_args():
   arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
 
   arg_parser.add_argument("example_path", nargs='?', default=None,
-                          help="file path or URI to example")
+                          help="file path or URI to an example")
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
                           help="enable asciization of unicode characters")
