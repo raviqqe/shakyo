@@ -40,6 +40,8 @@ CURSOR_WIDTH = 1
 ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
 SEPARATOR = ", "
+SHOW_LANGUAGES_OPTION = "--show-languages"
+SHOW_STYLES_OPTION = "--show-styles"
 SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
@@ -275,13 +277,13 @@ def parse_args():
   arg_parser.add_argument("-l", "--language", metavar="LANGUAGE",
                           dest="lexer_name", type=str, default=None,
                           help="specify a language of an example")
-  arg_parser.add_argument("--show-languages",
+  arg_parser.add_argument(SHOW_LANGUAGES_OPTION,
                           dest="show_languages", action="store_true",
                           help="show all lauguages available for examples")
   arg_parser.add_argument("-s", "--style",
                           dest="style_name", type=str, default="default",
                           help="specify a style name" + ARGUMENT_DEFAULT_HELP)
-  arg_parser.add_argument("--show-styles",
+  arg_parser.add_argument(SHOW_STYLES_OPTION,
                           dest="show_styles", action="store_true",
                           help="show all available style names")
   arg_parser.add_argument("-t", "--spaces-per-tab",
@@ -320,10 +322,11 @@ def check_args(args):
     error("Number of spaces per tab must be greater than 0.")
   elif args.lexer_name is not None \
       and args.lexer_name not in all_lexer_names():
-    error("The language, \"{}\" is not available for examples."
-          .format(args.lexer_name))
+    error("The language, \"{}\" is not available for examples. See `{} {}`."
+          .format(args.lexer_name, COMMAND_NAME, SHOW_LANGUAGES_OPTION))
   elif args.style_name not in all_style_names():
-    error("The style, \"{}\" is not available.".format(args.style_name))
+    error("The style, \"{}\" is not available. See `{} {}`."
+          .format(args.style_name, COMMAND_NAME, SHOW_STYLES_OPTION))
 
 
 def is_uri(uri):
