@@ -320,7 +320,8 @@ def check_args(args):
     error("Number of spaces per tab must be greater than 0.")
   elif args.lexer_name is not None \
       and args.lexer_name not in all_lexer_names():
-    error("The lexer, \"{}\" is not available.".format(args.lexer_name))
+    error("The language, \"{}\" is not available for examples."
+          .format(args.lexer_name))
   elif args.style_name not in all_style_names():
     error("The style, \"{}\" is not available.".format(args.style_name))
 
