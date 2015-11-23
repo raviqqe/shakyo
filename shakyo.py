@@ -324,13 +324,6 @@ def check_args(args):
   elif args.style_name not in all_style_names():
     error("The style, \"{}\" is not available.".format(args.style_name))
 
-  if args.example_path is not None and not is_uri(args.example_path):
-    try:
-      with open(args.example_path, "rb") as f:
-        f.read(1)
-    except (FileNotFoundError, PermissionError) as e:
-      error(e)
-
 
 def is_uri(uri):
   return validators.url(uri)
@@ -359,8 +352,11 @@ def read_from_stdin():
 
 
 def read_local_file(path):
-  with open(path, "rb") as f:
-    return f.read().decode(ENCODING, "replace")
+  try:
+    with open(path, "rb") as f:
+      return f.read().decode(ENCODING, "replace")
+  except (FileNotFoundError, PermissionError) as e:
+    error(e)
 
 
 def read_remote_file(uri):
@@ -370,8 +366,11 @@ def read_remote_file(uri):
           .format(", ".join(sorted(SUPPORTED_SCHEMES))))
 
   message("Loading a page...")
-  with urllib.request.urlopen(uri) as response:
-    return response.read().decode(ENCODING, "replace")
+  try:
+    with urllib.request.urlopen(uri) as response:
+      return response.read().decode(ENCODING, "replace")
+  except urllib.error.URLError as e:
+    error(e)
 
 
 def guess_lexer(text, filename=None):
