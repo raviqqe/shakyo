@@ -20,7 +20,7 @@ import xorcise
 
 __version__ = "0.0.3"
 
-COMMAND_NAME = sys.argv[0]
+COMMAND_NAME = os.path.basename(sys.argv[0])
 
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
 QUIT_CHARS = xorcise.ESCAPE_CHARS
