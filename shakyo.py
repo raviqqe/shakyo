@@ -18,7 +18,7 @@ import xorcise
 
 # constants
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 COMMAND_NAME = os.path.basename(sys.argv[0])
 
