@@ -344,7 +344,10 @@ def print_sequence(sequence, sep=", "):
 
 
 def read_from_stdin():
-  text = sys.stdin.read()
+  try:
+    text = sys.stdin.read()
+  except KeyboardInterrupt:
+    error("Nothing could be read from stdin.")
 
   os.close(sys.stdin.fileno())
   sys.stdin = open(TTY_DEVICE_FILE)
