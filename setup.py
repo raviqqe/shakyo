@@ -62,7 +62,7 @@ def main():
   setuptools.setup(
       name=COMMAND_NAME,
       version=version(),
-      description="a tool to learn about something just by copying it by hand",
+      description="a tool to learn about something just by typing it",
       long_description=readme_text(),
       license="Public Domain",
       author="raviqqe",

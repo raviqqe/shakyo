@@ -28,9 +28,8 @@ CLEAR_CHAR = xorcise.ctrl('u')
 SCROLL_UP_CHAR = xorcise.ctrl('n')
 SCROLL_DOWN_CHAR = xorcise.ctrl('p')
 
-DESCRIPTION = "{} is a tool to learn about something just copying it " \
-              "by hand. Type {} to scroll up and " \
-              "{} to scroll down one line, " \
+DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
+              "Type {} to scroll up and {} to scroll down one line, " \
               "and Esc or ^[ to exit while running it." \
               .format(COMMAND_NAME,
                       xorcise.unctrl(SCROLL_UP_CHAR),
