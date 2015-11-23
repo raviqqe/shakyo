@@ -23,11 +23,11 @@ Type `shakyo --help`.
 # Example
 
 ```
-$ cat source_code.c | shakyo
+$ cat source_code.py | shakyo
 ```
 
 ```
-$ shakyo source_code.c
+$ shakyo source_code.py
 ```
 
 ```
