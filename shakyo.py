@@ -258,7 +258,7 @@ def parse_args():
                           help="file path or URI to example")
   arg_parser.add_argument("-a", "--asciize",
                           dest="asciize", action="store_true",
-                          help="enable asciization")
+                          help="enable asciization of unicode characters")
   arg_parser.add_argument("-b", "--background-color",
                           dest="background_rgb", default="000000",
                           help="tell {} the hexadecimal background color "
