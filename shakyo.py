@@ -409,13 +409,17 @@ def text2lines(text, lexer, style_name="default",
                colorize=True, decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
   return XorciseFormatter(style=style, colorize=colorize, decorate=decorate) \
-         .format(lexer.get_tokens(text))
+         .format(lexer.get_tokens(strip_text(text)))
 
 
 def interpret_string_rgb(string_rgb):
   assert len(string_rgb) == 6
   int_rgb = int(string_rgb, 16)
   return (int_rgb >> 16 & 0xff, int_rgb >> 8 & 0xff, int_rgb & 0xff)
+
+
+def strip_text(text):
+  return '\n'.join(line.rstrip() for line in text.split('\n'))
 
 
 
