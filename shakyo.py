@@ -123,14 +123,13 @@ class Shakyo:
       self.__console.scroll()
 
   def __scroll_down(self):
+    if self.__example_lines[-1] is None: return
     self.__example_lines.base_index -= 1
     top_line_index = 0 - self.__geometry.y_input
     if self.__example_lines[top_line_index] is not None:
       self.__console.scroll(self.__example_lines[top_line_index], direction=-1)
-    elif self.__example_lines[0] is not None:
-      self.__console.scroll(direction=-1)
     else:
-      self.__example_lines.base_index += 1
+      self.__console.scroll(direction=-1)
 
   def __page_down(self):
     for _ in range(self.__console.screen_height):
