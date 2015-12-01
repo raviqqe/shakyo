@@ -27,6 +27,8 @@ QUIT_CHARS = xorcise.ESCAPE_CHARS
 CLEAR_CHAR = xorcise.ctrl('u')
 SCROLL_UP_CHAR = xorcise.ctrl('n')
 SCROLL_DOWN_CHAR = xorcise.ctrl('p')
+PAGE_DOWN_CHAR = xorcise.ctrl('f')
+PAGE_UP_CHAR = xorcise.ctrl('b')
 
 DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
               "Type {} to scroll up and {} to scroll down one line, " \
@@ -87,6 +89,12 @@ class Shakyo:
         self.__input_line = xorcise.Line()
       elif char in DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
+      elif char == PAGE_DOWN_CHAR:
+        self.__input_line = xorcise.Line()
+        self.__page_down()
+      elif char == PAGE_UP_CHAR:
+        self.__input_line = xorcise.Line()
+        self.__page_up()
       elif char == SCROLL_DOWN_CHAR:
         self.__input_line = xorcise.Line()
         self.__scroll_down()
@@ -123,6 +131,16 @@ class Shakyo:
       self.__console.scroll(direction=-1)
     else:
       self.__example_lines.base_index += 1
+
+  def __page_down(self):
+    for _ in range(self.__console.screen_height):
+      if self.__example_lines[1] is None: break
+      self.__scroll_up()
+
+  def __page_up(self):
+    for _ in range(self.__console.screen_height):
+      if self.__example_lines[-1] is None: break
+      self.__scroll_down()
 
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
