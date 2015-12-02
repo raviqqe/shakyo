@@ -25,18 +25,18 @@ COMMAND_NAME = os.path.basename(sys.argv[0])
 DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
 QUIT_CHARS = xorcise.ESCAPE_CHARS
 CLEAR_CHAR = xorcise.ctrl('u')
-SCROLL_UP_CHAR = xorcise.ctrl('n')
-SCROLL_DOWN_CHAR = xorcise.ctrl('p')
+SCROLL_DOWN_CHAR = xorcise.ctrl('n')
+SCROLL_UP_CHAR = xorcise.ctrl('p')
 PAGE_DOWN_CHAR = xorcise.ctrl('f')
 PAGE_UP_CHAR = xorcise.ctrl('b')
 
 DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
-              "Type {} to scroll up and {} to scroll down one line, " \
+              "Type {} to scroll down and {} to scroll up one line, " \
               "{} to scroll down and {} to scroll up one page, " \
               "and Esc or ^[ to exit while running it." \
               .format(COMMAND_NAME,
-                      xorcise.unctrl(SCROLL_UP_CHAR),
                       xorcise.unctrl(SCROLL_DOWN_CHAR),
+                      xorcise.unctrl(SCROLL_UP_CHAR),
                       xorcise.unctrl(PAGE_DOWN_CHAR),
                       xorcise.unctrl(PAGE_UP_CHAR))
 
@@ -98,14 +98,14 @@ class Shakyo:
       elif char == PAGE_UP_CHAR:
         self.__input_line = xorcise.Line()
         self.__page_up()
-      elif char == SCROLL_DOWN_CHAR:
-        self.__input_line = xorcise.Line()
-        self.__scroll_down()
-      elif (char == '\n' and self.__input_line.normalized
-                             == self.__example_lines[0].normalized) \
-           or (char == SCROLL_UP_CHAR):
+      elif char == SCROLL_UP_CHAR:
         self.__input_line = xorcise.Line()
         self.__scroll_up()
+      elif (char == '\n' and self.__input_line.normalized
+                             == self.__example_lines[0].normalized) \
+           or (char == SCROLL_DOWN_CHAR):
+        self.__input_line = xorcise.Line()
+        self.__scroll_down()
       elif xorcise.is_printable_char(char) \
            and (self.__input_line + xorcise.Character(char)).width \
                + CURSOR_WIDTH <= self.__console.screen_width:
@@ -117,7 +117,7 @@ class Shakyo:
                               self.__input_line,
                               clear=False)
 
-  def __scroll_up(self):
+  def __scroll_down(self):
     self.__example_lines.base_index += 1
     bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
     if self.__example_lines[bottom_line_index] is not None:
@@ -125,7 +125,7 @@ class Shakyo:
     else:
       self.__console.scroll()
 
-  def __scroll_down(self):
+  def __scroll_up(self):
     if self.__example_lines[-1] is None: return
     self.__example_lines.base_index -= 1
     top_line_index = 0 - self.__geometry.y_input
@@ -137,12 +137,12 @@ class Shakyo:
   def __page_down(self):
     for _ in range(self.__console.screen_height):
       if self.__example_lines[1] is None: break
-      self.__scroll_up()
+      self.__scroll_down()
 
   def __page_up(self):
     for _ in range(self.__console.screen_height):
       if self.__example_lines[-1] is None: break
-      self.__scroll_down()
+      self.__scroll_up()
 
   def __print_all_example_lines(self):
     for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
