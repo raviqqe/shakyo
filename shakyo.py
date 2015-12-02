@@ -32,10 +32,13 @@ PAGE_UP_CHAR = xorcise.ctrl('b')
 
 DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
               "Type {} to scroll up and {} to scroll down one line, " \
+              "{} to scroll down and {} to scroll up one page, " \
               "and Esc or ^[ to exit while running it." \
               .format(COMMAND_NAME,
                       xorcise.unctrl(SCROLL_UP_CHAR),
-                      xorcise.unctrl(SCROLL_DOWN_CHAR))
+                      xorcise.unctrl(SCROLL_DOWN_CHAR),
+                      xorcise.unctrl(PAGE_DOWN_CHAR),
+                      xorcise.unctrl(PAGE_UP_CHAR))
 
 ARGUMENT_DEFAULT_HELP = " (default: %(default)s)"
 CURSOR_WIDTH = 1
