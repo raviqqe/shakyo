@@ -32,7 +32,10 @@ class Console:
     return self.__window.getmaxyx()[1]
 
   def get_char(self) -> str:
-    return chr(self.__window.getch())
+    char = self.__window.get_wch()
+    if isinstance(char, int):
+      return chr(char)
+    return char
 
   def print_line(self, y, line, clear=True):
     assert 0 <= y < self.screen_height
