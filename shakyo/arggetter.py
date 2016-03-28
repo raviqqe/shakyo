@@ -1,10 +1,10 @@
 import argparse
 
 import consolekit as ck
-from .const import *
-from .log import *
-from .pygments_util import *
-from .util import *
+from . import const
+from . import log
+from . import pygments_util
+from . import util
 
 
 
@@ -15,11 +15,11 @@ _DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
               "Type {} to scroll down and {} to scroll up one line, " \
               "{} to scroll down and {} to scroll up one page, " \
               "and Esc or ^[ to exit while running it." \
-              .format(COMMAND_NAME,
-                      ck.unctrl(SCROLL_DOWN_CHAR),
-                      ck.unctrl(SCROLL_UP_CHAR),
-                      ck.unctrl(PAGE_DOWN_CHAR),
-                      ck.unctrl(PAGE_UP_CHAR))
+              .format(const.COMMAND_NAME,
+                      ck.unctrl(const.SCROLL_DOWN_CHAR),
+                      ck.unctrl(const.SCROLL_UP_CHAR),
+                      ck.unctrl(const.PAGE_DOWN_CHAR),
+                      ck.unctrl(const.PAGE_UP_CHAR))
 _SHOW_LANGUAGES_OPTION = "--show-languages"
 _SHOW_STYLES_OPTION = "--show-styles"
 
@@ -40,7 +40,7 @@ def get_args():
                           help="tell {} the hexadecimal background color "
                                "of your terminal to avoid the same font color "
                                "as it"
-                               .format(COMMAND_NAME)
+                               .format(const.COMMAND_NAME)
                                + _DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument("-c", "--no-color",
                           dest="colorize", action="store_false",
@@ -71,19 +71,19 @@ def get_args():
   args = arg_parser.parse_args()
 
   if args.show_version:
-    print("version:", VERSION)
+    print("version:", const.VERSION)
     exit()
   elif args.show_languages:
-    _print_sequence(all_lexer_names())
+    _print_sequence(pygments_util.all_lexer_names())
     exit()
   elif args.show_styles:
-    _print_sequence(all_style_names())
+    _print_sequence(pygments_util.all_style_names())
     exit()
 
   try:
-    args.background_rgb = interpret_string_rgb(args.background_rgb)
+    args.background_rgb = util.interpret_string_rgb(args.background_rgb)
   except (AssertionError, ValueError):
-    error("\"{}\" is invalid as a hexadecimal RGB color."
+    log.error("\"{}\" is invalid as a hexadecimal RGB color."
           .format(args.background_rgb))
 
   _check_args(args)
@@ -93,17 +93,17 @@ def get_args():
 
 def _check_args(args):
   if args.spaces_per_tab <= 0:
-    error("Number of spaces per tab must be greater than 0.")
+    log.error("Number of spaces per tab must be greater than 0.")
   elif args.lexer_name is not None \
-       and args.lexer_name not in all_lexer_names():
-    error("The language, \"{}\" is not available for examples. "
+       and args.lexer_name not in pygments_util.all_lexer_names():
+    log.error("The language, \"{}\" is not available for examples. "
               "See `{} {}`."
               .format(args.lexer_name,
-                      COMMAND_NAME,
+                      const.COMMAND_NAME,
                       _SHOW_LANGUAGES_OPTION))
-  elif args.style_name not in all_style_names():
-    error("The style, \"{}\" is not available. See `{} {}`."
-              .format(args.style_name, COMMAND_NAME, _SHOW_STYLES_OPTION))
+  elif args.style_name not in pygments_util.all_style_names():
+    log.error("The style, \"{}\" is not available. See `{} {}`."
+              .format(args.style_name, const.COMMAND_NAME, _SHOW_STYLES_OPTION))
 
 
 def _print_sequence(sequence):

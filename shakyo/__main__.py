@@ -3,24 +3,24 @@
 import sys
 
 import consolekit as ck
-from .arggetter import *
-from .path2x import *
-from .pygments_util import *
-from .shakyo import *
-from .text2lines import *
-from .log import *
+from . import arggetter
+from . import path2x
+from . import pygments_util
+from . import shakyo
+from . import text2lines
+from . import log
 
 
 
 # main routine
 
 def main():
-  args = get_args()
+  args = arggetter.get_args()
 
-  if not sys.stdout.isatty(): error("stdout is not a tty.")
+  if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
-  filename = path_to_filename(args.example_path)
-  example_text = path_to_text(args.example_path)
+  filename = path2x.path_to_filename(args.example_path)
+  example_text = path2x.path_to_text(args.example_path)
 
   try:
     # CAUTION:
@@ -31,16 +31,16 @@ def main():
                                  spaces_per_tab=args.spaces_per_tab,
                                  background_rgb=args.background_rgb)
 
-    example_lines = text_to_lines(
+    example_lines = text2lines.text_to_lines(
         example_text,
-        lexer=guess_lexer(lexer_name=args.lexer_name,
-                          filename=filename,
-                          text=example_text),
+        lexer=pygments_util.guess_lexer(lexer_name=args.lexer_name,
+                                        filename=filename,
+                                        text=example_text),
         style_name=args.style_name,
         colorize=args.colorize,
         decorate=args.decorate)
 
-    Shakyo(console, example_lines).do()
+    shakyo.Shakyo(console, example_lines).do()
   except KeyboardInterrupt:
     pass
   finally:
