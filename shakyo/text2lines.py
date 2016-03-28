@@ -14,11 +14,11 @@ def text_to_lines(text,
                   colorize=True,
                   decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  attrs = __create_attrs(style=style, colorize=colorize, decorate=decorate)
-  return __tokens_to_lines(lexer.get_tokens(__strip_text(text)), attrs)
+  attrs = _create_attrs(style=style, colorize=colorize, decorate=decorate)
+  return _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attrs)
 
 
-def __create_attrs(style="default", colorize=True, decorate=True):
+def _create_attrs(style="default", colorize=True, decorate=True):
   attrs = {}
   for token_type, properties \
       in pygments.formatter.Formatter(style=style).style:
@@ -34,7 +34,7 @@ def __create_attrs(style="default", colorize=True, decorate=True):
   return attrs
 
 
-def __tokens_to_lines(tokens, attrs):
+def _tokens_to_lines(tokens, attrs):
   line = ck.Line()
   for token_type, string in tokens:
     while token_type not in attrs:
@@ -52,5 +52,5 @@ def __tokens_to_lines(tokens, attrs):
     yield line
 
 
-def __strip_text(text):
+def _strip_text(text):
   return '\n'.join(line.rstrip() for line in text.split('\n'))

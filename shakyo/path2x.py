@@ -19,11 +19,11 @@ _TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
 # functions
 
-def __is_uri(uri):
+def _is_uri(uri):
   return validators.url(uri)
 
 
-def __read_from_stdin():
+def _read_from_stdin():
   try:
     text = sys.stdin.read()
   except KeyboardInterrupt:
@@ -35,7 +35,7 @@ def __read_from_stdin():
   return text
 
 
-def __read_local_file(path):
+def _read_local_file(path):
   try:
     with open(path, "rb") as f:
       return f.read().decode(_ENCODING, "replace")
@@ -43,7 +43,7 @@ def __read_local_file(path):
     error(e)
 
 
-def __read_remote_file(uri):
+def _read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in _SUPPORTED_SCHEMES:
     error("Invalid scheme of URI is detected. "
               "(supported schemes: {})"
@@ -57,23 +57,23 @@ def __read_remote_file(uri):
     error(e)
 
 
-def __uri_to_filename(uri):
+def _uri_to_filename(uri):
   return os.path.basename(urllib.parse.urlparse(uri).path)
 
 
 def path_to_filename(path):
   if path is None:
     return None
-  elif __is_uri(path):
-    return __uri_to_filename(path)
+  elif _is_uri(path):
+    return _uri_to_filename(path)
   else:
     return os.path.basename(path)
 
 
 def path_to_text(path):
   if path is None:
-    return __read_from_stdin()
-  elif __is_uri(path):
-    return __read_remote_file(path)
+    return _read_from_stdin()
+  elif _is_uri(path):
+    return _read_remote_file(path)
   else:
-    return __read_local_file(path)
+    return _read_local_file(path)

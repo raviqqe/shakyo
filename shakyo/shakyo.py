@@ -11,103 +11,103 @@ class Shakyo:
   ATTR_WRONG = ck.RenditionAttribute.reverse
 
   def __init__(self, console, example_lines):
-    self.__console = console
-    self.__geometry = _Geometry(console)
-    self.__input_line = ck.Line()
-    self.__example_lines = _FoldedLines(example_lines,
+    self._console = console
+    self._geometry = _Geometry(console)
+    self._input_line = ck.Line()
+    self._example_lines = _FoldedLines(example_lines,
                                         max_width=(console.screen_width - 1))
-    if self.__example_lines[0] is None:
+    if self._example_lines[0] is None:
       raise Exception("No line can be read from the example source.")
 
   def do(self):
-    self.__print_all_example_lines()
+    self._print_all_example_lines()
 
-    while self.__example_lines[0] is not None:
-      self.__update_input_line()
-      char = self.__console.get_char()
+    while self._example_lines[0] is not None:
+      self._update_input_line()
+      char = self._console.get_char()
 
       if char in QUIT_CHARS:
         break
       elif char == CLEAR_CHAR:
-        self.__input_line = ck.Line()
+        self._input_line = ck.Line()
       elif char in DELETE_CHARS:
-        self.__input_line = self.__input_line[:-1]
+        self._input_line = self._input_line[:-1]
       elif char == PAGE_DOWN_CHAR:
-        self.__input_line = ck.Line()
-        self.__page_down()
+        self._input_line = ck.Line()
+        self._page_down()
       elif char == PAGE_UP_CHAR:
-        self.__input_line = ck.Line()
-        self.__page_up()
+        self._input_line = ck.Line()
+        self._page_up()
       elif char == SCROLL_UP_CHAR:
-        self.__input_line = ck.Line()
-        self.__scroll_up()
-      elif (char == '\n' and self.__input_line.normalized
-                             == self.__example_lines[0].normalized) \
+        self._input_line = ck.Line()
+        self._scroll_up()
+      elif (char == '\n' and self._input_line.normalized
+                             == self._example_lines[0].normalized) \
            or (char == SCROLL_DOWN_CHAR):
-        self.__input_line = ck.Line()
-        self.__scroll_down()
+        self._input_line = ck.Line()
+        self._scroll_down()
       elif ck.is_printable_char(char) \
-           and (self.__input_line + ck.Character(char)).width \
-               + self.CURSOR_WIDTH <= self.__console.screen_width:
-        self.__input_line += ck.Character(char, self.__next_attr(char))
+           and (self._input_line + ck.Character(char)).width \
+               + self.CURSOR_WIDTH <= self._console.screen_width:
+        self._input_line += ck.Character(char, self._next_attr(char))
 
-  def __update_input_line(self):
-    self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
-    self.__console.print_line(self.__geometry.y_input,
-                              self.__input_line,
+  def _update_input_line(self):
+    self._console.print_line(self._geometry.y_input, self._example_lines[0])
+    self._console.print_line(self._geometry.y_input,
+                              self._input_line,
                               clear=False)
 
-  def __scroll_down(self):
-    self.__example_lines.base_index += 1
-    bottom_line_index = self.__geometry.y_bottom - self.__geometry.y_input
-    if self.__example_lines[bottom_line_index] is not None:
-      self.__console.scroll(self.__example_lines[bottom_line_index])
+  def _scroll_down(self):
+    self._example_lines.base_index += 1
+    bottom_line_index = self._geometry.y_bottom - self._geometry.y_input
+    if self._example_lines[bottom_line_index] is not None:
+      self._console.scroll(self._example_lines[bottom_line_index])
     else:
-      self.__console.scroll()
+      self._console.scroll()
 
-  def __scroll_up(self):
-    if self.__example_lines[-1] is None: return
-    self.__example_lines.base_index -= 1
-    top_line_index = 0 - self.__geometry.y_input
-    if self.__example_lines[top_line_index] is not None:
-      self.__console.scroll(self.__example_lines[top_line_index], direction=-1)
+  def _scroll_up(self):
+    if self._example_lines[-1] is None: return
+    self._example_lines.base_index -= 1
+    top_line_index = 0 - self._geometry.y_input
+    if self._example_lines[top_line_index] is not None:
+      self._console.scroll(self._example_lines[top_line_index], direction=-1)
     else:
-      self.__console.scroll(direction=-1)
+      self._console.scroll(direction=-1)
 
-  def __page_down(self):
-    for _ in range(self.__console.screen_height):
-      if self.__example_lines[1] is None: break
-      self.__scroll_down()
+  def _page_down(self):
+    for _ in range(self._console.screen_height):
+      if self._example_lines[1] is None: break
+      self._scroll_down()
 
-  def __page_up(self):
-    for _ in range(self.__console.screen_height):
-      if self.__example_lines[-1] is None: break
-      self.__scroll_up()
+  def _page_up(self):
+    for _ in range(self._console.screen_height):
+      if self._example_lines[-1] is None: break
+      self._scroll_up()
 
-  def __print_all_example_lines(self):
-    for index in range(self.__geometry.y_bottom - self.__geometry.y_input + 1):
-      if self.__example_lines[index] is None: break
-      self.__console.print_line(self.__geometry.y_input + index,
-                                self.__example_lines[index])
+  def _print_all_example_lines(self):
+    for index in range(self._geometry.y_bottom - self._geometry.y_input + 1):
+      if self._example_lines[index] is None: break
+      self._console.print_line(self._geometry.y_input + index,
+                                self._example_lines[index])
 
-  def __next_attr(self, char):
-    normalized_input_line = self.__input_line.normalized
-    normalized_example_line = self.__example_lines[0].normalized
+  def _next_attr(self, char):
+    normalized_input_line = self._input_line.normalized
+    normalized_example_line = self._example_lines[0].normalized
     if len(normalized_input_line) >= len(normalized_example_line):
       return self.ATTR_WRONG
-    return (self.ATTR_CORRECT if self.__is_correct_char(char)
+    return (self.ATTR_CORRECT if self._is_correct_char(char)
             else self.ATTR_WRONG) \
            | normalized_example_line[min(len(normalized_input_line),
                                          len(normalized_example_line) - 1)] \
                                          .attr
 
-  def __is_correct_char(self, char):
-    next_input_line = self.__input_line + ck.Character(char)
-    for index in range(len(self.__input_line.normalized),
+  def _is_correct_char(self, char):
+    next_input_line = self._input_line + ck.Character(char)
+    for index in range(len(self._input_line.normalized),
                        len(next_input_line.normalized)):
-      if index >= len(self.__example_lines[0].normalized) \
+      if index >= len(self._example_lines[0].normalized) \
          or next_input_line.normalized[index].value \
-            != self.__example_lines[0].normalized[index].value:
+            != self._example_lines[0].normalized[index].value:
         return False
     return True
 
@@ -121,41 +121,41 @@ class _Geometry:
 class _FoldedLines:
   def __init__(self, raw_lines, max_width=79):
     assert max_width >= 2 # for double-width characters
-    self.__line_generator = self.__fold_lines(raw_lines, max_width)
-    self.__lines = []
-    self.__base_index = 0
+    self._line_generator = self._fold_lines(raw_lines, max_width)
+    self._lines = []
+    self._base_index = 0
 
   def __getitem__(self, relative_index):
     assert isinstance(relative_index, int)
 
-    index = self.__base_index + relative_index
+    index = self._base_index + relative_index
 
-    for line in self.__line_generator:
-      self.__lines.append(line)
-      if index < len(self.__lines):
+    for line in self._line_generator:
+      self._lines.append(line)
+      if index < len(self._lines):
         break
 
-    return self.__lines[index] if 0 <= index < len(self.__lines) else None
+    return self._lines[index] if 0 <= index < len(self._lines) else None
 
   @property
   def base_index(self):
-    return self.__base_index
+    return self._base_index
 
   @base_index.setter
   def base_index(self, base_index):
     assert isinstance(base_index, int)
-    self.__base_index = base_index
+    self._base_index = base_index
 
   @classmethod
-  def __fold_lines(cls, lines, max_width):
+  def _fold_lines(cls, lines, max_width):
     for line in lines:
       while line.width > max_width:
-        new_line, line = cls.__split_line(line, max_width)
+        new_line, line = cls._split_line(line, max_width)
         yield new_line
       yield line
 
   @staticmethod
-  def __split_line(line, max_width):
+  def _split_line(line, max_width):
     assert line.width > max_width
 
     # binary search for max index to construct a line of max width

@@ -74,10 +74,10 @@ def get_args():
     print("version:", VERSION)
     exit()
   elif args.show_languages:
-    __print_sequence(all_lexer_names())
+    _print_sequence(all_lexer_names())
     exit()
   elif args.show_styles:
-    __print_sequence(all_style_names())
+    _print_sequence(all_style_names())
     exit()
 
   try:
@@ -86,12 +86,12 @@ def get_args():
     error("\"{}\" is invalid as a hexadecimal RGB color."
           .format(args.background_rgb))
 
-  __check_args(args)
+  _check_args(args)
 
   return args
 
 
-def __check_args(args):
+def _check_args(args):
   if args.spaces_per_tab <= 0:
     error("Number of spaces per tab must be greater than 0.")
   elif args.lexer_name is not None \
@@ -106,5 +106,5 @@ def __check_args(args):
               .format(args.style_name, COMMAND_NAME, _SHOW_STYLES_OPTION))
 
 
-def __print_sequence(sequence):
+def _print_sequence(sequence):
   print(*sorted(sequence), sep=", ")

@@ -15,10 +15,10 @@ class Line:
 
   def __init__(self, *chars):
     assert all(isinstance(char, Character) for char in chars)
-    self.__chars = chars
+    self._chars = chars
 
   def __len__(self):
-    return len(self.__chars)
+    return len(self._chars)
 
   def __eq__(self, line):
     if line is None: return False
@@ -32,7 +32,7 @@ class Line:
     return True
 
   def __iter__(self):
-    for char in self.__chars:
+    for char in self._chars:
       yield char
 
   def __add__(self, char_or_line):
@@ -49,42 +49,42 @@ class Line:
 
   def __getitem__(self, key):
     if isinstance(key, int):
-      return self.__chars[key]
+      return self._chars[key]
     elif isinstance(key, slice):
-      return Line(*self.__chars[key])
+      return Line(*self._chars[key])
     else:
       raise IndexError("Invalid key for Line class is detected. (key: {})"
                        .format(key))
 
   @property
   def normalized(self):
-    return Line(*self.__normalized_chars)
+    return Line(*self._normalized_chars)
 
   @property
   def width(self):
     return sum(char.width for char in self.normalized)
 
   @property
-  def __normalized_chars(self):
+  def _normalized_chars(self):
     position = 0
-    for char in self.__chars:
+    for char in self._chars:
       if char.value == '\t':
-        boundary = self.__next_tab_boundary(position)
+        boundary = self._next_tab_boundary(position)
         while position != boundary:
           position += 1
           yield Character(' ', char.attr)
         continue
 
-      for normalized_char in self.__normalize_char(char):
+      for normalized_char in self._normalize_char(char):
         position += normalized_char.width
         yield normalized_char
 
   @classmethod
-  def __next_tab_boundary(cls, position):
+  def _next_tab_boundary(cls, position):
     return (position // cls.SPACES_PER_TAB + 1) * cls.SPACES_PER_TAB
 
   @classmethod
-  def __normalize_char(cls, char):
+  def _normalize_char(cls, char):
     if cls.ASCIIZE:
       return [Character(string_char, char.attr)
               for string_char in text_unidecode.unidecode(char.value)]

@@ -8,16 +8,16 @@ from .misc import is_printable_char
 class Character:
   def __init__(self, value, attr=RenditionAttribute.normal):
     assert is_printable_char(value) and isinstance(attr, int)
-    self.__value = value
-    self.__attr = attr
+    self._value = value
+    self._attr = attr
 
   @property
   def value(self):
-    return self.__value
+    return self._value
 
   @property
   def attr(self):
-    return self.__attr
+    return self._attr
 
   @property
   def width(self):
