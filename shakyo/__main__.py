@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import pygments.formatter
-import pygments.styles
 import sys
 
 import arg
@@ -9,6 +7,7 @@ import consolekit as ck
 import const
 import textgetter
 import guesslexer
+import text2lines
 import log
 
 
@@ -133,44 +132,6 @@ class Geometry:
     self.y_bottom = console.screen_height - 1
 
 
-class LineFormatter(pygments.formatter.Formatter):
-  """
-  TODO: Follow Liskov substitution principle.
-  """
-
-  def __init__(self, style="default", colorize=True, decorate=True):
-    super().__init__(style=style)
-
-    self.__attrs = {}
-    for token_type, properties in self.style:
-      attr = ck.RenditionAttribute.normal
-      if colorize and properties["color"]:
-        attr |= ck.ColorAttribute.get_best_match(
-                interpret_string_rgb(properties["color"]))
-      if decorate and properties["bold"]:
-        attr |= ck.RenditionAttribute.bold
-      if decorate and properties["underline"]:
-        attr |= ck.RenditionAttribute.underline
-      self.__attrs[token_type] = attr
-
-  def format(self, tokens):
-    line = ck.Line()
-    for token_type, string in tokens:
-      while token_type not in self.__attrs:
-        token_type = token_type.parent
-
-      for char in string:
-        if char == '\n':
-          yield line
-          line = ck.Line()
-        elif ck.is_printable_char(char):
-          line += ck.Character(char, self.__attrs[token_type])
-
-    # if there is no newline character at the end of the last line
-    if len(line) > 0:
-      yield line
-
-
 class FormattedLines:
   def __init__(self, raw_lines, max_width=79):
     assert max_width >= 2 # for double-width characters
@@ -226,26 +187,6 @@ class FormattedLines:
 
 
 
-# functions
-
-def text2lines(text, lexer, style_name="default",
-               colorize=True, decorate=True):
-  style = pygments.styles.get_style_by_name(style_name)
-  return LineFormatter(style=style, colorize=colorize, decorate=decorate) \
-         .format(lexer.get_tokens(strip_text(text)))
-
-
-def interpret_string_rgb(string_rgb):
-  assert len(string_rgb) == 6
-  int_rgb = int(string_rgb, 16)
-  return (int_rgb >> 16 & 0xff, int_rgb >> 8 & 0xff, int_rgb & 0xff)
-
-
-def strip_text(text):
-  return '\n'.join(line.rstrip() for line in text.split('\n'))
-
-
-
 # main routine
 
 def main():
@@ -264,7 +205,7 @@ def main():
                                  spaces_per_tab=args.spaces_per_tab,
                                  background_rgb=args.background_rgb)
 
-    example_lines = text2lines(
+    example_lines = text2lines.text_to_lines(
         example_text,
         lexer=guesslexer.guess_lexer(args.lexer_name, filename, example_text),
         style_name=args.style_name,
