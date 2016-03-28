@@ -14,12 +14,14 @@ def text_to_lines(text,
                   colorize=True,
                   decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  attrs = _create_attrs(style=style, colorize=colorize, decorate=decorate)
-  return _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attrs)
+  attr_table = _create_attr_table(style=style,
+                                  colorize=colorize,
+                                  decorate=decorate)
+  return _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attr_table)
 
 
-def _create_attrs(style="default", colorize=True, decorate=True):
-  attrs = {}
+def _create_attr_table(style="default", colorize=True, decorate=True):
+  attr_table = {}
   for token_type, properties \
       in pygments.formatter.Formatter(style=style).style:
     attr = ck.RenditionAttribute.normal
@@ -30,14 +32,14 @@ def _create_attrs(style="default", colorize=True, decorate=True):
       attr |= ck.RenditionAttribute.bold
     if decorate and properties["underline"]:
       attr |= ck.RenditionAttribute.underline
-    attrs[token_type] = attr
-  return attrs
+    attr_table[token_type] = attr
+  return attr_table
 
 
-def _tokens_to_lines(tokens, attrs):
+def _tokens_to_lines(tokens, attr_table):
   line = ck.Line()
   for token_type, string in tokens:
-    while token_type not in attrs:
+    while token_type not in attr_table:
       token_type = token_type.parent
 
     for char in string:
@@ -45,7 +47,7 @@ def _tokens_to_lines(tokens, attrs):
         yield line
         line = ck.Line()
       elif ck.is_printable_char(char):
-        line += ck.Character(char, attrs[token_type])
+        line += ck.Character(char, attr_table[token_type])
 
   # if there is no newline character at the end of the last line
   if len(line) > 0:
