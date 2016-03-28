@@ -31,7 +31,11 @@ class Console:
     return self._window.getmaxyx()[1]
 
   def get_char(self) -> str:
-    char = self._window.get_wch()
+    if hasattr(self._window, "get_wch"):
+      char = self._window.get_wch()
+    else:
+      char = self._window.getch()
+
     if isinstance(char, int):
       return chr(char)
     return char
