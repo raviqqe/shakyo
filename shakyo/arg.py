@@ -5,6 +5,7 @@ import pygments.styles
 import consolekit as ck
 import const
 import log
+import util
 
 
 
@@ -81,7 +82,7 @@ def get_args():
     exit()
 
   try:
-    args.background_rgb = __interpret_string_rgb(args.background_rgb)
+    args.background_rgb = util.inerpret_string_rgb(args.background_rgb)
   except (AssertionError, ValueError):
     log.error("\"{}\" is invalid as a hexadecimal RGB color."
           .format(args.background_rgb))
@@ -117,9 +118,3 @@ def __all_style_names():
 
 def __print_sequence(sequence):
   print(*sorted(sequence), sep=", ")
-
-
-def __interpret_string_rgb(string_rgb):
-  assert len(string_rgb) == 6
-  int_rgb = int(string_rgb, 16)
-  return (int_rgb >> 16 & 0xff, int_rgb >> 8 & 0xff, int_rgb & 0xff)
