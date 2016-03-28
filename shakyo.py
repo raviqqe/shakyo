@@ -450,6 +450,15 @@ def uri_to_filename(uri):
   return os.path.basename(urllib.parse.urlparse(uri).path)
 
 
+def get_filename_and_text(path):
+  if path is None:
+    return None, read_from_stdin()
+  elif is_uri(path):
+    return uri_to_filename(path), read_remote_file(path)
+  else:
+    return os.path.basename(path), read_local_file(path)
+
+
 
 # main routine
 
@@ -458,15 +467,7 @@ def main():
 
   if not sys.stdout.isatty(): error("stdout is not a tty.")
 
-  if args.example_path is None:
-    filename = None
-    example_text = read_from_stdin()
-  elif is_uri(args.example_path):
-    filename = uri_to_filename(args.example_path)
-    example_text = read_remote_file(args.example_path)
-  else:
-    filename = os.path.basename(args.example_path)
-    example_text = read_local_file(args.example_path)
+  filename, example_text = get_filename_and_text(args.example_path)
 
   try:
     # CAUTION:
