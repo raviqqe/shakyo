@@ -11,8 +11,8 @@ class Line:
   Line instances are immutable.
   """
 
-  SPACES_PER_TAB = 4
-  ASCIIZE = False
+  _SPACES_PER_TAB = 4
+  _ASCIIZE = False
 
   def __init__(self, *chars):
     assert all(isinstance(char, character.Character) for char in chars)
@@ -82,11 +82,11 @@ class Line:
 
   @classmethod
   def _next_tab_boundary(cls, position):
-    return (position // cls.SPACES_PER_TAB + 1) * cls.SPACES_PER_TAB
+    return (position // cls._SPACES_PER_TAB + 1) * cls._SPACES_PER_TAB
 
   @classmethod
   def _normalize_char(cls, char):
-    if cls.ASCIIZE:
+    if cls._ASCIIZE:
       return [character.Character(string_char, char.attr)
               for string_char in text_unidecode.unidecode(char.value)]
     else:
