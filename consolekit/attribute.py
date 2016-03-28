@@ -51,7 +51,7 @@ class ColorAttribute:
       if pair_index >= curses.COLOR_PAIRS: break
       curses.init_pair(pair_index, color_index, -1)
       cls._colors.append((cls._get_rgb_by_color_index(color_index),
-                           curses.color_pair(pair_index)))
+                          curses.color_pair(pair_index)))
     cls._colors.sort()
 
   @classmethod
