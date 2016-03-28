@@ -5,7 +5,7 @@ import consolekit as ck
 
 
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 
 COMMAND_NAME = os.path.basename(sys.argv[0])
 
