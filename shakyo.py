@@ -40,8 +40,8 @@ DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
                       ck.unctrl(PAGE_DOWN_CHAR),
                       ck.unctrl(PAGE_UP_CHAR))
 
-DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 CURSOR_WIDTH = 1
+DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
 SEPARATOR = ", "
