@@ -27,10 +27,10 @@ def warn(*text):
 
 
 def version():
-  with open("shakyo/__main__.py") as f:
+  with open("shakyo/const.py") as f:
     lines = f.readlines()
-  return next(re.match(r"__version__\s*=\s*\"((\d|\.)*)\"", line)
-              for line in lines if line.startswith("__version__")).group(1)
+  return next(re.match(r"_*VERSION\s*=\s*\"((\d|\.)*)\"", line)
+              for line in lines if line.startswith("VERSION")).group(1)
 
 
 def read_text_file(filename):
