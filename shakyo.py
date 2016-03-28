@@ -478,8 +478,7 @@ def main():
                                colorize=args.colorize,
                                decorate=args.decorate)
 
-    shakyo = Shakyo(console, example_lines)
-    shakyo.do()
+    Shakyo(console, example_lines).do()
   except KeyboardInterrupt:
     pass
   finally:
