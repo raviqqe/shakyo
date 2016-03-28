@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 
-import os
-import os.path
-import pygments
 import pygments.formatter
-import pygments.lexers
 import pygments.styles
 import sys
-import urllib.parse
-import urllib.request
-import validators
 
 import arg
 import consolekit as ck
 import const
+import textgetter
 import guesslexer
 import log
 
@@ -22,9 +16,6 @@ import log
 # constants
 
 CURSOR_WIDTH = 1
-ENCODING = "UTF-8"
-SUPPORTED_SCHEMES = {"http", "https", "ftp"}
-TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
 
 
@@ -237,44 +228,6 @@ class FormattedLines:
 
 # functions
 
-def is_uri(uri):
-  return validators.url(uri)
-
-
-def read_from_stdin():
-  try:
-    text = sys.stdin.read()
-  except KeyboardInterrupt:
-    log.error("Nothing could be read from stdin.")
-
-  os.close(sys.stdin.fileno())
-  sys.stdin = open(TTY_DEVICE_FILE)
-
-  return text
-
-
-def read_local_file(path):
-  try:
-    with open(path, "rb") as f:
-      return f.read().decode(ENCODING, "replace")
-  except (FileNotFoundError, PermissionError) as e:
-    log.error(e)
-
-
-def read_remote_file(uri):
-  if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
-    log.error("Invalid scheme of URI is detected. "
-          "(supported schemes: {})"
-          .format(", ".join(sorted(SUPPORTED_SCHEMES))))
-
-  log.message("Loading a page...")
-  try:
-    with urllib.request.urlopen(uri) as response:
-      return response.read().decode(ENCODING, "replace")
-  except urllib.error.URLError as e:
-    log.error(e)
-
-
 def text2lines(text, lexer, style_name="default",
                colorize=True, decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
@@ -292,19 +245,6 @@ def strip_text(text):
   return '\n'.join(line.rstrip() for line in text.split('\n'))
 
 
-def uri_to_filename(uri):
-  return os.path.basename(urllib.parse.urlparse(uri).path)
-
-
-def get_filename_and_text(path):
-  if path is None:
-    return None, read_from_stdin()
-  elif is_uri(path):
-    return uri_to_filename(path), read_remote_file(path)
-  else:
-    return os.path.basename(path), read_local_file(path)
-
-
 
 # main routine
 
@@ -313,7 +253,7 @@ def main():
 
   if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
-  filename, example_text = get_filename_and_text(args.example_path)
+  filename, example_text = textgetter.get_filename_and_text(args.example_path)
 
   try:
     # CAUTION:
