@@ -1,7 +1,6 @@
 import curses
 import curses.ascii
 import unicodedata
-
 from curses.ascii import ctrl, unctrl
 
 

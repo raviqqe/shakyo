@@ -1,8 +1,7 @@
 import curses
 import unicodedata
 
-from .line import Line
-from .attribute import ColorAttribute
+from . import line
 
 
 
@@ -39,7 +38,7 @@ class Console:
 
   def print_line(self, y, line, clear=True):
     assert 0 <= y < self.screen_height
-    assert isinstance(line, Line)
+    assert isinstance(line, line.Line)
 
     self._window.move(y, 0)
     if clear:
@@ -61,7 +60,7 @@ class Console:
   @_keep_position
   def scroll(self, line=None, direction=1):
     assert direction in {-1, 1}
-    assert isinstance(line, Line) or line is None
+    assert isinstance(line, line.Line) or line is None
 
     self._window.scroll(direction)
 
