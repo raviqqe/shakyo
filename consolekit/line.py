@@ -25,7 +25,7 @@ class Line:
     if line is None: return False
     if not isinstance(line, Line):
       raise ValueError("Line cannot be compared with other class instances "
-                       "except for or None.")
+                       "except for None.")
 
     if len(self) != len(line): return False
     for my_char, your_char in zip(self, line):
