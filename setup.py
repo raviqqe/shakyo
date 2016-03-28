@@ -27,7 +27,7 @@ def warn(*text):
 
 
 def version():
-  with open("shakyo.py") as f:
+  with open("shakyo/__main__.py") as f:
     lines = f.readlines()
   return next(re.match(r"__version__\s*=\s*\"((\d|\.)*)\"", line)
               for line in lines if line.startswith("__version__")).group(1)
@@ -68,9 +68,10 @@ def main():
       author="raviqqe",
       author_email="raviqqe@gmail.com",
       url="http://github.com/raviqqe/shakyo/",
-      py_modules=["shakyo"],
-      packages=["consolekit"],
-      entry_points={"console_scripts" : [COMMAND_NAME + "=shakyo:main"]},
+      packages=["shakyo", "consolekit"],
+      entry_points={
+        "console_scripts" : [COMMAND_NAME + "=shakyo.__main__:main"]
+      },
       install_requires=["pygments", "text_unidecode", "validators"],
       classifiers=[
           "Development Status :: 3 - Alpha",
