@@ -71,11 +71,10 @@ class Line:
         while position != boundary:
           position += 1
           yield character.Character(' ', char.attr)
-        continue
-
-      for normalized_char in self._normalize_char(char):
-        position += normalized_char.width
-        yield normalized_char
+      else:
+        for normalized_char in self._normalize_char(char):
+          position += normalized_char.width
+          yield normalized_char
 
   @classmethod
   def _next_tab_boundary(cls, position):
