@@ -12,7 +12,7 @@ import urllib.parse
 import urllib.request
 import validators
 
-import xorcise
+import consolekit
 
 
 
@@ -22,23 +22,23 @@ __version__ = "0.0.5"
 
 COMMAND_NAME = os.path.basename(sys.argv[0])
 
-DELETE_CHARS = xorcise.DELETE_CHARS | xorcise.BACKSPACE_CHARS
-QUIT_CHARS = xorcise.ESCAPE_CHARS
-CLEAR_CHAR = xorcise.ctrl('u')
-SCROLL_DOWN_CHAR = xorcise.ctrl('n')
-SCROLL_UP_CHAR = xorcise.ctrl('p')
-PAGE_DOWN_CHAR = xorcise.ctrl('f')
-PAGE_UP_CHAR = xorcise.ctrl('b')
+DELETE_CHARS = consolekit.DELETE_CHARS | consolekit.BACKSPACE_CHARS
+QUIT_CHARS = consolekit.ESCAPE_CHARS
+CLEAR_CHAR = consolekit.ctrl('u')
+SCROLL_DOWN_CHAR = consolekit.ctrl('n')
+SCROLL_UP_CHAR = consolekit.ctrl('p')
+PAGE_DOWN_CHAR = consolekit.ctrl('f')
+PAGE_UP_CHAR = consolekit.ctrl('b')
 
 DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
               "Type {} to scroll down and {} to scroll up one line, " \
               "{} to scroll down and {} to scroll up one page, " \
               "and Esc or ^[ to exit while running it." \
               .format(COMMAND_NAME,
-                      xorcise.unctrl(SCROLL_DOWN_CHAR),
-                      xorcise.unctrl(SCROLL_UP_CHAR),
-                      xorcise.unctrl(PAGE_DOWN_CHAR),
-                      xorcise.unctrl(PAGE_UP_CHAR))
+                      consolekit.unctrl(SCROLL_DOWN_CHAR),
+                      consolekit.unctrl(SCROLL_UP_CHAR),
+                      consolekit.unctrl(PAGE_DOWN_CHAR),
+                      consolekit.unctrl(PAGE_UP_CHAR))
 
 ARGUMENT_DEFAULT_HELP = " (default: %(default)s)"
 CURSOR_WIDTH = 1
@@ -67,13 +67,13 @@ def error(*text):
 # classes
 
 class Shakyo:
-  ATTR_CORRECT = xorcise.RenditionAttribute.normal
-  ATTR_WRONG = xorcise.RenditionAttribute.reverse
+  ATTR_CORRECT = consolekit.RenditionAttribute.normal
+  ATTR_WRONG = consolekit.RenditionAttribute.reverse
 
   def __init__(self, console, example_lines):
     self.__console = console
     self.__geometry = Geometry(console)
-    self.__input_line = xorcise.Line()
+    self.__input_line = consolekit.Line()
     self.__example_lines = FormattedLines(example_lines,
                                           max_width=(console.screen_width - 1))
     if self.__example_lines[0] is None:
@@ -89,27 +89,27 @@ class Shakyo:
       if char in QUIT_CHARS:
         break
       elif char == CLEAR_CHAR:
-        self.__input_line = xorcise.Line()
+        self.__input_line = consolekit.Line()
       elif char in DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
       elif char == PAGE_DOWN_CHAR:
-        self.__input_line = xorcise.Line()
+        self.__input_line = consolekit.Line()
         self.__page_down()
       elif char == PAGE_UP_CHAR:
-        self.__input_line = xorcise.Line()
+        self.__input_line = consolekit.Line()
         self.__page_up()
       elif char == SCROLL_UP_CHAR:
-        self.__input_line = xorcise.Line()
+        self.__input_line = consolekit.Line()
         self.__scroll_up()
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
            or (char == SCROLL_DOWN_CHAR):
-        self.__input_line = xorcise.Line()
+        self.__input_line = consolekit.Line()
         self.__scroll_down()
-      elif xorcise.is_printable_char(char) \
-           and (self.__input_line + xorcise.Character(char)).width \
+      elif consolekit.is_printable_char(char) \
+           and (self.__input_line + consolekit.Character(char)).width \
                + CURSOR_WIDTH <= self.__console.screen_width:
-        self.__input_line += xorcise.Character(char, self.__next_attr(char))
+        self.__input_line += consolekit.Character(char, self.__next_attr(char))
 
   def __update_input_line(self):
     self.__console.print_line(self.__geometry.y_input, self.__example_lines[0])
@@ -162,7 +162,7 @@ class Shakyo:
                                          .attr
 
   def __is_correct_char(self, char):
-    next_input_line = self.__input_line + xorcise.Character(char)
+    next_input_line = self.__input_line + consolekit.Character(char)
     for index in range(len(self.__input_line.normalized),
                        len(next_input_line.normalized)):
       if index >= len(self.__example_lines[0].normalized) \
@@ -188,18 +188,18 @@ class XorciseFormatter(pygments.formatter.Formatter):
 
     self.__attrs = {}
     for token_type, properties in self.style:
-      attr = xorcise.RenditionAttribute.normal
+      attr = consolekit.RenditionAttribute.normal
       if colorize and properties["color"]:
-        attr |= xorcise.ColorAttribute.get_best_match(
+        attr |= consolekit.ColorAttribute.get_best_match(
                 interpret_string_rgb(properties["color"]))
       if decorate and properties["bold"]:
-        attr |= xorcise.RenditionAttribute.bold
+        attr |= consolekit.RenditionAttribute.bold
       if decorate and properties["underline"]:
-        attr |= xorcise.RenditionAttribute.underline
+        attr |= consolekit.RenditionAttribute.underline
       self.__attrs[token_type] = attr
 
   def format(self, tokens):
-    line = xorcise.Line()
+    line = consolekit.Line()
     for token_type, value in tokens:
       while token_type not in self.__attrs:
         token_type = token_type.parent
@@ -207,9 +207,9 @@ class XorciseFormatter(pygments.formatter.Formatter):
       for char in value:
         if char == '\n':
           yield line
-          line = xorcise.Line()
-        elif xorcise.is_printable_char(char):
-          line += xorcise.Character(char, self.__attrs[token_type])
+          line = consolekit.Line()
+        elif consolekit.is_printable_char(char):
+          line += consolekit.Character(char, self.__attrs[token_type])
 
     # if there is no newline character at the end of the last line
     if len(line) > 0:
@@ -465,7 +465,7 @@ def main():
     # You need to raise some Exception instead of calling exit() here
     # to prevent curses from messing up your terminal.
 
-    console = xorcise.turn_on_console(asciize=args.asciize,
+    console = consolekit.turn_on_console(asciize=args.asciize,
                                       spaces_per_tab=args.spaces_per_tab,
                                       background_rgb=args.background_rgb)
 
@@ -483,7 +483,7 @@ def main():
   except KeyboardInterrupt:
     pass
   finally:
-    xorcise.turn_off_console()
+    consolekit.turn_off_console()
 
 
 if __name__ == "__main__":

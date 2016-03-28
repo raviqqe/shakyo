@@ -69,7 +69,7 @@ def main():
       author_email="raviqqe@gmail.com",
       url="http://github.com/raviqqe/shakyo/",
       py_modules=["shakyo"],
-      packages=["xorcise"],
+      packages=["consolekit"],
       entry_points={"console_scripts" : [COMMAND_NAME + "=shakyo:main"]},
       install_requires=["pygments", "text_unidecode", "validators"],
       classifiers=[
