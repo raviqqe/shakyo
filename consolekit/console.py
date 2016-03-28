@@ -38,6 +38,7 @@ class Console:
 
     if isinstance(char, int):
       return chr(char)
+    assert isinstance(char, str)
     return char
 
   def print_line(self, y, line, clear=True):
