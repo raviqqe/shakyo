@@ -43,6 +43,7 @@ DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
 CURSOR_WIDTH = 1
 DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 ENCODING = "UTF-8"
+FALLBACK_LEXER = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
 LEXER_OPTIONS = {"stripall" : True}
 SEPARATOR = ", "
 SHOW_LANGUAGES_OPTION = "--show-languages"
@@ -407,7 +408,7 @@ def guess_lexer(text, filename=None):
   if lexer is None:
     lexer = guess_lexer_from_text(text)
   if lexer is None:
-    lexer = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
+    lexer = FALLBACK_LEXER
   return lexer
 
 
