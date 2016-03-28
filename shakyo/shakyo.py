@@ -12,10 +12,10 @@ class Shakyo:
 
   def __init__(self, console, example_lines):
     self.__console = console
-    self.__geometry = Geometry(console)
+    self.__geometry = _Geometry(console)
     self.__input_line = ck.Line()
-    self.__example_lines = FormattedLines(example_lines,
-                                          max_width=(console.screen_width - 1))
+    self.__example_lines = _FoldedLines(example_lines,
+                                        max_width=(console.screen_width - 1))
     if self.__example_lines[0] is None:
       raise Exception("No line can be read from the example source.")
 
@@ -112,13 +112,13 @@ class Shakyo:
     return True
 
 
-class Geometry:
+class _Geometry:
   def __init__(self, console):
     self.y_input = (console.screen_height - 1) // 2
     self.y_bottom = console.screen_height - 1
 
 
-class FormattedLines:
+class _FoldedLines:
   def __init__(self, raw_lines, max_width=79):
     assert max_width >= 2 # for double-width characters
     self.__line_generator = self.__fold_lines(raw_lines, max_width)
