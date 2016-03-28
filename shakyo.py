@@ -178,7 +178,7 @@ class Geometry:
     self.y_bottom = console.screen_height - 1
 
 
-class XorciseFormatter(pygments.formatter.Formatter):
+class LineFormatter(pygments.formatter.Formatter):
   """
   TODO: Follow Liskov substitution principle.
   """
@@ -200,11 +200,11 @@ class XorciseFormatter(pygments.formatter.Formatter):
 
   def format(self, tokens):
     line = ck.Line()
-    for token_type, value in tokens:
+    for token_type, string in tokens:
       while token_type not in self.__attrs:
         token_type = token_type.parent
 
-      for char in value:
+      for char in string:
         if char == '\n':
           yield line
           line = ck.Line()
@@ -428,7 +428,7 @@ def guess_lexer_from_text(text):
 def text2lines(text, lexer, style_name="default",
                colorize=True, decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  return XorciseFormatter(style=style, colorize=colorize, decorate=decorate) \
+  return LineFormatter(style=style, colorize=colorize, decorate=decorate) \
          .format(lexer.get_tokens(strip_text(text)))
 
 
