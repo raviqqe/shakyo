@@ -10,8 +10,8 @@ from .util import *
 
 # constants
 
-DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
-DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
+_DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
+_DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
               "Type {} to scroll down and {} to scroll up one line, " \
               "{} to scroll down and {} to scroll up one page, " \
               "and Esc or ^[ to exit while running it." \
@@ -20,15 +20,15 @@ DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
                       ck.unctrl(SCROLL_UP_CHAR),
                       ck.unctrl(PAGE_DOWN_CHAR),
                       ck.unctrl(PAGE_UP_CHAR))
-SHOW_LANGUAGES_OPTION = "--show-languages"
-SHOW_STYLES_OPTION = "--show-styles"
+_SHOW_LANGUAGES_OPTION = "--show-languages"
+_SHOW_STYLES_OPTION = "--show-styles"
 
 
 
 # functions
 
 def get_args():
-  arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
+  arg_parser = argparse.ArgumentParser(description=_DESCRIPTION)
 
   arg_parser.add_argument("example_path", nargs='?', default=None,
                           help="file path or URI to an example")
@@ -41,7 +41,7 @@ def get_args():
                                "of your terminal to avoid the same font color "
                                "as it"
                                .format(COMMAND_NAME)
-                               + DEFAULT_ARGUMENT_HELP)
+                               + _DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument("-c", "--no-color",
                           dest="colorize", action="store_false",
                           help="disable colorization of text")
@@ -51,19 +51,19 @@ def get_args():
   arg_parser.add_argument("-l", "--language", metavar="LANGUAGE",
                           dest="lexer_name", type=str, default=None,
                           help="specify a language of an example")
-  arg_parser.add_argument(SHOW_LANGUAGES_OPTION,
+  arg_parser.add_argument(_SHOW_LANGUAGES_OPTION,
                           dest="show_languages", action="store_true",
                           help="show all lauguages available for examples")
   arg_parser.add_argument("-s", "--style",
                           dest="style_name", type=str, default="default",
-                          help="specify a style name" + DEFAULT_ARGUMENT_HELP)
-  arg_parser.add_argument(SHOW_STYLES_OPTION,
+                          help="specify a style name" + _DEFAULT_ARGUMENT_HELP)
+  arg_parser.add_argument(_SHOW_STYLES_OPTION,
                           dest="show_styles", action="store_true",
                           help="show all available style names")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab"
-                               + DEFAULT_ARGUMENT_HELP)
+                               + _DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument("-v", "--version",
                           dest="show_version", action="store_true",
                           help="show version information")
@@ -100,10 +100,10 @@ def __check_args(args):
               "See `{} {}`."
               .format(args.lexer_name,
                       COMMAND_NAME,
-                      SHOW_LANGUAGES_OPTION))
+                      _SHOW_LANGUAGES_OPTION))
   elif args.style_name not in all_style_names():
     error("The style, \"{}\" is not available. See `{} {}`."
-              .format(args.style_name, COMMAND_NAME, SHOW_STYLES_OPTION))
+              .format(args.style_name, COMMAND_NAME, _SHOW_STYLES_OPTION))
 
 
 def __print_sequence(sequence):

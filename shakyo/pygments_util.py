@@ -7,8 +7,8 @@ import pygments.lexers.special
 
 # constants
 
-LEXER_OPTIONS = {"stripall" : True}
-FALLBACK_LEXER = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
+_LEXER_OPTIONS = {"stripall" : True}
+_FALLBACK_LEXER = pygments.lexers.special.TextLexer(**_LEXER_OPTIONS)
 
 
 
@@ -28,20 +28,20 @@ def __guess_lexer_from_filename_and_text(filename, text):
   if text is not None and lexer is None:
     lexer = __guess_lexer_from_text(text)
   if lexer is None:
-    lexer = FALLBACK_LEXER
+    lexer = _FALLBACK_LEXER
   return lexer
 
 
 def __guess_lexer_from_filename(filename):
   try:
-    return pygments.lexers.get_lexer_for_filename(filename, **LEXER_OPTIONS)
+    return pygments.lexers.get_lexer_for_filename(filename, **_LEXER_OPTIONS)
   except pygments.util.ClassNotFound:
     return None
 
 
 def __guess_lexer_from_text(text):
   try:
-    return pygments.lexers.guess_lexer(text, **LEXER_OPTIONS)
+    return pygments.lexers.guess_lexer(text, **_LEXER_OPTIONS)
   except pygments.util.ClassNotFound:
     return None
 

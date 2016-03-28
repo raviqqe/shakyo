@@ -11,9 +11,9 @@ from .log import *
 
 # constants
 
-ENCODING = "UTF-8"
-SUPPORTED_SCHEMES = {"http", "https", "ftp"}
-TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
+_ENCODING = "UTF-8"
+_SUPPORTED_SCHEMES = {"http", "https", "ftp"}
+_TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
 
 
@@ -30,7 +30,7 @@ def __read_from_stdin():
     error("Nothing could be read from stdin.")
 
   os.close(sys.stdin.fileno())
-  sys.stdin = open(TTY_DEVICE_FILE)
+  sys.stdin = open(_TTY_DEVICE_FILE)
 
   return text
 
@@ -38,21 +38,21 @@ def __read_from_stdin():
 def __read_local_file(path):
   try:
     with open(path, "rb") as f:
-      return f.read().decode(ENCODING, "replace")
+      return f.read().decode(_ENCODING, "replace")
   except (FileNotFoundError, PermissionError) as e:
     error(e)
 
 
 def __read_remote_file(uri):
-  if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
+  if urllib.parse.urlparse(uri).scheme not in _SUPPORTED_SCHEMES:
     error("Invalid scheme of URI is detected. "
               "(supported schemes: {})"
-              .format(", ".join(sorted(SUPPORTED_SCHEMES))))
+              .format(", ".join(sorted(_SUPPORTED_SCHEMES))))
 
   message("Loading a page...")
   try:
     with urllib.request.urlopen(uri) as response:
-      return response.read().decode(ENCODING, "replace")
+      return response.read().decode(_ENCODING, "replace")
   except urllib.error.URLError as e:
     error(e)
 
