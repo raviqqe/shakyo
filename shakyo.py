@@ -446,6 +446,10 @@ def get_lexer_by_name(lexer_name):
   return pygments.lexers.get_lexer_by_name(lexer_name)
 
 
+def uri_to_filename(uri):
+  return os.path.basename(urllib.parse.urlparse(uri).path)
+
+
 
 # main routine
 
@@ -458,7 +462,7 @@ def main():
     filename = None
     example_text = read_from_stdin()
   elif is_uri(args.example_path):
-    filename = os.path.basename(urllib.parse.urlparse(args.example_path).path)
+    filename = uri_to_filename(args.example_path)
     example_text = read_remote_file(args.example_path)
   else:
     filename = os.path.basename(args.example_path)
