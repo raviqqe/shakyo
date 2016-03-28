@@ -2,7 +2,7 @@
 
 import sys
 
-import arg
+import arggetter
 import consolekit as ck
 import const
 import path2x
@@ -190,7 +190,7 @@ class FormattedLines:
 # main routine
 
 def main():
-  args = arg.get_args()
+  args = arggetter.get_args()
 
   if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
