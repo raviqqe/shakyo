@@ -1,11 +1,11 @@
 import sys
 
-import const
+from .const import *
 
 
 
 def message(*text):
-  print("{}:".format(const.COMMAND_NAME), *text, file=sys.stderr)
+  print("{}:".format(COMMAND_NAME), *text, file=sys.stderr)
 
 
 def error(*text):

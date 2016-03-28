@@ -5,7 +5,7 @@ import urllib.parse
 import urllib.request
 import validators
 
-import log
+from .log import *
 
 
 
@@ -27,7 +27,7 @@ def __read_from_stdin():
   try:
     text = sys.stdin.read()
   except KeyboardInterrupt:
-    log.error("Nothing could be read from stdin.")
+    error("Nothing could be read from stdin.")
 
   os.close(sys.stdin.fileno())
   sys.stdin = open(TTY_DEVICE_FILE)
@@ -40,21 +40,21 @@ def __read_local_file(path):
     with open(path, "rb") as f:
       return f.read().decode(ENCODING, "replace")
   except (FileNotFoundError, PermissionError) as e:
-    log.error(e)
+    error(e)
 
 
 def __read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
-    log.error("Invalid scheme of URI is detected. "
+    error("Invalid scheme of URI is detected. "
               "(supported schemes: {})"
               .format(", ".join(sorted(SUPPORTED_SCHEMES))))
 
-  log.message("Loading a page...")
+  message("Loading a page...")
   try:
     with urllib.request.urlopen(uri) as response:
       return response.read().decode(ENCODING, "replace")
   except urllib.error.URLError as e:
-    log.error(e)
+    error(e)
 
 
 def __uri_to_filename(uri):

@@ -1,5 +1,5 @@
 import consolekit as ck
-import const
+from .const import *
 
 
 
@@ -26,24 +26,24 @@ class Shakyo:
       self.__update_input_line()
       char = self.__console.get_char()
 
-      if char in const.QUIT_CHARS:
+      if char in QUIT_CHARS:
         break
-      elif char == const.CLEAR_CHAR:
+      elif char == CLEAR_CHAR:
         self.__input_line = ck.Line()
-      elif char in const.DELETE_CHARS:
+      elif char in DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
-      elif char == const.PAGE_DOWN_CHAR:
+      elif char == PAGE_DOWN_CHAR:
         self.__input_line = ck.Line()
         self.__page_down()
-      elif char == const.PAGE_UP_CHAR:
+      elif char == PAGE_UP_CHAR:
         self.__input_line = ck.Line()
         self.__page_up()
-      elif char == const.SCROLL_UP_CHAR:
+      elif char == SCROLL_UP_CHAR:
         self.__input_line = ck.Line()
         self.__scroll_up()
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
-           or (char == const.SCROLL_DOWN_CHAR):
+           or (char == SCROLL_DOWN_CHAR):
         self.__input_line = ck.Line()
         self.__scroll_down()
       elif ck.is_printable_char(char) \

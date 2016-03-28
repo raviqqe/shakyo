@@ -2,7 +2,7 @@ import pygments.formatter
 import pygments.styles
 
 import consolekit as ck
-import util
+from .util import *
 
 
 
@@ -21,7 +21,7 @@ class __LineFormatter(pygments.formatter.Formatter):
       attr = ck.RenditionAttribute.normal
       if colorize and properties["color"]:
         attr |= ck.ColorAttribute.get_best_match(
-                util.interpret_string_rgb(properties["color"]))
+                interpret_string_rgb(properties["color"]))
       if decorate and properties["bold"]:
         attr |= ck.RenditionAttribute.bold
       if decorate and properties["underline"]:

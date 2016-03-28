@@ -2,25 +2,25 @@
 
 import sys
 
-import arggetter
 import consolekit as ck
-import path2x
-import pygments_util
-import shakyo
-import text2lines
-import log
+from .arggetter import *
+from .path2x import *
+from .pygments_util import *
+from .shakyo import *
+from .text2lines import *
+from .log import *
 
 
 
 # main routine
 
 def main():
-  args = arggetter.get_args()
+  args = get_args()
 
-  if not sys.stdout.isatty(): log.error("stdout is not a tty.")
+  if not sys.stdout.isatty(): error("stdout is not a tty.")
 
-  filename = path2x.path_to_filename(args.example_path)
-  example_text = path2x.path_to_text(args.example_path)
+  filename = path_to_filename(args.example_path)
+  example_text = path_to_text(args.example_path)
 
   try:
     # CAUTION:
@@ -31,16 +31,16 @@ def main():
                                  spaces_per_tab=args.spaces_per_tab,
                                  background_rgb=args.background_rgb)
 
-    example_lines = text2lines.text_to_lines(
+    example_lines = text_to_lines(
         example_text,
-        lexer=pygments_util.guess_lexer(lexer_name=args.lexer_name,
-                                        filename=filename,
-                                        text=example_text),
+        lexer=guess_lexer(lexer_name=args.lexer_name,
+                          filename=filename,
+                          text=example_text),
         style_name=args.style_name,
         colorize=args.colorize,
         decorate=args.decorate)
 
-    shakyo.Shakyo(console, example_lines).do()
+    Shakyo(console, example_lines).do()
   except KeyboardInterrupt:
     pass
   finally:
