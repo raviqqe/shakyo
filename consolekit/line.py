@@ -87,9 +87,9 @@ class Line:
   def __normalize_char(cls, char):
     if cls.ASCIIZE:
       return [Character(string_char, char.attr)
-             for string_char in text_unidecode.unidecode(char.value)]
+              for string_char in text_unidecode.unidecode(char.value)]
     else:
       return [Character(string_char, char.attr)
-             if not unicodedata.category(string_char).startswith("Z")
-             else Character(' ', char.attr)
-             for string_char in unicodedata.normalize("NFC", char.value)]
+              if not unicodedata.category(string_char).startswith("Z")
+              else Character(' ', char.attr)
+              for string_char in unicodedata.normalize("NFC", char.value)]
