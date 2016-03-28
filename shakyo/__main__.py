@@ -5,7 +5,6 @@ import os.path
 import pygments
 import pygments.formatter
 import pygments.lexers
-import pygments.lexers.special
 import pygments.styles
 import sys
 import urllib.parse
@@ -15,6 +14,7 @@ import validators
 import arg
 import consolekit as ck
 import const
+import guesslexer
 import log
 
 
@@ -23,8 +23,6 @@ import log
 
 CURSOR_WIDTH = 1
 ENCODING = "UTF-8"
-LEXER_OPTIONS = {"stripall" : True}
-FALLBACK_LEXER = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
 SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
 
@@ -277,31 +275,6 @@ def read_remote_file(uri):
     log.error(e)
 
 
-def guess_lexer(text, filename=None):
-  lexer = None
-  if filename is not None:
-    lexer = get_lexer_for_filename(filename)
-  if lexer is None:
-    lexer = guess_lexer_from_text(text)
-  if lexer is None:
-    lexer = FALLBACK_LEXER
-  return lexer
-
-
-def get_lexer_for_filename(filename):
-  try:
-    return pygments.lexers.get_lexer_for_filename(filename, **LEXER_OPTIONS)
-  except pygments.util.ClassNotFound:
-    return None
-
-
-def guess_lexer_from_text(text):
-  try:
-    return pygments.lexers.guess_lexer(text, **LEXER_OPTIONS)
-  except pygments.util.ClassNotFound:
-    return None
-
-
 def text2lines(text, lexer, style_name="default",
                colorize=True, decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
@@ -317,10 +290,6 @@ def interpret_string_rgb(string_rgb):
 
 def strip_text(text):
   return '\n'.join(line.rstrip() for line in text.split('\n'))
-
-
-def get_lexer_by_name(lexer_name):
-  return pygments.lexers.get_lexer_by_name(lexer_name)
 
 
 def uri_to_filename(uri):
@@ -355,14 +324,12 @@ def main():
                                  spaces_per_tab=args.spaces_per_tab,
                                  background_rgb=args.background_rgb)
 
-    if args.lexer_name is not None:
-      lexer = get_lexer_by_name(args.lexer_name)
-    else:
-      lexer = guess_lexer(example_text, filename)
-    example_lines = text2lines(example_text, lexer,
-                               style_name=args.style_name,
-                               colorize=args.colorize,
-                               decorate=args.decorate)
+    example_lines = text2lines(
+        example_text,
+        lexer=guesslexer.guess_lexer(args.lexer_name, filename, example_text),
+        style_name=args.style_name,
+        colorize=args.colorize,
+        decorate=args.decorate)
 
     Shakyo(console, example_lines).do()
   except KeyboardInterrupt:
