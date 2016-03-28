@@ -67,7 +67,7 @@ class Console:
     assert direction in {"up", "down"}
     assert isinstance(line, ln.Line) or line is None
 
-    self._window.scroll(direction)
+    self._window.scroll(1 if direction == "down" else -1)
 
     if line is not None and direction == "down":
       self.print_line(self.screen_height - 1, line)
