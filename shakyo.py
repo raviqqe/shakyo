@@ -442,6 +442,10 @@ def strip_text(text):
   return '\n'.join(line.rstrip() for line in text.split('\n'))
 
 
+def get_lexer_by_name(lexer_name):
+  return pygments.lexers.get_lexer_by_name(lexer_name)
+
+
 
 # main routine
 
@@ -470,7 +474,7 @@ def main():
                                  background_rgb=args.background_rgb)
 
     if args.lexer_name is not None:
-      lexer = pygments.lexers.get_lexer_by_name(args.lexer_name)
+      lexer = get_lexer_by_name(args.lexer_name)
     else:
       lexer = guess_lexer(example_text, filename)
     example_lines = text2lines(example_text, lexer,
