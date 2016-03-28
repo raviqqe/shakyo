@@ -1,10 +1,9 @@
 import argparse
-import pygments.lexers
-import pygments.styles
 
 import consolekit as ck
 import const
 import log
+import pygments_util
 import util
 
 
@@ -75,10 +74,10 @@ def get_args():
     print("version:", const.VERSION)
     exit()
   elif args.show_languages:
-    __print_sequence(__all_lexer_names())
+    __print_sequence(pygments_util.all_lexer_names())
     exit()
   elif args.show_styles:
-    __print_sequence(__all_style_names())
+    __print_sequence(pygments_util.all_style_names())
     exit()
 
   try:
@@ -96,24 +95,15 @@ def __check_args(args):
   if args.spaces_per_tab <= 0:
     log.error("Number of spaces per tab must be greater than 0.")
   elif args.lexer_name is not None \
-       and args.lexer_name not in __all_lexer_names():
+       and args.lexer_name not in pygments_util.all_lexer_names():
     log.error("The language, \"{}\" is not available for examples. "
               "See `{} {}`."
               .format(args.lexer_name,
                       const.COMMAND_NAME,
                       SHOW_LANGUAGES_OPTION))
-  elif args.style_name not in __all_style_names():
+  elif args.style_name not in pygments_util.all_style_names():
     log.error("The style, \"{}\" is not available. See `{} {}`."
               .format(args.style_name, const.COMMAND_NAME, SHOW_STYLES_OPTION))
-
-
-def __all_lexer_names():
-  return {alias for _, aliases, _, _ in pygments.lexers.get_all_lexers()
-          for alias in aliases}
-
-
-def __all_style_names():
-  return pygments.styles.get_all_styles()
 
 
 def __print_sequence(sequence):

@@ -6,7 +6,7 @@ import arg
 import consolekit as ck
 import const
 import textgetter
-import guesslexer
+import pygments_util
 import text2lines
 import log
 
@@ -207,7 +207,9 @@ def main():
 
     example_lines = text2lines.text_to_lines(
         example_text,
-        lexer=guesslexer.guess_lexer(args.lexer_name, filename, example_text),
+        lexer=pygments_util.guess_lexer(lexer_name=args.lexer_name,
+                                        filename=filename,
+                                        text=example_text),
         style_name=args.style_name,
         colorize=args.colorize,
         decorate=args.decorate)

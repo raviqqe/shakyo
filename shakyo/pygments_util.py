@@ -1,5 +1,6 @@
 import pygments
 import pygments.lexers
+import pygments.styles
 import pygments.lexers.special
 
 
@@ -43,3 +44,12 @@ def __guess_lexer_from_text(text):
     return pygments.lexers.guess_lexer(text, **LEXER_OPTIONS)
   except pygments.util.ClassNotFound:
     return None
+
+
+def all_lexer_names():
+  return {alias for _, aliases, _, _ in pygments.lexers.get_all_lexers()
+          for alias in aliases}
+
+
+def all_style_names():
+  return pygments.styles.get_all_styles()
