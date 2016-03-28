@@ -29,7 +29,7 @@ class Line:
 
     if len(self) != len(line): return False
     for my_char, your_char in zip(self, line):
-      if my_char.value != your_char.value: return False
+      if str(my_char) != str(your_char): return False
     return True
 
   def __iter__(self):
@@ -66,7 +66,7 @@ class Line:
   def _normalized_chars(self):
     position = 0
     for char in self._chars:
-      if char.value == '\t':
+      if str(char) == '\t':
         boundary = self._next_tab_boundary(position)
         while position != boundary:
           position += 1
@@ -84,9 +84,9 @@ class Line:
   def _normalize_char(cls, char):
     if cls._ASCIIZE:
       return [character.Character(string_char, char.attr)
-              for string_char in text_unidecode.unidecode(char.value)]
+              for string_char in text_unidecode.unidecode(str(char))]
     else:
       return [character.Character(string_char, char.attr)
               if not unicodedata.category(string_char).startswith("Z")
               else character.Character(' ', char.attr)
-              for string_char in unicodedata.normalize("NFC", char.value)]
+              for string_char in unicodedata.normalize("NFC", str(char))]

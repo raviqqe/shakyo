@@ -49,10 +49,10 @@ class Console:
       self._window.clrtoeol()
 
     for char in line.normalized:
-      assert not unicodedata.category(char.value).startswith("C")
+      assert not unicodedata.category(str(char)).startswith("C")
       if self._window.getyx()[1] + char.width > self.screen_width:
         break
-      self._window.addstr(char.value, char.attr)
+      self._window.addstr(str(char), char.attr)
 
   @_keep_position
   def erase(self):

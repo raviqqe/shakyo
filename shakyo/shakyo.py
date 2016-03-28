@@ -106,8 +106,8 @@ class Shakyo:
     for index in range(len(self._input_line.normalized),
                        len(next_input_line.normalized)):
       if index >= len(self._example_lines[0].normalized) \
-         or next_input_line.normalized[index].value \
-            != self._example_lines[0].normalized[index].value:
+         or str(next_input_line.normalized[index]) \
+            != str(self._example_lines[0].normalized[index]):
         return False
     return True
 

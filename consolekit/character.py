@@ -6,14 +6,13 @@ from . import misc
 
 
 class Character:
-  def __init__(self, value, attr=attribute.RenditionAttribute.normal):
-    assert misc.is_printable_char(value) and isinstance(attr, int)
-    self._value = value
+  def __init__(self, string, attr=attribute.RenditionAttribute.normal):
+    assert misc.is_printable_char(string) and isinstance(attr, int)
+    self._string = string
     self._attr = attr
 
-  @property
-  def value(self):
-    return self._value
+  def __str__(self):
+    return self._string
 
   @property
   def attr(self):
@@ -21,5 +20,5 @@ class Character:
 
   @property
   def width(self):
-    return 1 if unicodedata.east_asian_width(self.value) not in {"W", "F"} \
+    return 1 if unicodedata.east_asian_width(self._string) not in {"W", "F"} \
            else 2
