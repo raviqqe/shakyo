@@ -1,67 +1,32 @@
 #!/usr/bin/env python
 
-import argparse
 import os
 import os.path
 import pygments
 import pygments.formatter
 import pygments.lexers
+import pygments.lexers.special
 import pygments.styles
 import sys
 import urllib.parse
 import urllib.request
 import validators
 
+import arg
 import consolekit as ck
+import const
+import log
 
 
 
 # constants
 
-__version__ = "0.0.5"
-
-COMMAND_NAME = os.path.basename(sys.argv[0])
-
-DELETE_CHARS = ck.DELETE_CHARS | ck.BACKSPACE_CHARS
-QUIT_CHARS = ck.ESCAPE_CHARS
-CLEAR_CHAR = ck.ctrl('u')
-SCROLL_DOWN_CHAR = ck.ctrl('n')
-SCROLL_UP_CHAR = ck.ctrl('p')
-PAGE_DOWN_CHAR = ck.ctrl('f')
-PAGE_UP_CHAR = ck.ctrl('b')
-
-DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
-              "Type {} to scroll down and {} to scroll up one line, " \
-              "{} to scroll down and {} to scroll up one page, " \
-              "and Esc or ^[ to exit while running it." \
-              .format(COMMAND_NAME,
-                      ck.unctrl(SCROLL_DOWN_CHAR),
-                      ck.unctrl(SCROLL_UP_CHAR),
-                      ck.unctrl(PAGE_DOWN_CHAR),
-                      ck.unctrl(PAGE_UP_CHAR))
-
 CURSOR_WIDTH = 1
-DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 ENCODING = "UTF-8"
-FALLBACK_LEXER = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
 LEXER_OPTIONS = {"stripall" : True}
-SEPARATOR = ", "
-SHOW_LANGUAGES_OPTION = "--show-languages"
-SHOW_STYLES_OPTION = "--show-styles"
+FALLBACK_LEXER = pygments.lexers.special.TextLexer(**LEXER_OPTIONS)
 SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
-
-
-
-# the order of bugs
-
-def message(*text):
-  print("{}:".format(COMMAND_NAME), *text, file=sys.stderr)
-
-
-def error(*text):
-  message("error:", *text)
-  exit(1)
 
 
 
@@ -87,24 +52,24 @@ class Shakyo:
       self.__update_input_line()
       char = self.__console.get_char()
 
-      if char in QUIT_CHARS:
+      if char in const.QUIT_CHARS:
         break
-      elif char == CLEAR_CHAR:
+      elif char == const.CLEAR_CHAR:
         self.__input_line = ck.Line()
-      elif char in DELETE_CHARS:
+      elif char in const.DELETE_CHARS:
         self.__input_line = self.__input_line[:-1]
-      elif char == PAGE_DOWN_CHAR:
+      elif char == const.PAGE_DOWN_CHAR:
         self.__input_line = ck.Line()
         self.__page_down()
-      elif char == PAGE_UP_CHAR:
+      elif char == const.PAGE_UP_CHAR:
         self.__input_line = ck.Line()
         self.__page_up()
-      elif char == SCROLL_UP_CHAR:
+      elif char == const.SCROLL_UP_CHAR:
         self.__input_line = ck.Line()
         self.__scroll_up()
       elif (char == '\n' and self.__input_line.normalized
                              == self.__example_lines[0].normalized) \
-           or (char == SCROLL_DOWN_CHAR):
+           or (char == const.SCROLL_DOWN_CHAR):
         self.__input_line = ck.Line()
         self.__scroll_down()
       elif ck.is_printable_char(char) \
@@ -274,104 +239,15 @@ class FormattedLines:
 
 # functions
 
-def parse_args():
-  arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
-
-  arg_parser.add_argument("example_path", nargs='?', default=None,
-                          help="file path or URI to an example")
-  arg_parser.add_argument("-a", "--asciize",
-                          dest="asciize", action="store_true",
-                          help="enable asciization of unicode characters")
-  arg_parser.add_argument("-b", "--background-color",
-                          dest="background_rgb", default="000000",
-                          help="tell {} the hexadecimal background color "
-                               "of your terminal to avoid the same font color "
-                               "as it"
-                               .format(COMMAND_NAME)
-                               + DEFAULT_ARGUMENT_HELP)
-  arg_parser.add_argument("-c", "--no-color",
-                          dest="colorize", action="store_false",
-                          help="disable colorization of text")
-  arg_parser.add_argument("-d", "--no-decoration",
-                          dest="decorate", action="store_false",
-                          help="disable decoration of text")
-  arg_parser.add_argument("-l", "--language", metavar="LANGUAGE",
-                          dest="lexer_name", type=str, default=None,
-                          help="specify a language of an example")
-  arg_parser.add_argument(SHOW_LANGUAGES_OPTION,
-                          dest="show_languages", action="store_true",
-                          help="show all lauguages available for examples")
-  arg_parser.add_argument("-s", "--style",
-                          dest="style_name", type=str, default="default",
-                          help="specify a style name" + DEFAULT_ARGUMENT_HELP)
-  arg_parser.add_argument(SHOW_STYLES_OPTION,
-                          dest="show_styles", action="store_true",
-                          help="show all available style names")
-  arg_parser.add_argument("-t", "--spaces-per-tab",
-                          dest="spaces_per_tab", type=int, default=4,
-                          help="set number of spaces per tab"
-                               + DEFAULT_ARGUMENT_HELP)
-  arg_parser.add_argument("-v", "--version",
-                          dest="show_version", action="store_true",
-                          help="show version information")
-
-  args = arg_parser.parse_args()
-
-  if args.show_version:
-    print("version:", __version__)
-    exit()
-  elif args.show_languages:
-    print_sequence(all_lexer_names())
-    exit()
-  elif args.show_styles:
-    print_sequence(all_style_names())
-    exit()
-
-  try:
-    args.background_rgb = interpret_string_rgb(args.background_rgb)
-  except (AssertionError, ValueError):
-    error("\"{}\" is invalid as a hexadecimal RGB color."
-          .format(args.background_rgb))
-
-  check_args(args)
-
-  return args
-
-
-def check_args(args):
-  if args.spaces_per_tab <= 0:
-    error("Number of spaces per tab must be greater than 0.")
-  elif args.lexer_name is not None \
-      and args.lexer_name not in all_lexer_names():
-    error("The language, \"{}\" is not available for examples. See `{} {}`."
-          .format(args.lexer_name, COMMAND_NAME, SHOW_LANGUAGES_OPTION))
-  elif args.style_name not in all_style_names():
-    error("The style, \"{}\" is not available. See `{} {}`."
-          .format(args.style_name, COMMAND_NAME, SHOW_STYLES_OPTION))
-
-
 def is_uri(uri):
   return validators.url(uri)
-
-
-def all_lexer_names():
-  return {alias for _, aliases, _, _ in pygments.lexers.get_all_lexers()
-          for alias in aliases}
-
-
-def all_style_names():
-  return pygments.styles.get_all_styles()
-
-
-def print_sequence(sequence, sep=", "):
-  print(*sorted(sequence), sep=sep)
 
 
 def read_from_stdin():
   try:
     text = sys.stdin.read()
   except KeyboardInterrupt:
-    error("Nothing could be read from stdin.")
+    log.error("Nothing could be read from stdin.")
 
   os.close(sys.stdin.fileno())
   sys.stdin = open(TTY_DEVICE_FILE)
@@ -384,21 +260,21 @@ def read_local_file(path):
     with open(path, "rb") as f:
       return f.read().decode(ENCODING, "replace")
   except (FileNotFoundError, PermissionError) as e:
-    error(e)
+    log.error(e)
 
 
 def read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in SUPPORTED_SCHEMES:
-    error("Invalid scheme of URI is detected. "
+    log.error("Invalid scheme of URI is detected. "
           "(supported schemes: {})"
           .format(", ".join(sorted(SUPPORTED_SCHEMES))))
 
-  message("Loading a page...")
+  log.message("Loading a page...")
   try:
     with urllib.request.urlopen(uri) as response:
       return response.read().decode(ENCODING, "replace")
   except urllib.error.URLError as e:
-    error(e)
+    log.error(e)
 
 
 def guess_lexer(text, filename=None):
@@ -464,9 +340,9 @@ def get_filename_and_text(path):
 # main routine
 
 def main():
-  args = parse_args()
+  args = arg.get_args()
 
-  if not sys.stdout.isatty(): error("stdout is not a tty.")
+  if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
   filename, example_text = get_filename_and_text(args.example_path)
 
