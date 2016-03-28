@@ -82,7 +82,7 @@ def get_args():
     exit()
 
   try:
-    args.background_rgb = util.inerpret_string_rgb(args.background_rgb)
+    args.background_rgb = util.interpret_string_rgb(args.background_rgb)
   except (AssertionError, ValueError):
     log.error("\"{}\" is invalid as a hexadecimal RGB color."
           .format(args.background_rgb))
