@@ -40,7 +40,7 @@ DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
                       ck.unctrl(PAGE_DOWN_CHAR),
                       ck.unctrl(PAGE_UP_CHAR))
 
-ARGUMENT_DEFAULT_HELP = " (default: %(default)s)"
+DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 CURSOR_WIDTH = 1
 ENCODING = "UTF-8"
 LEXER_OPTIONS = {"stripall" : True}
@@ -287,7 +287,7 @@ def parse_args():
                                "of your terminal to avoid the same font color "
                                "as it"
                                .format(COMMAND_NAME)
-                               + ARGUMENT_DEFAULT_HELP)
+                               + DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument("-c", "--no-color",
                           dest="colorize", action="store_false",
                           help="disable colorization of text")
@@ -302,14 +302,14 @@ def parse_args():
                           help="show all lauguages available for examples")
   arg_parser.add_argument("-s", "--style",
                           dest="style_name", type=str, default="default",
-                          help="specify a style name" + ARGUMENT_DEFAULT_HELP)
+                          help="specify a style name" + DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument(SHOW_STYLES_OPTION,
                           dest="show_styles", action="store_true",
                           help="show all available style names")
   arg_parser.add_argument("-t", "--spaces-per-tab",
                           dest="spaces_per_tab", type=int, default=4,
                           help="set number of spaces per tab"
-                               + ARGUMENT_DEFAULT_HELP)
+                               + DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument("-v", "--version",
                           dest="show_version", action="store_true",
                           help="show version information")
