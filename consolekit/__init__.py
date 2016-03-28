@@ -10,8 +10,8 @@ from .misc import ESCAPE_CHARS, DELETE_CHARS, BACKSPACE_CHARS, \
 
 
 def turn_on_console(asciize=False, spaces_per_tab=4, background_rgb=(0, 0, 0)):
-  Line.ASCIIZE = asciize
-  Line.SPACES_PER_TAB = spaces_per_tab
+  Line._ASCIIZE = asciize
+  Line._SPACES_PER_TAB = spaces_per_tab
 
   window = curses.initscr()
   curses.noecho()
