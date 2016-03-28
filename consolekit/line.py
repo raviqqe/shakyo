@@ -29,7 +29,7 @@ class Line:
 
     if len(self) != len(line): return False
     for my_char, your_char in zip(self, line):
-      if str(my_char) != str(your_char): return False
+      if my_char != your_char: return False
     return True
 
   def __iter__(self):
@@ -66,7 +66,7 @@ class Line:
   def _normalized_chars(self):
     position = 0
     for char in self._chars:
-      if str(char) == '\t':
+      if char == '\t':
         boundary = self._next_tab_boundary(position)
         while position != boundary:
           position += 1

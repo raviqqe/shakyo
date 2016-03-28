@@ -14,6 +14,9 @@ class Character:
   def __str__(self):
     return self._string
 
+  def __eq__(self, you):
+    return str(self) == str(you)
+
   @property
   def attr(self):
     return self._attr
