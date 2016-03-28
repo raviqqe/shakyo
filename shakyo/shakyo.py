@@ -70,9 +70,9 @@ class Shakyo:
     self._example_lines.base_index -= 1
     top_line_index = 0 - self._geometry.y_input
     if self._example_lines[top_line_index] is not None:
-      self._console.scroll(self._example_lines[top_line_index], direction=-1)
+      self._console.scroll(self._example_lines[top_line_index], direction="up")
     else:
-      self._console.scroll(direction=-1)
+      self._console.scroll(direction="up")
 
   def _page_down(self):
     for _ in range(self._console.screen_height):
