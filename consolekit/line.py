@@ -7,7 +7,8 @@ from . import character
 
 class Line:
   """
-  A immutable class which represents one-line text on console.
+  A class whose instances represent one-line text on a console.
+  Line instances are immutable.
   """
 
   SPACES_PER_TAB = 4
