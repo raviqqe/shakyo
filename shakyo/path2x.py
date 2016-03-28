@@ -61,10 +61,19 @@ def __uri_to_filename(uri):
   return os.path.basename(urllib.parse.urlparse(uri).path)
 
 
-def get_filename_and_text(path):
+def path_to_filename(path):
   if path is None:
-    return None, __read_from_stdin()
+    return None
   elif __is_uri(path):
-    return __uri_to_filename(path), __read_remote_file(path)
+    return __uri_to_filename(path)
   else:
-    return os.path.basename(path), __read_local_file(path)
+    return os.path.basename(path)
+
+
+def path_to_text(path):
+  if path is None:
+    return __read_from_stdin()
+  elif __is_uri(path):
+    return __read_remote_file(path)
+  else:
+    return __read_local_file(path)

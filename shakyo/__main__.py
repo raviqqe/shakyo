@@ -5,7 +5,7 @@ import sys
 import arg
 import consolekit as ck
 import const
-import textgetter
+import path2x
 import pygments_util
 import text2lines
 import log
@@ -194,7 +194,8 @@ def main():
 
   if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
-  filename, example_text = textgetter.get_filename_and_text(args.example_path)
+  filename = path2x.path_to_filename(args.example_path)
+  example_text = path2x.path_to_text(args.example_path)
 
   try:
     # CAUTION:
