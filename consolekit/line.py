@@ -51,11 +51,8 @@ class Line:
   def __getitem__(self, key):
     if isinstance(key, int):
       return self._chars[key]
-    elif isinstance(key, slice):
-      return Line(*self._chars[key])
-    else:
-      raise IndexError("Invalid key for Line class is detected. (key: {})"
-                       .format(key))
+    assert isinstance(key, slice)
+    return Line(*self._chars[key])
 
   @property
   def normalized(self):
