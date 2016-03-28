@@ -40,9 +40,9 @@ class Line:
     if isinstance(char_or_line, character.Character):
       char = char_or_line
       return Line(*self, char)
-    elif isinstance(char_or_line, Line):
-      line = char_or_line
-      return Line(*self, *line)
+    assert isinstance(char_or_line, Line)
+    line = char_or_line
+    return Line(*self, *line)
 
   def __radd__(self, char):
     assert isinstance(char, character.Character)
