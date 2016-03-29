@@ -102,11 +102,11 @@ class Shakyo:
                                          .attr
 
   def _is_correct_char(self, char):
-    next_input_line = self._input_line + ck.Character(char)
+    new_input_line = self._input_line + ck.Character(char)
     for index in range(len(self._input_line.normalized),
-                       len(next_input_line.normalized)):
+                       len(new_input_line.normalized)):
       if index >= len(self._example_lines[0].normalized) \
-         or next_input_line.normalized[index] \
+         or new_input_line.normalized[index] \
             != self._example_lines[0].normalized[index]:
         return False
     return True
