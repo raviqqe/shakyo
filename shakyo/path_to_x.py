@@ -1,6 +1,7 @@
 import os
 import os.path
 import sys
+import typing
 import urllib.parse
 import urllib.request
 import validators
@@ -14,6 +15,7 @@ from . import log
 _ENCODING = "UTF-8"
 _SUPPORTED_SCHEMES = {"http", "https", "ftp"}
 _TTY_DEVICE_FILE = "/dev/tty" # POSIX compliant
+_PATH_TYPE = typing.Union[str, None]
 
 
 
@@ -61,7 +63,7 @@ def _uri_to_filename(uri):
   return os.path.basename(urllib.parse.urlparse(uri).path)
 
 
-def path_to_filename(path):
+def path_to_filename(path: _PATH_TYPE):
   if path is None:
     return None
   elif _is_uri(path):
@@ -70,7 +72,7 @@ def path_to_filename(path):
     return os.path.basename(path)
 
 
-def path_to_text(path):
+def path_to_text(path: _PATH_TYPE):
   if path is None:
     return _read_from_stdin()
   elif _is_uri(path):
