@@ -47,7 +47,7 @@ class Shakyo:
       elif ck.is_printable_char(char) \
            and (self._input_line + ck.Character(char)).width \
                + self.CURSOR_WIDTH <= self._console.screen_width:
-        self._input_line += ck.Character(char, self._next_attr(char))
+        self._input_line += ck.Character(char, self._next_char_attr(char))
 
   def _update_input_line(self):
     self._console.print_line(self._geometry.y_input, self._example_lines[0])
@@ -88,7 +88,7 @@ class Shakyo:
       self._console.print_line(self._geometry.y_input + index,
                                self._example_lines[index])
 
-  def _next_attr(self, char):
+  def _next_char_attr(self, char):
     attr_correct = self._console.decoration_attrs.normal
     attr_wrong = self._console.decoration_attrs.reverse
 
