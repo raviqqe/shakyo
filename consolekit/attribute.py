@@ -21,7 +21,7 @@ class DecorationAttribute(enum.IntEnum):
 
 class ColorAttribute:
   _colors = []
-  _rgb2attr = {}
+  _rgb_to_attr = {}
   _background_rgb = None
 
   @classmethod
@@ -37,11 +37,11 @@ class ColorAttribute:
     if not curses.has_colors():
       return curses.A_NORMAL
 
-    if rgb in cls._rgb2attr:
-      return cls._rgb2attr[rgb]
+    if rgb in cls._rgb_to_attr:
+      return cls._rgb_to_attr[rgb]
 
     attr = cls._find_best_match(rgb)
-    cls._rgb2attr[rgb] = attr
+    cls._rgb_to_attr[rgb] = attr
     return attr
 
   @classmethod
