@@ -6,6 +6,36 @@ from . import util
 
 
 
+# classes
+
+class _AttrTable:
+  def __init__(self, console, style="default", colorize=True, decorate=True):
+    self._token_type_to_attr = {}
+    for token_type, properties in self._style_to_token_properties(style):
+      attr = console.decoration_attrs.normal
+      if colorize and properties["color"]:
+        attr |= console.color_attrs.get_best_match(
+                util.interpret_string_rgb(properties["color"]))
+      if decorate and properties["bold"]:
+        attr |= console.decoration_attrs.bold
+      if decorate and properties["underline"]:
+        attr |= console.decoration_attrs.underline
+      self._token_type_to_attr[token_type] = attr
+
+  def __getitem__(self, token_type):
+    while token_type not in self._token_type_to_attr:
+      if token_type == token_type.parent:
+        raise KeyError("Token type, {} is not found in attribute table."
+                       .format(token_type))
+      token_type = token_type.parent
+    return self._token_type_to_attr[token_type]
+
+  @staticmethod
+  def _style_to_token_properties(style):
+    return pygments.formatter.Formatter(style=style).style
+
+
+
 # functions
 
 def text_to_lines(text,
@@ -15,35 +45,16 @@ def text_to_lines(text,
                   colorize=True,
                   decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  attr_table = _create_attr_table(console,
-                                  style=style,
-                                  colorize=colorize,
-                                  decorate=decorate)
+  attr_table = _AttrTable(console,
+                          style=style,
+                          colorize=colorize,
+                          decorate=decorate)
   return _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attr_table)
-
-
-def _create_attr_table(console, style="default", colorize=True, decorate=True):
-  attr_table = {}
-  for token_type, properties \
-      in pygments.formatter.Formatter(style=style).style:
-    attr = console.decoration_attrs.normal
-    if colorize and properties["color"]:
-      attr |= console.color_attrs.get_best_match(
-              util.interpret_string_rgb(properties["color"]))
-    if decorate and properties["bold"]:
-      attr |= console.decoration_attrs.bold
-    if decorate and properties["underline"]:
-      attr |= console.decoration_attrs.underline
-    attr_table[token_type] = attr
-  return attr_table
 
 
 def _tokens_to_lines(tokens, attr_table):
   line = ck.Line()
   for token_type, string in tokens:
-    while token_type not in attr_table:
-      token_type = token_type.parent
-
     for char in string:
       if char == '\n':
         yield line
