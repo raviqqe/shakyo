@@ -7,8 +7,8 @@ from . import const
 
 class Shakyo:
   CURSOR_WIDTH = 1
-  ATTR_CORRECT = ck.RenditionAttribute.normal
-  ATTR_WRONG = ck.RenditionAttribute.reverse
+  ATTR_CORRECT = ck.DecorationAttribute.normal
+  ATTR_WRONG = ck.DecorationAttribute.reverse
 
   def __init__(self, console, example_lines):
     self._console = console

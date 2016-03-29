@@ -6,7 +6,7 @@ from . import misc
 
 
 class Character:
-  def __init__(self, string, attr=attribute.RenditionAttribute.normal):
+  def __init__(self, string, attr=attribute.DecorationAttribute.normal):
     assert misc.is_printable_char(string) and isinstance(attr, int)
     self._string = string
     self._attr = attr

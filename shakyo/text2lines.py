@@ -24,14 +24,14 @@ def _create_attr_table(style="default", colorize=True, decorate=True):
   attr_table = {}
   for token_type, properties \
       in pygments.formatter.Formatter(style=style).style:
-    attr = ck.RenditionAttribute.normal
+    attr = ck.DecorationAttribute.normal
     if colorize and properties["color"]:
       attr |= ck.ColorAttribute.get_best_match(
               util.interpret_string_rgb(properties["color"]))
     if decorate and properties["bold"]:
-      attr |= ck.RenditionAttribute.bold
+      attr |= ck.DecorationAttribute.bold
     if decorate and properties["underline"]:
-      attr |= ck.RenditionAttribute.underline
+      attr |= ck.DecorationAttribute.underline
     attr_table[token_type] = attr
   return attr_table
 

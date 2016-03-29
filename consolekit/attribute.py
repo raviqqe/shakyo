@@ -8,7 +8,7 @@ _CURSES_COLOR_SCALE = 1000
 
 
 @enum.unique
-class RenditionAttribute(enum.IntEnum):
+class DecorationAttribute(enum.IntEnum):
   altcharset =  curses.A_ALTCHARSET
   blink =       curses.A_BLINK
   bold =        curses.A_BOLD
