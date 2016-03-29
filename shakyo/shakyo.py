@@ -13,7 +13,7 @@ class Shakyo:
     self._geometry = _Geometry(console)
     self._input_line = ck.Line()
     self._example_lines = _FoldedLines(example_lines,
-                                        max_width=(console.screen_width - 1))
+                                       max_width=(console.screen_width - 1))
     if self._example_lines[0] is None:
       raise Exception("No line can be read from the example source.")
 
@@ -52,8 +52,8 @@ class Shakyo:
   def _update_input_line(self):
     self._console.print_line(self._geometry.y_input, self._example_lines[0])
     self._console.print_line(self._geometry.y_input,
-                              self._input_line,
-                              clear=False)
+                             self._input_line,
+                             clear=False)
 
   def _scroll_down(self):
     self._example_lines.base_index += 1
@@ -86,7 +86,7 @@ class Shakyo:
     for index in range(self._geometry.y_bottom - self._geometry.y_input + 1):
       if self._example_lines[index] is None: break
       self._console.print_line(self._geometry.y_input + index,
-                                self._example_lines[index])
+                               self._example_lines[index])
 
   def _next_attr(self, char):
     attr_correct = self._console.decoration_attrs.normal
