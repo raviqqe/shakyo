@@ -41,8 +41,8 @@ def _read_local_file(path):
   try:
     with open(path, "rb") as f:
       return f.read().decode(_ENCODING, "replace")
-  except (FileNotFoundError, PermissionError) as e:
-    log.error(e)
+  except (FileNotFoundError, PermissionError) as exception:
+    log.error(exception)
 
 
 def _read_remote_file(uri):
@@ -55,8 +55,8 @@ def _read_remote_file(uri):
   try:
     with urllib.request.urlopen(uri) as response:
       return response.read().decode(_ENCODING, "replace")
-  except urllib.error.URLError as e:
-    log.error(e)
+  except urllib.error.URLError as exception:
+    log.error(exception)
 
 
 def _uri_to_filename(uri):
