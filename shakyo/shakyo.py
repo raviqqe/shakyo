@@ -7,8 +7,6 @@ from . import const
 
 class Shakyo:
   CURSOR_WIDTH = 1
-  ATTR_CORRECT = ck.DecorationAttribute.normal
-  ATTR_WRONG = ck.DecorationAttribute.reverse
 
   def __init__(self, console, example_lines):
     self._console = console
@@ -91,12 +89,14 @@ class Shakyo:
                                 self._example_lines[index])
 
   def _next_attr(self, char):
+    attr_correct = self._console.decoration_attrs.normal
+    attr_wrong = self._console.decoration_attrs.reverse
+
     normalized_input_line = self._input_line.normalized
     normalized_example_line = self._example_lines[0].normalized
     if len(normalized_input_line) >= len(normalized_example_line):
-      return self.ATTR_WRONG
-    return (self.ATTR_CORRECT if self._is_correct_char(char)
-            else self.ATTR_WRONG) \
+      return attr_wrong
+    return (attr_correct if self._is_correct_char(char) else attr_wrong) \
            | normalized_example_line[min(len(normalized_input_line),
                                          len(normalized_example_line) - 1)] \
                                          .attr

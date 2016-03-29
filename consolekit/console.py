@@ -2,17 +2,28 @@ import curses
 import unicodedata
 
 from . import line as ln
+from . import attribute
 
 
 
 class Console:
-  def __init__(self, window):
+  def __init__(self, window, background_rgb=(0, 0, 0)):
     self._window = window
     self._window.keypad(True)
     self._window.scrollok(True)
     self._window.clear()
     self._window.move(0, 0)
     self._window.refresh()
+
+    attribute.ColorAttribute.initialize(background_rgb=background_rgb)
+
+  @property
+  def decoration_attrs(self):
+    return attribute.DecorationAttribute
+
+  @property
+  def color_attrs(self):
+    return attribute.ColorAttribute
 
   def _keep_position(method):
     def wrapper(self, *args, **keyword_args):

@@ -9,29 +9,31 @@ from . import util
 # functions
 
 def text_to_lines(text,
+                  console,
                   lexer,
                   style_name="default",
                   colorize=True,
                   decorate=True):
   style = pygments.styles.get_style_by_name(style_name)
-  attr_table = _create_attr_table(style=style,
+  attr_table = _create_attr_table(console,
+                                  style=style,
                                   colorize=colorize,
                                   decorate=decorate)
   return _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attr_table)
 
 
-def _create_attr_table(style="default", colorize=True, decorate=True):
+def _create_attr_table(console, style="default", colorize=True, decorate=True):
   attr_table = {}
   for token_type, properties \
       in pygments.formatter.Formatter(style=style).style:
-    attr = ck.DecorationAttribute.normal
+    attr = console.decoration_attrs.normal
     if colorize and properties["color"]:
-      attr |= ck.ColorAttribute.get_best_match(
+      attr |= console.color_attrs.get_best_match(
               util.interpret_string_rgb(properties["color"]))
     if decorate and properties["bold"]:
-      attr |= ck.DecorationAttribute.bold
+      attr |= console.decoration_attrs.bold
     if decorate and properties["underline"]:
-      attr |= ck.DecorationAttribute.underline
+      attr |= console.decoration_attrs.underline
     attr_table[token_type] = attr
   return attr_table
 

@@ -33,6 +33,7 @@ def main():
 
     example_lines = text2lines.text_to_lines(
         example_text,
+        console,
         lexer=pygments_util.guess_lexer(lexer_name=args.lexer_name,
                                         filename=filename,
                                         text=example_text),
