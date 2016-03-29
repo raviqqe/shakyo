@@ -1,4 +1,4 @@
-import consolekit as ck
+from . import consolekit as ck
 from . import const
 
 

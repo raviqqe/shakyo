@@ -1,6 +1,6 @@
 import argparse
 
-import consolekit as ck
+from . import consolekit as ck
 from . import const
 from . import log
 from . import pygments_util

@@ -1,7 +1,7 @@
 import pygments.formatter
 import pygments.styles
 
-import consolekit as ck
+from . import consolekit as ck
 from . import util
 
 

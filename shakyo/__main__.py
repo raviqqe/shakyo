@@ -2,7 +2,7 @@
 
 import sys
 
-import consolekit as ck
+from . import consolekit as ck
 from . import arggetter
 from . import path_to_x
 from . import pygments_util

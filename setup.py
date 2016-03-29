@@ -68,7 +68,7 @@ def main():
       author="raviqqe",
       author_email="raviqqe@gmail.com",
       url="http://github.com/raviqqe/shakyo/",
-      packages=["shakyo", "consolekit"],
+      packages=["shakyo", "shakyo.consolekit"],
       entry_points={
         "console_scripts" : [COMMAND_NAME + "=shakyo.__main__:main"]
       },

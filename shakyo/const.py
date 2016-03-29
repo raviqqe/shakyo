@@ -1,7 +1,7 @@
 import os.path
 import sys
 
-import consolekit as ck
+from . import consolekit as ck
 
 
 
