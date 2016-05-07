@@ -99,7 +99,9 @@ class Shakyo:
   def _next_example_char_attr(self):
     normalized_example_line = self._example_lines[0].normalized
     return normalized_example_line[min(len(self._input_line.normalized),
-                                       len(normalized_example_line) - 1)].attr
+                                       len(normalized_example_line) - 1)].attr\
+           if len(normalized_example_line) != 0 else \
+           self._console.decoration_attrs.normal
 
   def _is_correct_char(self, char):
     normalized_input_line = self._input_line.normalized
