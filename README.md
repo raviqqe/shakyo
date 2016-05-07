@@ -1,6 +1,6 @@
 # Shakyo
 
-![shakyo calligraphy](img/shakyo_calligraphy.png)
+![shakyo calligraphy](https://raw.github.com/raviqqe/shakyo/master/img/shakyo_calligraphy.png)
 
 
 # About
