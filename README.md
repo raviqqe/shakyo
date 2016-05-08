@@ -17,7 +17,8 @@ $ pip install shakyo
 
 # Usage
 
-Type `shakyo --help`.
+Keep typing letters on a cursor.
+For more information, run `shakyo --help`.
 
 
 # Example
