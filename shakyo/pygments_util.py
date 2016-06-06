@@ -3,6 +3,8 @@ import pygments.lexers
 import pygments.styles
 import pygments.lexers.special
 
+from .path_to_x import path_to_filename, path_to_text
+
 
 
 # constants
@@ -14,21 +16,27 @@ _FALLBACK_LEXER = pygments.lexers.special.TextLexer(**_LEXER_OPTIONS)
 
 # functions
 
-def guess_lexer(lexer_name=None, filename=None, text=None):
+def guess_lexer(lexer_name=None, path=None):
   if lexer_name is not None:
     return pygments.lexers.get_lexer_by_name(lexer_name)
   else:
-    return _guess_lexer_from_filename_and_text(filename, text)
+    return _guess_lexer_from_path(path)
 
 
-def _guess_lexer_from_filename_and_text(filename, text):
+def _guess_lexer_from_path(path):
   lexer = None
+
+  filename = path_to_filename(path)
   if filename is not None:
     lexer = _guess_lexer_from_filename(filename)
+
+  text = path_to_text(path)
   if text is not None and lexer is None:
     lexer = _guess_lexer_from_text(text)
+
   if lexer is None:
     lexer = _FALLBACK_LEXER
+
   return lexer
 
 

@@ -4,10 +4,10 @@ import sys
 
 from . import consolekit as ck
 from . import arggetter
-from . import path_to_x
+from .path_to_x import path_to_text
 from . import pygments_util
 from . import shakyo
-from . import text_to_lines
+from .text_to_lines import text_to_lines
 from . import log
 
 
@@ -19,15 +19,11 @@ def get_example_lines(example_path,
                       style_name,
                       colorize,
                       decorate):
-  example_text = path_to_x.path_to_text(example_path)
-
-  return text_to_lines.text_to_lines(
-      example_text,
+  return text_to_lines(
+      path_to_text(example_path),
       console,
-      lexer=pygments_util.guess_lexer(
-          lexer_name=lexer_name,
-          filename=path_to_x.path_to_filename(example_path),
-          text=example_text),
+      lexer=pygments_util.guess_lexer(lexer_name=lexer_name,
+                                      path=example_path),
       style_name=style_name,
       colorize=colorize,
       decorate=decorate)
