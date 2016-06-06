@@ -7,15 +7,46 @@ from . import attribute
 
 
 class Console:
-  def __init__(self, window, background_rgb=(0, 0, 0)):
-    self._window = window
+  def __init__(self,
+               asciize=False,
+               spaces_per_tab=4,
+               background_rgb=(0, 0, 0)):
+    ln.Line._ASCIIZE = asciize
+    ln.Line._SPACES_PER_TAB = spaces_per_tab
+    self._background_rgb = background_rgb
+
+  def _initialize_window(self):
+    self._window = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
     self._window.keypad(True)
     self._window.scrollok(True)
     self._window.clear()
     self._window.move(0, 0)
     self._window.refresh()
 
-    attribute.ColorAttribute.initialize(background_rgb=background_rgb)
+  def _initialize_colors(self):
+    curses.start_color()
+    curses.use_default_colors()
+    attribute.ColorAttribute.initialize(background_rgb=self._background_rgb)
+
+  def turn_on(self):
+    self._initialize_window()
+    self._initialize_colors()
+
+  def turn_off(self):
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
+
+  def __enter__(self):
+    self.turn_on()
+    return self
+
+  def __exit__(self, exc_type, _exc_value, _traceback):
+    self.turn_off()
+    if exc_type == KeyboardInterrupt:
+      return True
 
   @property
   def decoration_attrs(self):

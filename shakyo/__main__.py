@@ -22,15 +22,9 @@ def main():
   filename = path_to_x.path_to_filename(args.example_path)
   example_text = path_to_x.path_to_text(args.example_path)
 
-  try:
-    # CAUTION:
-    # You need to raise some Exception instead of calling exit() here
-    # to prevent curses from messing up your terminal.
-
-    console = ck.turn_on_console(asciize=args.asciize,
-                                 spaces_per_tab=args.spaces_per_tab,
-                                 background_rgb=args.background_rgb)
-
+  with ck.Console(asciize=args.asciize,
+                  spaces_per_tab=args.spaces_per_tab,
+                  background_rgb=args.background_rgb) as console:
     example_lines = text_to_lines.text_to_lines(
         example_text,
         console,
@@ -42,10 +36,6 @@ def main():
         decorate=args.decorate)
 
     shakyo.Shakyo(console, example_lines).do()
-  except KeyboardInterrupt:
-    pass
-  finally:
-    ck.turn_off_console()
 
 
 if __name__ == "__main__":
