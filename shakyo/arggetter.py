@@ -12,14 +12,14 @@ from . import util
 
 _DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 _DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
-              "Type {} to scroll down and {} to scroll up one line, " \
-              "{} to scroll down and {} to scroll up one page, " \
-              "and Esc or ^[ to exit while running it." \
-              .format(const.COMMAND_NAME,
-                      ck.unctrl(const.SCROLL_DOWN_CHAR),
-                      ck.unctrl(const.SCROLL_UP_CHAR),
-                      ck.unctrl(const.PAGE_DOWN_CHAR),
-                      ck.unctrl(const.PAGE_UP_CHAR))
+               "Type {} to scroll down and {} to scroll up one line, " \
+               "{} to scroll down and {} to scroll up one page, " \
+               "and Esc or ^[ to exit while running it." \
+               .format(const.COMMAND_NAME,
+                       ck.unctrl(const.SCROLL_DOWN_CHAR),
+                       ck.unctrl(const.SCROLL_UP_CHAR),
+                       ck.unctrl(const.PAGE_DOWN_CHAR),
+                       ck.unctrl(const.PAGE_UP_CHAR))
 _SHOW_LANGUAGES_OPTION = "--show-languages"
 _SHOW_STYLES_OPTION = "--show-styles"
 
