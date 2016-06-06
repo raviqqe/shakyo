@@ -64,8 +64,7 @@ def path_to_filename(path: _PATH_TYPE):
     return None
   elif _is_uri(path):
     return _uri_to_filename(path)
-  else:
-    return os.path.basename(path)
+  return os.path.basename(path)
 
 
 def path_to_text(path: _PATH_TYPE):
@@ -73,5 +72,4 @@ def path_to_text(path: _PATH_TYPE):
     return _read_from_stdin()
   elif _is_uri(path):
     return _read_remote_file(path)
-  else:
-    return _read_local_file(path)
+  return _read_local_file(path)
