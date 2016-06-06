@@ -48,9 +48,9 @@ def readme_text():
       f.write(pypandoc.convert(readme_md, RST_EXT))
     return read_text_file(readme_rst)
   except ImportError as e:
+    warn(e)
     if os.path.isfile(readme_rst):
       os.remove(readme_rst)
-    warn(e)
     shutil.copyfile(readme_md, README_BASENAME)
     return read_text_file(README_BASENAME)
 
