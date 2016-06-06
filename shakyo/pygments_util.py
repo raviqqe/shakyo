@@ -19,8 +19,7 @@ _FALLBACK_LEXER = pygments.lexers.special.TextLexer(**_LEXER_OPTIONS)
 def guess_lexer(lexer_name=None, path=None):
   if lexer_name is not None:
     return pygments.lexers.get_lexer_by_name(lexer_name)
-  else:
-    return _guess_lexer_from_path(path)
+  return _guess_lexer_from_path(path)
 
 
 def _guess_lexer_from_path(path):
