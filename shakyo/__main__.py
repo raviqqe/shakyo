@@ -13,14 +13,13 @@ from . import log
 
 
 def get_example_lines(example_path,
+                      example_text,
                       console,
                       *,
                       lexer_name,
                       style_name,
                       colorize,
                       decorate):
-  example_text = path_to_text(example_path)
-
   return text_to_lines.text_to_lines(
       example_text,
       console,
@@ -38,11 +37,14 @@ def main():
 
   if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
+  example_text = path_to_text(args.example_path)
+
   with ck.Console(asciize=args.asciize,
                   spaces_per_tab=args.spaces_per_tab,
                   background_rgb=args.background_rgb) as console:
     shakyo.Shakyo(console,
                   get_example_lines(args.example_path,
+                                    example_text,
                                     console,
                                     lexer_name=args.lexer_name,
                                     style_name=args.style_name,
