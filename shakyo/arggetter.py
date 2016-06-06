@@ -109,4 +109,4 @@ def _check_args(args):
 
 
 def _print_sequence(sequence):
-  print(*sorted(sequence), sep=", ")
+  print(util.sequence_to_string(sequence))
