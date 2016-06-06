@@ -27,9 +27,14 @@ def _is_uri(uri):
 
 
 def _read_from_stdin():
-  text = sys.stdin.read()
+  try:
+    text = sys.stdin.read()
+  except KeyboardInterrupt:
+    log.error("Nothing could be read from stdin.")
+
   os.close(sys.stdin.fileno())
   sys.stdin = open(_TTY_DEVICE_FILE)
+
   return text
 
 
