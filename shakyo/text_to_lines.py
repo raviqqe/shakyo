@@ -49,7 +49,7 @@ def text_to_lines(text,
                           style=style,
                           colorize=colorize,
                           decorate=decorate)
-  return _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attr_table)
+  yield from _tokens_to_lines(lexer.get_tokens(_strip_text(text)), attr_table)
 
 
 def _tokens_to_lines(tokens, attr_table):
