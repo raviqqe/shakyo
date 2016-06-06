@@ -3,7 +3,7 @@
 import sys
 
 from . import consolekit as ck
-from . import arggetter
+from .get_args import get_args
 from .path_to_x import path_to_text
 from . import pygments_util
 from . import shakyo
@@ -30,7 +30,7 @@ def get_example_lines(example_path,
 
 
 def main():
-  args = arggetter.get_args()
+  args = get_args()
 
   if not sys.stdout.isatty(): log.error("stdout is not a tty.")
 
