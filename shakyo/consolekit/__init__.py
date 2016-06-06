@@ -26,4 +26,3 @@ def turn_off_console():
   curses.nocbreak()
   curses.echo()
   curses.endwin()
-
