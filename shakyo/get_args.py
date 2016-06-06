@@ -1,7 +1,7 @@
 import argparse
 
 from . import consolekit as ck
-from . import const
+from . import config
 from . import log
 from . import pygments_util
 from . import util
@@ -16,11 +16,11 @@ _DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
                "Type {} to scroll down and {} to scroll up one line, " \
                "{} to scroll down and {} to scroll up one page, " \
                "and Esc or ^[ to exit while running it." \
-               .format(const.COMMAND_NAME,
-                       ck.unctrl(const.SCROLL_DOWN_CHAR),
-                       ck.unctrl(const.SCROLL_UP_CHAR),
-                       ck.unctrl(const.PAGE_DOWN_CHAR),
-                       ck.unctrl(const.PAGE_UP_CHAR))
+               .format(config.COMMAND_NAME,
+                       ck.unctrl(config.SCROLL_DOWN_CHAR),
+                       ck.unctrl(config.SCROLL_UP_CHAR),
+                       ck.unctrl(config.PAGE_DOWN_CHAR),
+                       ck.unctrl(config.PAGE_UP_CHAR))
 _SHOW_LANGUAGES_OPTION = "--show-languages"
 _SHOW_STYLES_OPTION = "--show-styles"
 
@@ -41,7 +41,7 @@ def get_args():
                           help="tell {} the hexadecimal background color "
                                "of your terminal to avoid the same font color "
                                "as it"
-                               .format(const.COMMAND_NAME)
+                               .format(config.COMMAND_NAME)
                                + _DEFAULT_ARGUMENT_HELP)
   arg_parser.add_argument("-c", "--no-color",
                           dest="colorize", action="store_false",
@@ -72,7 +72,7 @@ def get_args():
   args = arg_parser.parse_args()
 
   if args.show_version:
-    print("version:", const.VERSION)
+    print("version:", config.VERSION)
     exit()
   elif args.show_languages:
     _print_sequence(pygments_util.all_lexer_names())
@@ -100,12 +100,12 @@ def _check_args(args):
     log.error("The language, \"{}\" is not available for examples. "
               "See `{} {}`."
               .format(args.lexer_name,
-                      const.COMMAND_NAME,
+                      config.COMMAND_NAME,
                       _SHOW_LANGUAGES_OPTION))
   elif args.style_name not in pygments_util.all_style_names():
     log.error("The style, \"{}\" is not available. See `{} {}`."
               .format(args.style_name,
-                      const.COMMAND_NAME,
+                      config.COMMAND_NAME,
                       _SHOW_STYLES_OPTION))
 
 

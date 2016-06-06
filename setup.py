@@ -27,7 +27,7 @@ def warn(*text):
 
 
 def version():
-  with open("shakyo/const.py") as f:
+  with open("shakyo/config.py") as f:
     return next(re.match(r"_*VERSION\s*=\s*\"((\d|\.)*)\"", line)
                 for line in f.readlines()
                 if line.startswith("VERSION")).group(1)
