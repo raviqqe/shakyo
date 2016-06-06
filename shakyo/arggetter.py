@@ -103,7 +103,9 @@ def _check_args(args):
                       _SHOW_LANGUAGES_OPTION))
   elif args.style_name not in pygments_util.all_style_names():
     log.error("The style, \"{}\" is not available. See `{} {}`."
-              .format(args.style_name, const.COMMAND_NAME, _SHOW_STYLES_OPTION))
+              .format(args.style_name,
+                      const.COMMAND_NAME,
+                      _SHOW_STYLES_OPTION))
 
 
 def _print_sequence(sequence):
