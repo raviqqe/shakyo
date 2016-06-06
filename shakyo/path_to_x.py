@@ -7,6 +7,7 @@ import urllib.request
 import validators
 
 from . import log
+from . import util
 
 
 
@@ -49,7 +50,7 @@ def _read_remote_file(uri):
   if urllib.parse.urlparse(uri).scheme not in _SUPPORTED_SCHEMES:
     log.error("Invalid scheme of URI is detected. "
               "(supported schemes: {})"
-              .format(", ".join(sorted(_SUPPORTED_SCHEMES))))
+              .format(util.sequence_to_string(_SUPPORTED_SCHEMES)))
 
   log.message("Loading a page...")
   try:
