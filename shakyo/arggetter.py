@@ -12,6 +12,7 @@ from . import util
 
 _DEFAULT_ARGUMENT_HELP = " (default: %(default)s)"
 _DESCRIPTION = "{} is a tool to learn about something just by typing it. " \
+               "To play with it, just type letters on a cursor. " \
                "Type {} to scroll down and {} to scroll up one line, " \
                "{} to scroll down and {} to scroll up one page, " \
                "and Esc or ^[ to exit while running it." \
