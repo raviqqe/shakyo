@@ -84,6 +84,6 @@ class Line:
       return [character.Character(string_char, char.attr)
               for string_char in text_unidecode.unidecode(str(char))]
     return [character.Character(string_char, char.attr)
-            if not unicodedata.category(string_char).startswith("Z")
-            else character.Character(' ', char.attr)
+            if not unicodedata.category(string_char).startswith("Z") else
+            character.Character(' ', char.attr)
             for string_char in unicodedata.normalize("NFC", str(char))]
